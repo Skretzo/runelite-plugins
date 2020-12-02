@@ -82,11 +82,7 @@ public class SceneOverlay extends Overlay
 
 		if (config.tileLocation())
 		{
-			renderTile(graphics, new Color(
-				config.tileColour().getRed(),
-				config.tileColour().getGreen(),
-				config.tileColour().getBlue(),
-				config.tileAlpha()));
+			renderTile(graphics, config.tileColour());
 		}
 
 		return null;

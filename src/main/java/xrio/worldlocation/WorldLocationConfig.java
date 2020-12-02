@@ -25,6 +25,7 @@
 package xrio.worldlocation;
 
 import java.awt.Color;
+import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -108,23 +109,9 @@ public interface WorldLocationConfig extends Config
 	)
 	String settingsSection = "settingsSection";
 
-	@Range(
-		max = 255
-	)
+	@Alpha
 	@ConfigItem(
 		position = 7,
-		keyName = "tileAlpha",
-		name = "Tile Colour Alpha",
-		description = "The alpha value [0, 255] for the world point tile colour",
-		section = settingsSection
-	)
-	default int tileAlpha()
-	{
-		return 127;
-	}
-
-	@ConfigItem(
-		position = 8,
 		keyName = "tileColour",
 		name = "Tile Colour",
 		description = "The colour of the tile for the world point location",
@@ -135,8 +122,9 @@ public interface WorldLocationConfig extends Config
 		return new Color(0, 0, 0, 127);
 	}
 
+	@Alpha
 	@ConfigItem(
-		position = 9,
+		position = 8,
 		keyName = "chunkLineColour",
 		name = "Chunk Line Colour",
 		description = "The colour of the chunk border",
@@ -147,8 +135,9 @@ public interface WorldLocationConfig extends Config
 		return Color.BLUE;
 	}
 
+	@Alpha
 	@ConfigItem(
-		position = 10,
+		position = 9,
 		keyName = "regionLineColour",
 		name = "Region Line Colour",
 		description = "The colour of the region border",
@@ -163,7 +152,7 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-		position = 11,
+		position = 10,
 		keyName = "chunkLineWidth",
 		name = "Chunk Line Width",
 		description = "The chunk border line width",
@@ -178,7 +167,7 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-		position = 12,
+		position = 11,
 		keyName = "regionLineWidth",
 		name = "Region Line Width",
 		description = "The region border line width",

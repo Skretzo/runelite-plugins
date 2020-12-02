@@ -65,11 +65,7 @@ class WorldMapOverlay extends Overlay
 	{
 		if (config.mapTileLines())
 		{
-			drawMapLines(graphics, 1, new Color(
-				config.tileColour().getRed(),
-				config.tileColour().getGreen(),
-				config.tileColour().getBlue(),
-				config.tileAlpha()));
+			drawMapLines(graphics, 1, config.tileColour());
 		}
 
 		if (config.mapChunkLines())
