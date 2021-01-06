@@ -57,7 +57,7 @@ class WorldMapOverlay extends Overlay
 		setPosition(OverlayPosition.DYNAMIC);
 		setPriority(OverlayPriority.HIGH);
 		setLayer(OverlayLayer.MANUAL);
-		drawAfterInterface(WidgetID.FULLSCREEN_MAP_GROUP_ID);
+		drawAfterInterface(WidgetID.FULLSCREEN_CONTAINER_TLI);
 		this.client = client;
 		this.config = config;
 	}
