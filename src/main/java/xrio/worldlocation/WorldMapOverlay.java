@@ -36,7 +36,6 @@ import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.api.RenderOverview;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -57,7 +56,7 @@ class WorldMapOverlay extends Overlay
 		setPosition(OverlayPosition.DYNAMIC);
 		setPriority(OverlayPriority.HIGH);
 		setLayer(OverlayLayer.MANUAL);
-		drawAfterInterface(WidgetID.FULLSCREEN_CONTAINER_TLI);
+		drawAfterLayer(WidgetInfo.WORLD_MAP_VIEW);
 		this.client = client;
 		this.config = config;
 	}
