@@ -70,6 +70,10 @@ public class SceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (config.tileLines())
+		{
+			renderLines(graphics, 1, config.tileLineWidth(), config.tileLineColour());
+		}
 		if (config.chunkLines())
 		{
 			renderLines(graphics, 8, config.chunkLineWidth(), config.chunkLineColour());

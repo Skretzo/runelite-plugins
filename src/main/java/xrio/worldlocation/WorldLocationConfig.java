@@ -48,6 +48,17 @@ public interface WorldLocationConfig extends Config
 
 	@ConfigItem(
 		position = 1,
+		keyName = "tileLines",
+		name = "Tile Lines",
+		description = "Show tile (1 x 1) lines"
+	)
+	default boolean tileLines()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		position = 2,
 		keyName = "chunkLines",
 		name = "Chunk Lines",
 		description = "Show chunk (8 x 8) lines"
@@ -58,7 +69,7 @@ public interface WorldLocationConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 2,
+		position = 3,
 		keyName = "regionLines",
 		name = "Region Lines",
 		description = "Show region (64 x 64) lines"
@@ -69,7 +80,7 @@ public interface WorldLocationConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 3,
+		position = 4,
 		keyName = "mapTileLines",
 		name = "World Map Tile Lines",
 		description = "Show tile (1 x 1) lines on the world map"
@@ -80,7 +91,7 @@ public interface WorldLocationConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 4,
+		position = 5,
 		keyName = "mapChunkLines",
 		name = "World Map Chunk Lines",
 		description = "Show chunk (8 x 8) lines on the world map"
@@ -91,7 +102,7 @@ public interface WorldLocationConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 5,
+		position = 6,
 		keyName = "mapRegionLines",
 		name = "World Map Region Lines",
 		description = "Show region (64 x 64) lines on the world map"
@@ -102,7 +113,7 @@ public interface WorldLocationConfig extends Config
 	}
 
 	@ConfigSection(
-		position = 6,
+		position = 7,
 		name = "Settings",
 		description = "Colour and line width options",
 		closedByDefault = true
@@ -111,7 +122,7 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 7,
+		position = 8,
 		keyName = "tileColour",
 		name = "Tile Colour",
 		description = "The colour of the tile for the world point location",
@@ -124,7 +135,20 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 8,
+		position = 9,
+		keyName = "tileLineColour",
+		name = "Tile Line Colour",
+		description = "The colour of the tile border",
+		section = settingsSection
+	)
+	default Color tileLineColour()
+	{
+		return new Color(0, 0, 0, 127);
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 10,
 		keyName = "chunkLineColour",
 		name = "Chunk Line Colour",
 		description = "The colour of the chunk border",
@@ -137,7 +161,7 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 9,
+		position = 11,
 		keyName = "regionLineColour",
 		name = "Region Line Colour",
 		description = "The colour of the region border",
@@ -152,7 +176,22 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-		position = 10,
+			position = 12,
+			keyName = "tileLineWidth",
+			name = "Tile Line Width",
+			description = "The tile border line width",
+			section = settingsSection
+	)
+	default int tileLineWidth()
+	{
+		return 1;
+	}
+
+	@Range(
+		max = 5
+	)
+	@ConfigItem(
+		position = 13,
 		keyName = "chunkLineWidth",
 		name = "Chunk Line Width",
 		description = "The chunk border line width",
@@ -167,7 +206,7 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-		position = 11,
+		position = 14,
 		keyName = "regionLineWidth",
 		name = "Region Line Width",
 		description = "The region border line width",
