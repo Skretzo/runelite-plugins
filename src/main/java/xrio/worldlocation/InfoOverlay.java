@@ -48,28 +48,28 @@ public class InfoOverlay extends OverlayPanel
 	}
 
 	@Override
-    public Dimension render(Graphics2D graphics)
-    {
-    	if (!config.gridInfo() || client.getLocalPlayer() == null)
-        {
-            return null;
-        }
+	public Dimension render(Graphics2D graphics)
+	{
+		if (!config.gridInfo() || client.getLocalPlayer() == null)
+		{
+			return null;
+		}
 
-        int z = client.getPlane();
+		int z = client.getPlane();
 
-    	WorldPoint wp = client.getLocalPlayer().getWorldLocation();
-    	final int tileX = wp.getX();
-    	final int tileY = wp.getY();
-    	final int chunkX = tileX >> 3;
-    	final int chunkY = tileY >> 3;
-    	final int chunkTileX = tileX % 8;
-    	final int chunkTileY = tileY % 8;
-    	final int chunkID = (chunkX << 11) | chunkY;
-    	final int regionX = tileX >> 6;
-    	final int regionY = tileY >> 6;
-    	final int regionTileX = tileX % 64;
-    	final int regionTileY = tileY % 64;
-    	final int regionID = (regionX << 8) | regionY;
+		WorldPoint wp = client.getLocalPlayer().getWorldLocation();
+		final int tileX = wp.getX();
+		final int tileY = wp.getY();
+		final int chunkX = tileX >> 3;
+		final int chunkY = tileY >> 3;
+		final int chunkTileX = tileX % 8;
+		final int chunkTileY = tileY % 8;
+		final int chunkID = (chunkX << 11) | chunkY;
+		final int regionX = tileX >> 6;
+		final int regionY = tileY >> 6;
+		final int regionTileX = tileX % 64;
+		final int regionTileY = tileY % 64;
+		final int regionID = (regionX << 8) | regionY;
 
 		final boolean useId = InfoType.UNIQUE_ID.equals(config.gridInfoType());
 
@@ -90,6 +90,6 @@ public class InfoOverlay extends OverlayPanel
 				(regionX + ", " + regionY + ", " + regionTileX + ", " + regionTileY))
 			.build());
 
-        return super.render(graphics);
-    }
+		return super.render(graphics);
+	}
 }
