@@ -112,8 +112,19 @@ public interface WorldLocationConfig extends Config
 		return false;
 	}
 
-	@ConfigSection(
+	@ConfigItem(
 		position = 7,
+		keyName = "gridInfo",
+		name = "Grid Info",
+		description = "Show information about the current grid"
+	)
+	default boolean gridInfo()
+	{
+		return false;
+	}
+
+	@ConfigSection(
+		position = 8,
 		name = "Settings",
 		description = "Colour and line width options",
 		closedByDefault = true
@@ -122,7 +133,7 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 8,
+		position = 9,
 		keyName = "tileColour",
 		name = "Tile Colour",
 		description = "The colour of the tile for the world point location",
@@ -135,7 +146,7 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 9,
+		position = 10,
 		keyName = "tileLineColour",
 		name = "Tile Line Colour",
 		description = "The colour of the tile border",
@@ -148,7 +159,7 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 10,
+		position = 11,
 		keyName = "chunkLineColour",
 		name = "Chunk Line Colour",
 		description = "The colour of the chunk border",
@@ -161,7 +172,7 @@ public interface WorldLocationConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 11,
+		position = 12,
 		keyName = "regionLineColour",
 		name = "Region Line Colour",
 		description = "The colour of the region border",
@@ -176,11 +187,11 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-			position = 12,
-			keyName = "tileLineWidth",
-			name = "Tile Line Width",
-			description = "The tile border line width",
-			section = settingsSection
+		position = 13,
+		keyName = "tileLineWidth",
+		name = "Tile Line Width",
+		description = "The tile border line width",
+		section = settingsSection
 	)
 	default int tileLineWidth()
 	{
@@ -191,7 +202,7 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-		position = 13,
+		position = 14,
 		keyName = "chunkLineWidth",
 		name = "Chunk Line Width",
 		description = "The chunk border line width",
@@ -206,7 +217,7 @@ public interface WorldLocationConfig extends Config
 		max = 5
 	)
 	@ConfigItem(
-		position = 14,
+		position = 15,
 		keyName = "regionLineWidth",
 		name = "Region Line Width",
 		description = "The region border line width",
@@ -215,5 +226,22 @@ public interface WorldLocationConfig extends Config
 	default int regionLineWidth()
 	{
 		return 4;
+	}
+
+	@ConfigItem(
+		position = 16,
+		keyName = "gridInfoType",
+		name = "Grid Info Type",
+		description = "The info formatting for the current tile, chunk or region grid." +
+			"<br>Tile: Tile X, Tile Y, Tile Z" +
+			"<br>Chunk ID: unique bit-packed chunk X & Y" +
+			"<br>Chunk: Chunk X, Chunk Y, Chunk Tile X, Chunk Tile Y" +
+			"<br>Region ID: unique bit-packed region X & Y" +
+			"<br>Region: Region X, Region Y, Region Tile X, Region Tile Y",
+		section = settingsSection
+	)
+	default InfoType gridInfoType()
+	{
+		return InfoType.UNIQUE_ID;
 	}
 }

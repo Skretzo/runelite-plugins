@@ -138,6 +138,10 @@ class WorldMapOverlay extends Overlay
 				{
 					int regionId = ((x >> 6) << 8) | (y >> 6);
 					String regionText = String.valueOf(regionId);
+					if (InfoType.LOCAL_COORDINATES.equals(config.gridInfoType()))
+					{
+						regionText = (x >> 6) + ", " + (y >> 6);
+					}
 					FontMetrics fm = graphics.getFontMetrics();
 					Rectangle2D textBounds = fm.getStringBounds(regionText, graphics);
 					int labelWidth = (int) textBounds.getWidth() + 2 * LABEL_PADDING;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Xrio
+ * Copyright (c) 2021, Xrio
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,54 +24,21 @@
  */
 package xrio.worldlocation;
 
-import com.google.inject.Inject;
-import com.google.inject.Provides;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.ui.overlay.OverlayManager;
-
-@PluginDescriptor(
-	name = "World Location",
-	description = "Shows world tile location and grid lines",
-	tags = {"world", "tile", "location", "coordinates", "grid", "lines"}
-)
-public class WorldLocationPlugin extends Plugin
+public enum InfoType
 {
-	@Inject
-	private OverlayManager overlayManager;
+	UNIQUE_ID("Unique ID"),
+	LOCAL_COORDINATES("Local coordinates");
 
-	@Inject
-	private InfoOverlay infoOverlay;
+	private final String name;
 
-	@Inject
-	private SceneOverlay sceneOverlay;
-
-	@Inject
-	private WorldMapOverlay worldMapOverlay;
-
-	@Inject
-	private WorldLocationConfig config;
-
-	@Provides
-	WorldLocationConfig providesConfig(ConfigManager configManager)
+	InfoType(String name)
 	{
-		return configManager.getConfig(WorldLocationConfig.class);
+		this.name = name;
 	}
 
 	@Override
-	protected void startUp() throws Exception
+	public String toString()
 	{
-		overlayManager.add(infoOverlay);
-		overlayManager.add(sceneOverlay);
-		overlayManager.add(worldMapOverlay);
-	}
-
-	@Override
-	protected void shutDown() throws Exception
-	{
-		overlayManager.remove(infoOverlay);
-		overlayManager.remove(sceneOverlay);
-		overlayManager.remove(worldMapOverlay);
+		return name;
 	}
 }
