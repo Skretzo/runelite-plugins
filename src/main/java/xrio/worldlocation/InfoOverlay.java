@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import net.runelite.api.Client;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -58,17 +59,29 @@ public class InfoOverlay extends OverlayPanel
 		int z = client.getPlane();
 
 		WorldPoint wp = client.getLocalPlayer().getWorldLocation();
-		final int tileX = wp.getX();
-		final int tileY = wp.getY();
-		final int chunkX = tileX >> 3;
-		final int chunkY = tileY >> 3;
+		int tileX = wp.getX();
+		int tileY = wp.getY();
 		final int chunkTileX = tileX % 8;
 		final int chunkTileY = tileY % 8;
-		final int chunkID = (chunkX << 11) | chunkY;
+
+		if (InstanceInfoType.TEMPLATE.equals(config.instanceInfoType()) && client.isInInstancedRegion())
+		{
+			int[][][] instanceTemplateChunks = client.getInstanceTemplateChunks();
+			LocalPoint localPoint = client.getLocalPlayer().getLocalLocation();
+			int chunkData = instanceTemplateChunks[z][localPoint.getSceneX() / 8][localPoint.getSceneY() / 8];
+
+			tileX = (chunkData >> 14 & 0x3FF) * 8 + chunkTileX;
+			tileY = (chunkData >> 3 & 0x7FF) * 8 + chunkTileY;
+		}
+
+		final int chunkX = tileX >> 3;
+		final int chunkY = tileY >> 3;
 		final int regionX = tileX >> 6;
 		final int regionY = tileY >> 6;
 		final int regionTileX = tileX % 64;
 		final int regionTileY = tileY % 64;
+
+		final int chunkID = (chunkX << 11) | chunkY;
 		final int regionID = (regionX << 8) | regionY;
 
 		final boolean useId = InfoType.UNIQUE_ID.equals(config.gridInfoType());

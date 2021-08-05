@@ -244,4 +244,18 @@ public interface WorldLocationConfig extends Config
 	{
 		return InfoType.UNIQUE_ID;
 	}
+
+	@ConfigItem(
+		position = 17,
+		keyName = "instanceInfoType",
+		name = "Instance Info Type",
+		description = "The info type for the instance." +
+			"<br>Template: source area" +
+			"<br>Copy: personalized area",
+		section = settingsSection
+	)
+	default InstanceInfoType instanceInfoType()
+	{
+		return InstanceInfoType.TEMPLATE;
+	}
 }
