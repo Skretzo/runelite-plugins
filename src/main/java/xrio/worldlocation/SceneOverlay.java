@@ -194,7 +194,18 @@ public class SceneOverlay extends Overlay
 					poly.contains(client.getMouseCanvasPosition().getX(), client.getMouseCanvasPosition().getY()))
 				{
 					WorldPoint wp = tile.getWorldLocation();
-					tooltipManager.add(new Tooltip(wp.getX() + ", " + wp.getY() + ", " + z));
+					int tileX = wp.getX();
+					int tileY = wp.getY();
+					if (InstanceInfoType.TEMPLATE.equals(config.instanceInfoType()) && client.isInInstancedRegion())
+					{
+						int[][][] instanceTemplateChunks = client.getInstanceTemplateChunks();
+						LocalPoint localPoint = tile.getLocalLocation();
+						int chunkData = instanceTemplateChunks[z][localPoint.getSceneX() / 8][localPoint.getSceneY() / 8];
+
+						tileX = (chunkData >> 14 & 0x3FF) * 8 + (tileX % 8);
+						tileY = (chunkData >> 3 & 0x7FF) * 8 + (tileY % 8);
+					}
+					tooltipManager.add(new Tooltip(tileX + ", " + tileY + ", " + z));
 					OverlayUtil.renderPolygon(graphics, poly, tileColour);
 				}
 			}
