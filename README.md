@@ -1,2 +1,2 @@
-# [RuneLite](https://github.com/runelite/runelite) plugins
-- [Radius Markers](../../tree/radius-markers)
+# Radius Markers
+![Icon](icon.png)
