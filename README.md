@@ -1,2 +1,1 @@
-# Example
-An example greeter plugin
+# [RuneLite](https://github.com/runelite/runelite) plugins
