@@ -96,7 +96,7 @@ public class RadiusMarkerPluginPanel extends PluginPanel
 			}
 		});
 
-		centerPanel.add(markerView, BorderLayout.CENTER);
+		centerPanel.add(markerView, BorderLayout.NORTH);
 
 		add(northPanel, BorderLayout.NORTH);
 		add(centerPanel, BorderLayout.CENTER);
@@ -107,6 +107,7 @@ public class RadiusMarkerPluginPanel extends PluginPanel
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.HORIZONTAL;
 		constraints.weightx = 1;
+		constraints.weighty = 1;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
@@ -117,7 +118,7 @@ public class RadiusMarkerPluginPanel extends PluginPanel
 			markerView.add(new RadiusMarkerPanel(plugin, config, marker), constraints);
 			constraints.gridy++;
 
-			markerView.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+			markerView.add(Box.createRigidArea(new Dimension(0, 10 + 8)), constraints);
 			constraints.gridy++;
 		}
 

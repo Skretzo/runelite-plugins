@@ -4,13 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -105,12 +105,13 @@ class RadiusMarkerPanel extends JPanel
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		setBorder(new EmptyBorder(0, 0, 0, 0));
 
 		JPanel nameWrapper = new JPanel(new BorderLayout());
 		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		nameWrapper.setBorder(NAME_BOTTOM_BORDER);
 
-		JPanel nameActions = new JPanel(new FlowLayout(FlowLayout.RIGHT,3, 3));
+		JPanel nameActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 3));
 		nameActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		save.setVisible(false);
@@ -545,6 +546,20 @@ class RadiusMarkerPanel extends JPanel
 
 		nameWrapper.add(nameInput, BorderLayout.CENTER);
 		nameWrapper.add(nameActions, BorderLayout.EAST);
+		nameInput.getTextField().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
+				{
+					containerSpawn.setVisible(!containerSpawn.isVisible());
+					containerWander.setVisible(!containerWander.isVisible());
+					containerRetreat.setVisible(!containerRetreat.isVisible());
+					containerAggro.setVisible(!containerAggro.isVisible());
+				}
+			}
+		});
 
 		rightActionsSpawn.add(visibilityLabelSpawn);
 		rightActionsWander.add(visibilityLabelWander);
@@ -563,7 +578,8 @@ class RadiusMarkerPanel extends JPanel
 		containerAggro.add(leftActionsAggro, BorderLayout.WEST);
 		containerAggro.add(rightActionsAggro, BorderLayout.EAST);
 
-		JPanel markerContainer = new JPanel(new GridLayout(5, 1));
+		JPanel markerContainer = new JPanel();
+		markerContainer.setLayout(new BoxLayout(markerContainer, BoxLayout.Y_AXIS));
 		markerContainer.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		markerContainer.add(nameWrapper);
