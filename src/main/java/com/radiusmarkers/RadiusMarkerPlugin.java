@@ -125,7 +125,6 @@ public class RadiusMarkerPlugin extends Plugin
 	{
 		markers.clear();
 
-		// final int[] regions = client.getMapRegions();
 		final int[] regions = getAllRegions();
 
 		if (regions == null)
@@ -196,6 +195,7 @@ public class RadiusMarkerPlugin extends Plugin
 		return new RadiusMarker(
 			colourRadiusMarker.getName(),
 			colourRadiusMarker.isVisible(),
+			colourRadiusMarker.isCollapsed(),
 			colourRadiusMarker.getZ(),
 			colourRadiusMarker.getWorldPoint().getRegionX(),
 			colourRadiusMarker.getWorldPoint().getRegionY(),
@@ -247,6 +247,7 @@ public class RadiusMarkerPlugin extends Plugin
 		final RadiusMarker marker = new RadiusMarker(
 			DEFAULT_MARKER_NAME + " " + (markers.size() + 1),
 			true,
+			false,
 			worldPoint.getPlane(),
 			worldPoint.getRegionX(),
 			worldPoint.getRegionY(),

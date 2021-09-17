@@ -11,6 +11,7 @@ class RadiusMarker
 {
 	String name;
 	boolean visible;
+	boolean collapsed;
 
 	int z;
 

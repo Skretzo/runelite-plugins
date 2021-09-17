@@ -52,6 +52,10 @@ class RadiusMarkerPanel extends JPanel
 	private final RadiusMarkerConfig config;
 	private final ColourRadiusMarker marker;
 
+	private final JPanel containerSpawn = new JPanel(new BorderLayout());
+	private final JPanel containerWander = new JPanel(new BorderLayout());
+	private final JPanel containerRetreat = new JPanel(new BorderLayout());
+	private final JPanel containerAggro = new JPanel(new BorderLayout());
 	private final JLabel colourIndicatorSpawn = new JLabel();
 	private final JLabel colourIndicatorWander = new JLabel();
 	private final JLabel colourIndicatorRetreat = new JLabel();
@@ -208,23 +212,6 @@ class RadiusMarkerPanel extends JPanel
 				}
 			}
 		});
-
-		JPanel containerSpawn = new JPanel(new BorderLayout());
-		containerSpawn.setBorder(new EmptyBorder(5, 0, 5, 0));
-		containerSpawn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
-		JPanel containerWander = new JPanel(new BorderLayout());
-		containerWander.setBorder(new EmptyBorder(5, 0, 5, 0));
-		containerWander.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
-		JPanel containerRetreat = new JPanel(new BorderLayout());
-		containerRetreat.setBorder(new EmptyBorder(5, 0, 5, 0));
-		containerRetreat.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
-		JPanel containerAggro = new JPanel(new BorderLayout());
-		containerAggro.setBorder(new EmptyBorder(5, 0, 5, 0));
-		containerAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
 		nameInput.getTextField().addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -232,13 +219,25 @@ class RadiusMarkerPanel extends JPanel
 			{
 				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
 				{
-					containerSpawn.setVisible(!containerSpawn.isVisible());
-					containerWander.setVisible(!containerWander.isVisible());
-					containerRetreat.setVisible(!containerRetreat.isVisible());
-					containerAggro.setVisible(!containerAggro.isVisible());
+					final boolean open = containerSpawn.isVisible();
+					updateCollapsed(!open);
+					marker.setCollapsed(open);
+					plugin.saveMarkers(marker.getWorldPoint().getRegionID());
 				}
 			}
 		});
+
+		containerSpawn.setBorder(new EmptyBorder(5, 0, 5, 0));
+		containerSpawn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+		containerWander.setBorder(new EmptyBorder(5, 0, 5, 0));
+		containerWander.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+		containerRetreat.setBorder(new EmptyBorder(5, 0, 5, 0));
+		containerRetreat.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+		containerAggro.setBorder(new EmptyBorder(5, 0, 5, 0));
+		containerAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		JPanel leftActionsSpawn = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		leftActionsSpawn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -275,7 +274,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		colourIndicatorWander.setToolTipText("Edit spawn colour");
+		colourIndicatorWander.setToolTipText("Edit wander colour");
 		colourIndicatorWander.setForeground(marker.getWanderColour());
 		colourIndicatorWander.addMouseListener(new MouseAdapter()
 		{
@@ -298,7 +297,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		colourIndicatorRetreat.setToolTipText("Edit spawn colour");
+		colourIndicatorRetreat.setToolTipText("Edit retreat colour");
 		colourIndicatorRetreat.setForeground(marker.getRetreatColour());
 		colourIndicatorRetreat.addMouseListener(new MouseAdapter()
 		{
@@ -321,7 +320,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		colourIndicatorAggro.setToolTipText("Edit spawn colour");
+		colourIndicatorAggro.setToolTipText("Edit aggro colour");
 		colourIndicatorAggro.setForeground(marker.getAggroColour());
 		colourIndicatorAggro.addMouseListener(new MouseAdapter()
 		{
@@ -580,6 +579,7 @@ class RadiusMarkerPanel extends JPanel
 		updateVisibility();
 		updateColourIndicators();
 		updateColourIndicators();
+		updateCollapsed(!marker.isCollapsed());
 	}
 
 	private void save()
@@ -643,6 +643,14 @@ class RadiusMarkerPanel extends JPanel
 		visibilityLabelAggro.setIcon(marker.isAggroVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
 	}
 
+	private void updateCollapsed(final boolean open)
+	{
+		containerSpawn.setVisible(open);
+		containerWander.setVisible(open);
+		containerRetreat.setVisible(open);
+		containerAggro.setVisible(open);
+	}
+
 	private void updateColourIndicators()
 	{
 		if (config.borderWidth() == 0)
@@ -668,7 +676,7 @@ class RadiusMarkerPanel extends JPanel
 
 	private void openColourPickerSpawn()
 	{
-		RuneliteColorPicker colourPicker = getColourPicker(marker.getSpawnColour());
+		RuneliteColorPicker colourPicker = getColourPicker(marker.getSpawnColour(), " - Spawn point colour");
 		colourPicker.setOnColorChange(c ->
 		{
 			marker.setSpawnColour(c);
@@ -679,7 +687,7 @@ class RadiusMarkerPanel extends JPanel
 
 	private void openColourPickerWander()
 	{
-		RuneliteColorPicker colourPicker = getColourPicker(marker.getWanderColour());
+		RuneliteColorPicker colourPicker = getColourPicker(marker.getWanderColour(), " - Wander range colour");
 		colourPicker.setOnColorChange(c ->
 		{
 			marker.setWanderColour(c);
@@ -690,7 +698,7 @@ class RadiusMarkerPanel extends JPanel
 
 	private void openColourPickerRetreat()
 	{
-		RuneliteColorPicker colourPicker = getColourPicker(marker.getRetreatColour());
+		RuneliteColorPicker colourPicker = getColourPicker(marker.getRetreatColour(), " - Retreat range colour");
 		colourPicker.setOnColorChange(c ->
 		{
 			marker.setRetreatColour(c);
@@ -701,7 +709,7 @@ class RadiusMarkerPanel extends JPanel
 
 	private void openColourPickerAggro()
 	{
-		RuneliteColorPicker colourPicker = getColourPicker(marker.getAggroColour());
+		RuneliteColorPicker colourPicker = getColourPicker(marker.getAggroColour(), " - Aggro range colour");
 		colourPicker.setOnColorChange(c ->
 		{
 			marker.setAggroColour(c);
@@ -710,12 +718,12 @@ class RadiusMarkerPanel extends JPanel
 		colourPicker.setVisible(true);
 	}
 
-	private RuneliteColorPicker getColourPicker(Color colour)
+	private RuneliteColorPicker getColourPicker(Color colour, String text)
 	{
 		RuneliteColorPicker colourPicker = plugin.getColourPickerManager().create(
 			SwingUtilities.windowForComponent(this),
 			colour,
-			marker.getName(),
+			marker.getName() + text,
 			false);
 		colourPicker.setLocation(getLocationOnScreen());
 		colourPicker.setOnClose(c -> plugin.saveMarkers(marker.getWorldPoint().getRegionID()));

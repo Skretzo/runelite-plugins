@@ -19,6 +19,7 @@ class ColourRadiusMarker
 
 	private String name;
 	private boolean visible;
+	private boolean collapsed;
 
 	private final int z;
 
@@ -41,6 +42,7 @@ class ColourRadiusMarker
 	{
 		this.name = radiusMarker.getName();
 		this.visible = radiusMarker.isVisible();
+		this.collapsed = radiusMarker.isCollapsed();
 
 		this.z = radiusMarker.getZ();
 		this.spawnColour = radiusMarker.getSpawnColour();
