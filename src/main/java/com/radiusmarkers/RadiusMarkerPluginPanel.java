@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,7 +27,7 @@ public class RadiusMarkerPluginPanel extends PluginPanel
 	private final JLabel markerAdd = new JLabel(ADD_ICON);
 	private final JLabel title = new JLabel();
 	private final PluginErrorPanel noMarkersPanel = new PluginErrorPanel();
-	private final JPanel markerView = new JPanel(new GridBagLayout());
+	private final JPanel markerView = new JPanel();
 
 	private final RadiusMarkerPlugin plugin;
 	private final RadiusMarkerConfig config;
@@ -58,21 +59,13 @@ public class RadiusMarkerPluginPanel extends PluginPanel
 		JPanel centerPanel = new JPanel(new BorderLayout());
 		centerPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
+		markerView.setLayout(new BoxLayout(markerView, BoxLayout.Y_AXIS));
 		markerView.setBackground(ColorScheme.DARK_GRAY_COLOR);
-
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.weightx = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
 
 		noMarkersPanel.setContent("Radius Markers", "Highlight radius regions in the game scene.");
 		noMarkersPanel.setVisible(false);
 
-		markerView.add(noMarkersPanel, constraints);
-		constraints.gridy++;
-
-		constraints.gridy++;
+		markerView.add(noMarkersPanel);
 
 		markerAdd.setToolTipText("Add new radius marker");
 		markerAdd.addMouseListener(new MouseAdapter()
@@ -104,32 +97,19 @@ public class RadiusMarkerPluginPanel extends PluginPanel
 
 	public void rebuild()
 	{
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.weightx = 1;
-		constraints.weighty = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-
 		markerView.removeAll();
 
 		for (final ColourRadiusMarker marker : plugin.getMarkers())
 		{
-			markerView.add(new RadiusMarkerPanel(plugin, config, marker), constraints);
-			constraints.gridy++;
-
-			markerView.add(Box.createRigidArea(new Dimension(0, 10 + 8)), constraints);
-			constraints.gridy++;
+			markerView.add(new RadiusMarkerPanel(plugin, config, marker));
+			markerView.add(Box.createRigidArea(new Dimension(0, 10)));
 		}
 
-		boolean empty = constraints.gridy == 0;
+		boolean empty = markerView.getComponentCount() == 0;
 		noMarkersPanel.setVisible(empty);
 		title.setVisible(!empty);
 
-		markerView.add(noMarkersPanel, constraints);
-		constraints.gridy++;
-
-		constraints.gridy++;
+		markerView.add(noMarkersPanel);
 
 		repaint();
 		revalidate();

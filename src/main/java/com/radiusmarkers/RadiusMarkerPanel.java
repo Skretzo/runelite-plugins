@@ -208,20 +208,6 @@ class RadiusMarkerPanel extends JPanel
 				}
 			}
 		});
-		nameInput.getTextField().addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseEntered(MouseEvent mouseEvent)
-			{
-				preview(true);
-			}
-
-			@Override
-			public void mouseExited(MouseEvent mouseEvent)
-			{
-				preview(false);
-			}
-		});
 
 		JPanel containerSpawn = new JPanel(new BorderLayout());
 		containerSpawn.setBorder(new EmptyBorder(5, 0, 5, 0));
@@ -238,6 +224,21 @@ class RadiusMarkerPanel extends JPanel
 		JPanel containerAggro = new JPanel(new BorderLayout());
 		containerAggro.setBorder(new EmptyBorder(5, 0, 5, 0));
 		containerAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+		nameInput.getTextField().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
+				{
+					containerSpawn.setVisible(!containerSpawn.isVisible());
+					containerWander.setVisible(!containerWander.isVisible());
+					containerRetreat.setVisible(!containerRetreat.isVisible());
+					containerAggro.setVisible(!containerAggro.isVisible());
+				}
+			}
+		});
 
 		JPanel leftActionsSpawn = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		leftActionsSpawn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -546,20 +547,6 @@ class RadiusMarkerPanel extends JPanel
 
 		nameWrapper.add(nameInput, BorderLayout.CENTER);
 		nameWrapper.add(nameActions, BorderLayout.EAST);
-		nameInput.getTextField().addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mouseClicked(MouseEvent e)
-			{
-				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
-				{
-					containerSpawn.setVisible(!containerSpawn.isVisible());
-					containerWander.setVisible(!containerWander.isVisible());
-					containerRetreat.setVisible(!containerRetreat.isVisible());
-					containerAggro.setVisible(!containerAggro.isVisible());
-				}
-			}
-		});
 
 		rightActionsSpawn.add(visibilityLabelSpawn);
 		rightActionsWander.add(visibilityLabelWander);
@@ -593,17 +580,6 @@ class RadiusMarkerPanel extends JPanel
 		updateVisibility();
 		updateColourIndicators();
 		updateColourIndicators();
-	}
-
-	private void preview(boolean on)
-	{
-		if (marker.isVisible())
-		{
-			return;
-		}
-
-		marker.setVisible(on);
-		plugin.saveMarkers(marker.getWorldPoint().getRegionID());
 	}
 
 	private void save()
