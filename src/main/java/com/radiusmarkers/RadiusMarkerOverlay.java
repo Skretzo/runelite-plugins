@@ -52,120 +52,151 @@ public class RadiusMarkerOverlay extends Overlay
 
 		for (final ColourRadiusMarker marker : markers)
 		{
-			WorldPoint point = marker.getWorldPoint();
-			if (point.getPlane() != client.getPlane() || !marker.isVisible())
+			WorldPoint worldPoint = marker.getWorldPoint();
+			if (worldPoint.getPlane() != client.getPlane() || !marker.isVisible())
 			{
 				continue;
 			}
 
 			if (marker.isAggroVisible())
 			{
-				drawBox(graphics, point, marker.getAggroRadius(), marker.getAggroColour(), stroke);
+				drawBox(graphics, worldPoint, marker.getAggroRadius(), marker.getAggroColour(), stroke);
 			}
 
 			if (marker.isRetreatVisible())
 			{
-				drawBox(graphics, point, marker.getRetreatRadius(), marker.getRetreatColour(), stroke);
+				drawBox(graphics, worldPoint, marker.getRetreatRadius(), marker.getRetreatColour(), stroke);
 			}
 
 			if (marker.isWanderVisible())
 			{
-				drawBox(graphics, point, marker.getWanderRadius(), marker.getWanderColour(), stroke);
+				drawBox(graphics, worldPoint, marker.getWanderRadius(), marker.getWanderColour(), stroke);
 			}
 
 			if (marker.isSpawnVisible())
 			{
-				drawBox(graphics, point, 0, marker.getSpawnColour(), stroke);
+				drawBox(graphics, worldPoint, 0, marker.getSpawnColour(), stroke);
 			}
 		}
 
 		return null;
 	}
 
-	private void drawBox(Graphics2D graphics, WorldPoint point, int radius, Color borderColour, Stroke borderStroke)
+	private void drawBox(Graphics2D graphics, WorldPoint worldPoint, int radius, Color borderColour, Stroke borderStroke)
 	{
 		if (client.getLocalPlayer() == null)
 		{
 			return;
 		}
+
 		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
-
-		// To-do: improve this check for large radiuses
-		if (point.distanceTo(playerLocation) >= MAX_DRAW_DISTANCE)
-		{
-			return;
-		}
-
-		LocalPoint lp = LocalPoint.fromWorld(client, point);
-		if (lp == null)
-		{
-			return;
-		}
-
-		renderBox(graphics, point, radius, borderColour, borderStroke);
-	}
-
-	private void renderBox(Graphics2D graphics, WorldPoint point, int radius, Color borderColour, Stroke borderStroke)
-	{
-		int startX = point.getX() - radius;
-		int startY = point.getY() - radius;
-		int endX = point.getX() + radius + 1;
-		int endY = point.getY() + radius + 1;
 
 		graphics.setStroke(borderStroke);
 		graphics.setColor(borderColour);
 
-		GeneralPath path = new GeneralPath();
-		for (int x = startX; x <= endX; x += radius * 2 + 1)
-		{
-			LocalPoint lp1 = LocalPoint.fromWorld(client, x, startY);
-			LocalPoint lp2 = LocalPoint.fromWorld(client, x, endY);
+		final GeneralPath path = new GeneralPath();
 
-			boolean first = true;
-			for (int y = lp1.getY(); y <= lp2.getY(); y += LOCAL_TILE_SIZE)
+		final int startX = worldPoint.getX() - radius;
+		final int startY = worldPoint.getY() - radius;
+		final int z = worldPoint.getPlane();
+
+		final int diameter = 2 * radius + 1;
+
+		int x = startX;
+		int y = startY;
+		boolean hasFirst;
+		for (int i = 1; i <= diameter; i++)
+		{
+			hasFirst = false;
+			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
 			{
-				Point p = Perspective.localToCanvas(client,
-						new LocalPoint(lp1.getX() - LOCAL_TILE_SIZE / 2, y - LOCAL_TILE_SIZE / 2),
-						client.getPlane());
-				if (p != null)
-				{
-					if (first)
-					{
-						path.moveTo(p.getX(), p.getY());
-						first = false;
-					}
-					else
-					{
-						path.lineTo(p.getX(), p.getY());
-					}
-				}
+				hasFirst = moveTo(path, x, y, z);
+			}
+			x = startX;
+			y = startY + i;
+			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				lineTo(path, x, y, z);
 			}
 		}
-		for (int y = startY; y <= endY; y += radius * 2 + 1)
+		for (int i = 1; i <= diameter; i++)
 		{
-			LocalPoint lp1 = LocalPoint.fromWorld(client, startX, y);
-			LocalPoint lp2 = LocalPoint.fromWorld(client, endX, y);
-
-			boolean first = true;
-			for (int x = lp1.getX(); x <= lp2.getX(); x += LOCAL_TILE_SIZE)
+			hasFirst = false;
+			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
 			{
-				Point p = Perspective.localToCanvas(client,
-						new LocalPoint(x - LOCAL_TILE_SIZE / 2, lp1.getY() - LOCAL_TILE_SIZE / 2),
-						client.getPlane());
-				if (p != null)
-				{
-					if (first)
-					{
-						path.moveTo(p.getX(), p.getY());
-						first = false;
-					}
-					else
-					{
-						path.lineTo(p.getX(), p.getY());
-					}
-				}
+				hasFirst = moveTo(path, x, y, z);
+			}
+			x = startX + i;
+			y = startY + diameter;
+			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				lineTo(path, x, y, z);
 			}
 		}
+		for (int i = (diameter - 1); i >= 0; i--)
+		{
+			hasFirst = false;
+			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				hasFirst = moveTo(path, x, y, z);
+			}
+			x = startX + diameter;
+			y = startY + i;
+			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				lineTo(path, x, y, z);
+			}
+		}
+		for (int i = (diameter - 1); i >= 0; i--)
+		{
+			hasFirst = false;
+			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				hasFirst = moveTo(path, x, y, z);
+			}
+			x = startX + i;
+			y = startY;
+			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				lineTo(path, x, y, z);
+			}
+		}
+
 		graphics.draw(path);
+	}
+
+	private boolean moveTo(GeneralPath path, final int x, final int y, final int z)
+	{
+		Point point = XYToPoint(x, y, z);
+		if (point != null)
+		{
+			path.moveTo(point.getX(), point.getY());
+			return true;
+		}
+		return false;
+	}
+
+	private void lineTo(GeneralPath path, final int x, final int y, final int z)
+	{
+		Point point = XYToPoint(x, y, z);
+		if (point != null)
+		{
+			path.lineTo(point.getX(), point.getY());
+		}
+	}
+
+	private Point XYToPoint(int x, int y, int z)
+	{
+		LocalPoint localPoint = LocalPoint.fromWorld(client, x, y);
+
+		if (localPoint == null)
+		{
+			return null;
+		}
+
+		return Perspective.localToCanvas(
+				client,
+				new LocalPoint(localPoint.getX() - LOCAL_TILE_SIZE / 2, localPoint.getY() - LOCAL_TILE_SIZE / 2),
+				z);
 	}
 }
