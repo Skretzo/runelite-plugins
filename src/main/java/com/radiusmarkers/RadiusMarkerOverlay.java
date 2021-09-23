@@ -27,6 +27,9 @@ public class RadiusMarkerOverlay extends Overlay
 	private final RadiusMarkerConfig config;
 	private final RadiusMarkerPlugin plugin;
 
+	private int x;
+	private int y;
+
 	@Inject
 	private RadiusMarkerOverlay(Client client, RadiusMarkerConfig config, RadiusMarkerPlugin plugin)
 	{
@@ -102,67 +105,45 @@ public class RadiusMarkerOverlay extends Overlay
 
 		final int diameter = 2 * radius + 1;
 
-		int x = startX;
-		int y = startY;
-		boolean hasFirst;
-		for (int i = 1; i <= diameter; i++)
-		{
-			hasFirst = false;
-			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				hasFirst = moveTo(path, x, y, z);
-			}
-			x = startX;
-			y = startY + i;
-			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				lineTo(path, x, y, z);
-			}
-		}
-		for (int i = 1; i <= diameter; i++)
-		{
-			hasFirst = false;
-			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				hasFirst = moveTo(path, x, y, z);
-			}
-			x = startX + i;
-			y = startY + diameter;
-			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				lineTo(path, x, y, z);
-			}
-		}
-		for (int i = (diameter - 1); i >= 0; i--)
-		{
-			hasFirst = false;
-			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				hasFirst = moveTo(path, x, y, z);
-			}
-			x = startX + diameter;
-			y = startY + i;
-			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				lineTo(path, x, y, z);
-			}
-		}
-		for (int i = (diameter - 1); i >= 0; i--)
-		{
-			hasFirst = false;
-			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				hasFirst = moveTo(path, x, y, z);
-			}
-			x = startX + i;
-			y = startY;
-			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
-			{
-				lineTo(path, x, y, z);
-			}
-		}
+		x = startX;
+		y = startY;
+
+		drawBoxSide(path, playerLocation, z, startX, startY, diameter, 1, 1, false, false, true, false);
+		drawBoxSide(path, playerLocation, z, startX, startY, diameter, 1, 1, true, false, false, true);
+		drawBoxSide(path, playerLocation, z, startX, startY, diameter, diameter - 1, -1, false, true, true, false);
+		drawBoxSide(path, playerLocation, z, startX, startY, diameter, diameter - 1, -1, true, false, false, false);
 
 		graphics.draw(path);
+	}
+
+	private void drawBoxSide(
+		final GeneralPath path, final WorldPoint playerLocation,
+		final int z, final int startX, final int startY,
+		final int diameter, final int start, final int increment,
+		final boolean useXI, final boolean useXDiameter,
+		final boolean useYI, final boolean useYDiameter)
+	{
+		final int xUseI = useXI ? 1 : 0;
+		final int yUseI = useYI ? 1 : 0;
+		final int xUseDiameter = useXDiameter ? 1 : 0;
+		final int yUseDiameter = useYDiameter ? 1 : 0;
+
+		for (int i = start; i >= 0 && i <= diameter; i += increment)
+		{
+			boolean hasFirst = false;
+			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				hasFirst = moveTo(path, x, y, z);
+			}
+
+			x = startX + i * xUseI + diameter * xUseDiameter;
+			y = startY + i * yUseI + diameter * yUseDiameter;
+
+			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			{
+				lineTo(path, x, y, z);
+			}
+		}
 	}
 
 	private boolean moveTo(GeneralPath path, final int x, final int y, final int z)
@@ -195,8 +176,8 @@ public class RadiusMarkerOverlay extends Overlay
 		}
 
 		return Perspective.localToCanvas(
-				client,
-				new LocalPoint(localPoint.getX() - LOCAL_TILE_SIZE / 2, localPoint.getY() - LOCAL_TILE_SIZE / 2),
-				z);
+			client,
+			new LocalPoint(localPoint.getX() - LOCAL_TILE_SIZE / 2, localPoint.getY() - LOCAL_TILE_SIZE / 2),
+			z);
 	}
 }
