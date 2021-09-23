@@ -2,6 +2,9 @@
 ![Icon](icon.png)
 
 ## Info
+![Image of example usage of radius markers in-game](https://user-images.githubusercontent.com/53493631/133250776-cdd7ec14-da0f-45e6-b564-a670bc7b96b4.png)  
+*Radius marker for a lonely chicken north-east of Lumbridge east farm*
+
 A radius marker is a way to display the spawn point, wander range, retreat range and/or aggro range of an NPC in the game scene. You place down a marker by clicking the ![plus icon](../radius-markers/src/main/resources/com/radiusmarkers/add_icon.png) icon in the plugin panel while being logged in-game. This will place the marker at the feet of your character, but the location can easily be adjusted in the panel later. This plugin does **NOT** automatically detect the radius regions for you. This is how you can determine those:
 - Spawn point
   - Observe the NPC respawn 1 or more times. The [NPC Indicators](https://github.com/runelite/runelite/wiki/NPC-Indicators) plugin can be helpful for this.
@@ -12,8 +15,9 @@ A radius marker is a way to display the spawn point, wander range, retreat range
 - Aggro range
   - Let the NPC attack you and bring it step-by-step away from its spawn point until it stops attacking you.
 
-![Image of example usage of radius markers in-game](https://user-images.githubusercontent.com/53493631/133250776-cdd7ec14-da0f-45e6-b564-a670bc7b96b4.png)  
-*Radius marker for a lonely chicken north-east of Lumbridge east farm*
+## To-do
+- Hunt range
+- Attack range
 
 ## Config options
 - Default radiuses
