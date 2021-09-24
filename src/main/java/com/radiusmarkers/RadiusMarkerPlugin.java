@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +14,17 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.Client;
+import net.runelite.api.MenuAction;
+import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -36,9 +45,13 @@ public class RadiusMarkerPlugin extends Plugin
 	private static final String ICON_FILE = "panel_icon.png";
 	private static final String REGION_PREFIX = "region_";
 	private static final String DEFAULT_MARKER_NAME = "Marker";
+	private static final String RENAME_MARKER = "Rename marker";
 
 	@Getter(AccessLevel.PACKAGE)
 	private final List<ColourRadiusMarker> markers = new ArrayList<>();
+
+	@Setter(AccessLevel.PACKAGE)
+	private ColourRadiusMarker renameMarker = null;
 
 	@Inject
 	private Client client;
@@ -104,6 +117,67 @@ public class RadiusMarkerPlugin extends Plugin
 
 		pluginPanel = null;
 		navigationButton = null;
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(final MenuEntryAdded event)
+	{
+		int type = event.getType();
+
+		if (type >= MENU_ACTION_DEPRIORITIZE_OFFSET)
+		{
+			type -= MENU_ACTION_DEPRIORITIZE_OFFSET;
+		}
+
+		final MenuAction menuAction = MenuAction.of(type);
+
+		if (MenuAction.EXAMINE_NPC.equals(menuAction) && renameMarker != null)
+		{
+			final int id = event.getIdentifier();
+			final NPC[] cachedNPCs = client.getCachedNPCs();
+			final NPC npc = cachedNPCs[id];
+
+			if (npc == null || npc.getName() == null)
+			{
+				return;
+			}
+
+			MenuEntry[] menuEntries = client.getMenuEntries();
+
+			menuEntries = Arrays.copyOf(menuEntries, menuEntries.length + 1);
+
+			final MenuEntry renameEntry = menuEntries[menuEntries.length - 1] = new MenuEntry();
+			renameEntry.setOption(RENAME_MARKER);
+			renameEntry.setTarget(event.getTarget().split("  ")[0] + " " + npc.getId() + "#" + npc.getIndex());
+			renameEntry.setParam0(event.getActionParam0());
+			renameEntry.setParam1(event.getActionParam1());
+			renameEntry.setIdentifier(event.getIdentifier());
+			renameEntry.setType(MenuAction.RUNELITE.getId());
+
+			client.setMenuEntries(menuEntries);
+		}
+	}
+
+	@Subscribe
+	public void onMenuOptionClicked(final MenuOptionClicked click)
+	{
+		if (!MenuAction.RUNELITE.equals(click.getMenuAction()) || !click.getMenuOption().equals(RENAME_MARKER))
+		{
+			return;
+		}
+
+		final int id = click.getId();
+		final NPC[] cachedNPCs = client.getCachedNPCs();
+		final NPC npc = cachedNPCs[id];
+
+		if (npc == null || npc.getName() == null || renameMarker == null)
+		{
+			return;
+		}
+
+		renameMarker.getPanel().setMarkerText(npc.getName() + " " + npc.getId() + "#" + npc.getIndex());
+
+		click.consume();
 	}
 
 	private void loadMarkers()

@@ -17,6 +17,8 @@ class ColourRadiusMarker
 {
 	private WorldPoint worldPoint;
 
+	private RadiusMarkerPanel panel;
+
 	private String name;
 	private boolean visible;
 	private boolean collapsed;

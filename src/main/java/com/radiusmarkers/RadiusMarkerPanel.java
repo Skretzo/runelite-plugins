@@ -107,6 +107,8 @@ class RadiusMarkerPanel extends JPanel
 		this.config = config;
 		this.marker = marker;
 
+		marker.setPanel(this);
+
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -582,6 +584,11 @@ class RadiusMarkerPanel extends JPanel
 		updateCollapsed(!marker.isCollapsed());
 	}
 
+	public void setMarkerText(final String text)
+	{
+		nameInput.setText(text);
+	}
+
 	private void save()
 	{
 		marker.setName(nameInput.getText());
@@ -610,6 +617,11 @@ class RadiusMarkerPanel extends JPanel
 		{
 			nameInput.getTextField().requestFocusInWindow();
 			nameInput.getTextField().selectAll();
+			plugin.setRenameMarker(marker);
+		}
+		else
+		{
+			plugin.setRenameMarker(null);
 		}
 	}
 
