@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,6 +29,7 @@ import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.components.FlatTextField;
 import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.SwingUtil;
 
 class RadiusMarkerPanel extends JPanel
 {
@@ -48,6 +50,11 @@ class RadiusMarkerPanel extends JPanel
 	private static final ImageIcon DELETE_ICON;
 	private static final ImageIcon DELETE_HOVER_ICON;
 
+	private static final ImageIcon COLLAPSE_ICON;
+	private static final ImageIcon COLLAPSE_HOVER_ICON;
+	private static final ImageIcon EXPAND_ICON;
+	private static final ImageIcon EXPAND_HOVER_ICON;
+
 	private final RadiusMarkerPlugin plugin;
 	private final RadiusMarkerConfig config;
 	private final ColourRadiusMarker marker;
@@ -66,6 +73,7 @@ class RadiusMarkerPanel extends JPanel
 	private final JLabel visibilityLabelRetreat = new JLabel();
 	private final JLabel visibilityLabelAggro = new JLabel();
 	private final JLabel deleteLabel = new JLabel();
+	private final JButton expandToggle;
 
 	private final FlatTextField nameInput = new FlatTextField();
 	private final JLabel save = new JLabel("Save");
@@ -99,6 +107,14 @@ class RadiusMarkerPanel extends JPanel
 		final BufferedImage deleteImg = ImageUtil.loadImageResource(RadiusMarkerPlugin.class, "delete_icon.png");
 		DELETE_ICON = new ImageIcon(deleteImg);
 		DELETE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(deleteImg, -100));
+
+		BufferedImage retractIcon = ImageUtil.loadImageResource(RadiusMarkerPlugin.class, "arrow_right.png");
+		retractIcon = ImageUtil.luminanceOffset(retractIcon, -121);
+		EXPAND_ICON = new ImageIcon(retractIcon);
+		EXPAND_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(retractIcon, -100));
+		final BufferedImage expandIcon = ImageUtil.rotateImage(retractIcon, Math.PI / 2);
+		COLLAPSE_ICON = new ImageIcon(expandIcon);
+		COLLAPSE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(expandIcon, -100));
 	}
 
 	RadiusMarkerPanel(RadiusMarkerPlugin plugin, RadiusMarkerConfig config, ColourRadiusMarker marker)
@@ -123,6 +139,7 @@ class RadiusMarkerPanel extends JPanel
 		save.setVisible(false);
 		save.setFont(FontManager.getRunescapeSmallFont());
 		save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+		save.setBorder(new EmptyBorder(3, 0, 0, 3));
 		save.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -147,6 +164,7 @@ class RadiusMarkerPanel extends JPanel
 		cancel.setVisible(false);
 		cancel.setFont(FontManager.getRunescapeSmallFont());
 		cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
+		cancel.setBorder(new EmptyBorder(3, 0, 0, 3));
 		cancel.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -198,7 +216,7 @@ class RadiusMarkerPanel extends JPanel
 		nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		nameInput.setPreferredSize(new Dimension(0, 24));
 		nameInput.getTextField().setForeground(Color.WHITE);
-		nameInput.getTextField().setBorder(new EmptyBorder(0, 8, 0, 0));
+		nameInput.getTextField().setBorder(new EmptyBorder(0, 5, 0, 0));
 		nameInput.addKeyListener(new KeyAdapter()
 		{
 			@Override
@@ -222,8 +240,8 @@ class RadiusMarkerPanel extends JPanel
 				if (e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1)
 				{
 					final boolean open = containerSpawn.isVisible();
-					updateCollapsed(!open);
 					marker.setCollapsed(open);
+					updateCollapsed();
 					plugin.saveMarkers(marker.getWorldPoint().getRegionID());
 				}
 			}
@@ -390,6 +408,20 @@ class RadiusMarkerPanel extends JPanel
 		JPanel rightActionsAggro = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
 		rightActionsAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
+		expandToggle = new JButton(marker.isCollapsed() ? COLLAPSE_ICON : EXPAND_ICON);
+		expandToggle.setRolloverIcon(marker.isCollapsed() ? COLLAPSE_HOVER_ICON : EXPAND_HOVER_ICON);
+		expandToggle.setPreferredSize(new Dimension(15, 0));
+		expandToggle.setBorder(new EmptyBorder(0, 6, 1, 0));
+		expandToggle.setToolTipText(marker.isCollapsed() ? "Expand marker" : "Collapse marker");
+		SwingUtil.removeButtonDecorations(expandToggle);
+		expandToggle.addActionListener(actionEvent ->
+		{
+			final boolean open = containerSpawn.isVisible();
+			marker.setCollapsed(open);
+			updateCollapsed();
+			plugin.saveMarkers(marker.getWorldPoint().getRegionID());
+		});
+
 		visibilityLabel.setToolTipText(marker.isVisible() ? "Hide marker" : "Show marker");
 		visibilityLabel.addMouseListener(new MouseAdapter()
 		{
@@ -546,6 +578,7 @@ class RadiusMarkerPanel extends JPanel
 		nameActions.add(visibilityLabel);
 		nameActions.add(deleteLabel);
 
+		nameWrapper.add(expandToggle, BorderLayout.WEST);
 		nameWrapper.add(nameInput, BorderLayout.CENTER);
 		nameWrapper.add(nameActions, BorderLayout.EAST);
 
@@ -580,8 +613,7 @@ class RadiusMarkerPanel extends JPanel
 
 		updateVisibility();
 		updateColourIndicators();
-		updateColourIndicators();
-		updateCollapsed(!marker.isCollapsed());
+		updateCollapsed();
 	}
 
 	public void setMarkerText(final String text)
@@ -612,6 +644,9 @@ class RadiusMarkerPanel extends JPanel
 		save.setVisible(saveAndCancel);
 		cancel.setVisible(saveAndCancel);
 		rename.setVisible(!saveAndCancel);
+		expandToggle.setVisible(!saveAndCancel);
+		visibilityLabel.setVisible(!saveAndCancel);
+		deleteLabel.setVisible(!saveAndCancel);
 
 		if (saveAndCancel)
 		{
@@ -655,12 +690,20 @@ class RadiusMarkerPanel extends JPanel
 		visibilityLabelAggro.setIcon(marker.isAggroVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
 	}
 
-	private void updateCollapsed(final boolean open)
+	private void updateCollapsed()
 	{
+		final boolean open = !marker.isCollapsed();
+
+		rename.setVisible(open);
+
 		containerSpawn.setVisible(open);
 		containerWander.setVisible(open);
 		containerRetreat.setVisible(open);
 		containerAggro.setVisible(open);
+
+		expandToggle.setIcon(open ? COLLAPSE_ICON : EXPAND_ICON);
+		expandToggle.setRolloverIcon(open ? COLLAPSE_HOVER_ICON : EXPAND_HOVER_ICON);
+		expandToggle.setToolTipText(open ?  "Collapse marker" : "Expand marker");
 	}
 
 	private void updateColourIndicators()
