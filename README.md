@@ -37,5 +37,5 @@ A radius marker is a way to display the spawn point, wander range, retreat range
   - Retreat range: ![#FFFF00FF](https://via.placeholder.com/15/FF00FF/000000?text=+) `#FFFF00FF`
   - Max range: ![#FFFF0000](https://via.placeholder.com/15/FF0000/000000?text=+) `#FFFF0000`
 - Border width: `3`
-- Show on minimap: `true`
-- Show on world map: `true`
+- Show on minimap: ✅ `true`
+- Show on world map: ✅ `true`
