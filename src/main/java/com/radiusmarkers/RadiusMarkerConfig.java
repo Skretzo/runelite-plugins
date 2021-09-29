@@ -62,7 +62,7 @@ public interface RadiusMarkerConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		keyName = "defaultCcolourSpawn",
+		keyName = "defaultColourSpawn",
 		name = "Spawn point",
 		description = "Default NPC spawn tile colour",
 		position = 5,
