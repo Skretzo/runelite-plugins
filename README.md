@@ -2,7 +2,7 @@
 ![Icon](icon.png)
 
 ## Info
-![Image of example usage of radius markers in-game](https://user-images.githubusercontent.com/53493631/135122278-a9649fa5-e567-4ac3-86ba-6f14a544113c.png)  
+![Example usage of radius markers in-game](https://user-images.githubusercontent.com/53493631/135122278-a9649fa5-e567-4ac3-86ba-6f14a544113c.png)  
 *Radius marker for a lonely chicken north-east of Lumbridge east farm*
 
 A radius marker is a way to display the spawn point, wander range, retreat range and/or max range of an NPC in the game scene. You place down a marker by clicking the ![plus icon](../radius-markers/src/main/resources/com/radiusmarkers/add_icon.png) icon in the plugin panel while being logged in-game. This will place the marker at the feet of your character, but the location can easily be adjusted in the panel later. This plugin does **NOT** automatically detect the radius regions for you. This is how you can determine those:
@@ -26,13 +26,16 @@ A radius marker is a way to display the spawn point, wander range, retreat range
 - Attack range
 
 ## Config options
+![Example of radius marker in the plugin panel](https://user-images.githubusercontent.com/53493631/135182247-5cd2dbe6-25f6-4e11-ba64-1896dbc373e7.png)
 - Default radiuses
-  - Wander radius: 5
-  - Retreat radius: 7
-  - Max radius: 8
+  - Wander radius: `5`
+  - Retreat radius: `7`
+  - Max radius: `8`
 - Default colours
   - Spawn point: ![#FF00FFFF](https://via.placeholder.com/15/00FFFF/000000?text=+) `#FF00FFFF`
   - Wander range: ![#FFFFFF00](https://via.placeholder.com/15/FFFF00/000000?text=+) `#FFFFFF00`
   - Retreat range: ![#FFFF00FF](https://via.placeholder.com/15/FF00FF/000000?text=+) `#FFFF00FF`
   - Max range: ![#FFFF0000](https://via.placeholder.com/15/FF0000/000000?text=+) `#FFFF0000`
-- Border width: 3
+- Border width: `3`
+- Show on minimap: `true`
+- Show on world map: `true`
