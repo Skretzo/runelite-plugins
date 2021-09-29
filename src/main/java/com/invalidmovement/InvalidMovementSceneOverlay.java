@@ -2,7 +2,6 @@ package com.invalidmovement;
 
 import com.google.inject.Inject;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
@@ -18,13 +17,11 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
-import net.runelite.client.ui.overlay.OverlayUtil;
 
-public class InvalidMovementSceneOverlay extends Overlay
+class InvalidMovementSceneOverlay extends Overlay
 {
 	private static final int LOCAL_TILE_SIZE = Perspective.LOCAL_TILE_SIZE;
 	private static final int MAX_DRAW_DISTANCE = 32;
-	private static final Color NO_COLOUR = new Color(0, 0, 0, 0);
 
 	private final Client client;
 	private final InvalidMovementConfig config;
@@ -43,11 +40,14 @@ public class InvalidMovementSceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		renderNoMovement(graphics);
+		if (config.showScene())
+		{
+			renderScene(graphics);
+		}
 		return null;
 	}
 
-	private void renderNoMovement(Graphics2D graphics)
+	private void renderScene(Graphics2D graphics)
 	{
 		if (client.getLocalPlayer() == null)
 		{
@@ -100,19 +100,28 @@ public class InvalidMovementSceneOverlay extends Overlay
 
 				final Set<MovementFlag> movementFlags = MovementFlag.getSetFlags(data);
 
-				if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_FULL))
-				{
-					OverlayUtil.renderPolygon(graphics, poly, NO_COLOUR, config.colour(), borderStroke);
-				}
-				else
-				{
-					graphics.setStroke(borderStroke);
-					graphics.setColor(config.colour());
+				graphics.setStroke(borderStroke);
 
+				if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_FLOOR))
+				{
+					graphics.setColor(config.colourFloor());
+					graphics.fill(poly);
+				}
+
+				if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_OBJECT))
+				{
+					graphics.setColor(config.colourObject());
+					graphics.fill(poly);
+				}
+
+				if (tile.getWallObject() != null)
+				{
 					final GeneralPath path = new GeneralPath();
 
 					final int x = worldPoint.getX();
 					final int y = worldPoint.getY();
+
+					graphics.setColor(config.colourWall());
 
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_SOUTH))
 					{

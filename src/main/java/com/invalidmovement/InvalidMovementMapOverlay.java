@@ -19,7 +19,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 
-public class InvalidMovementMapOverlay extends Overlay
+class InvalidMovementMapOverlay extends Overlay
 {
 	private final Client client;
 	private final InvalidMovementConfig config;
@@ -85,31 +85,33 @@ public class InvalidMovementMapOverlay extends Overlay
 
 				final Set<MovementFlag> movementFlags = MovementFlag.getSetFlags(data);
 
-				if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_FULL))
+				if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_FLOOR))
 				{
-					drawSquare(graphics, worldPoint, config.colour(), mapClipArea);
+					drawSquare(graphics, worldPoint, config.colourFloor(), mapClipArea);
 				}
-				else
+
+				if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_OBJECT))
 				{
-					if (tile.getWallObject() == null)
-					{
-						continue;
-					}
+					drawSquare(graphics, worldPoint, config.colourObject(), mapClipArea);
+				}
+
+				if (tile.getWallObject() != null)
+				{
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_SOUTH))
 					{
-						drawWall(graphics, worldPoint, config.colour(), mapClipArea, 0, 1, 1, 0);
+						drawWall(graphics, worldPoint, config.colourWall(), mapClipArea, 0, 1, 1, 0);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_WEST))
 					{
-						drawWall(graphics, worldPoint, config.colour(), mapClipArea, 0, 0, 0, 1);
+						drawWall(graphics, worldPoint, config.colourWall(), mapClipArea, 0, 0, 0, 1);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_NORTH))
 					{
-						drawWall(graphics, worldPoint, config.colour(), mapClipArea, 0, 0, 1, 0);
+						drawWall(graphics, worldPoint, config.colourWall(), mapClipArea, 0, 0, 1, 0);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_EAST))
 					{
-						drawWall(graphics, worldPoint, config.colour(), mapClipArea, 1, 0, 0, 1);
+						drawWall(graphics, worldPoint, config.colourWall(), mapClipArea, 1, 0, 0, 1);
 					}
 				}
 			}
@@ -131,12 +133,11 @@ public class InvalidMovementMapOverlay extends Overlay
 		final int width = end.getX() - x;
 		final int height = end.getY() - y;
 		x -= width / 2;
-		y -= height / 2;
-
-		if (!mapClipArea.contains(x, y) || !mapClipArea.contains(x + width, y + height))
+		if (!mapClipArea.contains(x, y))
 		{
 			return;
 		}
+		y -= height / 2;
 
 		graphics.setColor(color);
 		graphics.fillRect(x, y, width, height);
@@ -158,12 +159,11 @@ public class InvalidMovementMapOverlay extends Overlay
 		int width = end.getX() - x - 1;
 		int height = end.getY() - y - 1;
 		x -= width / 2;
-		y -= height / 2;
-
-		if (!mapClipArea.contains(x, y) || !mapClipArea.contains(x + width, y + height))
+		if (!mapClipArea.contains(x, y))
 		{
 			return;
 		}
+		y -= height / 2;
 
 		int a = (width % 2 == 0) ? 1 : 0;
 		int b = (height % 2 == 0) ? 1 : 0;

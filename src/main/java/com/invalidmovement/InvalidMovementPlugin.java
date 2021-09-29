@@ -18,13 +18,13 @@ public class InvalidMovementPlugin extends Plugin
 	private InvalidMovementConfig config;
 
 	@Inject
-	private InvalidMovementMapOverlay invalidMovementMapOverlay;
+	private InvalidMovementMapOverlay mapOverlay;
 
 	@Inject
-	private InvalidMovementSceneOverlay invalidMovementSceneOverlay;
+	private InvalidMovementSceneOverlay sceneOverlay;
 
 	@Inject
-	private InvalidMovementMinimapOverlay invalidMovementMinimapOverlay;
+	private InvalidMovementMinimapOverlay minimapOverlay;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -38,16 +38,16 @@ public class InvalidMovementPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(invalidMovementMapOverlay);
-		overlayManager.add(invalidMovementSceneOverlay);
-		overlayManager.add(invalidMovementMinimapOverlay);
+		overlayManager.add(mapOverlay);
+		overlayManager.add(sceneOverlay);
+		overlayManager.add(minimapOverlay);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		overlayManager.remove(invalidMovementMapOverlay);
-		overlayManager.remove(invalidMovementSceneOverlay);
-		overlayManager.remove(invalidMovementMinimapOverlay);
+		overlayManager.remove(mapOverlay);
+		overlayManager.remove(sceneOverlay);
+		overlayManager.remove(minimapOverlay);
 	}
 }
