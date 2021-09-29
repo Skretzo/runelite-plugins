@@ -36,9 +36,9 @@ class ColourRadiusMarker
 	private Color retreatColour;
 	private boolean retreatVisible;
 
-	private int aggroRadius;
-	private Color aggroColour;
-	private boolean aggroVisible;
+	private int maxRadius;
+	private Color maxColour;
+	private boolean maxVisible;
 
 	ColourRadiusMarker(RadiusMarker radiusMarker, WorldPoint worldPoint)
 	{
@@ -58,9 +58,9 @@ class ColourRadiusMarker
 		this.retreatColour = radiusMarker.getRetreatColour();
 		this.retreatVisible = radiusMarker.isRetreatVisible();
 
-		this.aggroRadius = radiusMarker.getAggroRadius();
-		this.aggroColour = radiusMarker.getAggroColour();
-		this.aggroVisible = radiusMarker.isAggroVisible();
+		this.maxRadius = radiusMarker.getMaxRadius();
+		this.maxColour = radiusMarker.getMaxColour();
+		this.maxVisible = radiusMarker.isMaxVisible();
 
 		this.worldPoint = worldPoint;
 	}

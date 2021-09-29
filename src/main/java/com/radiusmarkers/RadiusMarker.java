@@ -28,7 +28,7 @@ class RadiusMarker
 	Color retreatColour;
 	boolean retreatVisible;
 
-	int aggroRadius;
-	Color aggroColour;
-	boolean aggroVisible;
+	int maxRadius;
+	Color maxColour;
+	boolean maxVisible;
 }

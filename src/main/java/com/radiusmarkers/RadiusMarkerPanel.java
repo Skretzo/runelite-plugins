@@ -62,16 +62,16 @@ class RadiusMarkerPanel extends JPanel
 	private final JPanel containerSpawn = new JPanel(new BorderLayout());
 	private final JPanel containerWander = new JPanel(new BorderLayout());
 	private final JPanel containerRetreat = new JPanel(new BorderLayout());
-	private final JPanel containerAggro = new JPanel(new BorderLayout());
+	private final JPanel containerMax = new JPanel(new BorderLayout());
 	private final JLabel colourIndicatorSpawn = new JLabel();
 	private final JLabel colourIndicatorWander = new JLabel();
 	private final JLabel colourIndicatorRetreat = new JLabel();
-	private final JLabel colourIndicatorAggro = new JLabel();
+	private final JLabel colourIndicatorMax = new JLabel();
 	private final JLabel visibilityLabel = new JLabel();
 	private final JLabel visibilityLabelSpawn = new JLabel();
 	private final JLabel visibilityLabelWander = new JLabel();
 	private final JLabel visibilityLabelRetreat = new JLabel();
-	private final JLabel visibilityLabelAggro = new JLabel();
+	private final JLabel visibilityLabelMax = new JLabel();
 	private final JLabel deleteLabel = new JLabel();
 	private final JButton expandToggle;
 
@@ -84,7 +84,7 @@ class RadiusMarkerPanel extends JPanel
 	private final JSpinner spinnerY = new JSpinner(new SpinnerNumberModel(5, 0, Integer.MAX_VALUE, 1));
 	private final JSpinner spinnerRadiusWander = new JSpinner(new SpinnerNumberModel(5, 0, Integer.MAX_VALUE, 1));
 	private final JSpinner spinnerRadiusRetreat = new JSpinner(new SpinnerNumberModel(5, 0, Integer.MAX_VALUE, 1));
-	private final JSpinner spinnerRadiusAggro = new JSpinner(new SpinnerNumberModel(5, 0, Integer.MAX_VALUE, 1));
+	private final JSpinner spinnerRadiusMax = new JSpinner(new SpinnerNumberModel(5, 0, Integer.MAX_VALUE, 1));
 
 	static
 	{
@@ -256,8 +256,8 @@ class RadiusMarkerPanel extends JPanel
 		containerRetreat.setBorder(new EmptyBorder(5, 0, 5, 0));
 		containerRetreat.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		containerAggro.setBorder(new EmptyBorder(5, 0, 5, 0));
-		containerAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		containerMax.setBorder(new EmptyBorder(5, 0, 5, 0));
+		containerMax.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		JPanel leftActionsSpawn = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		leftActionsSpawn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -268,10 +268,10 @@ class RadiusMarkerPanel extends JPanel
 		JPanel leftActionsRetreat = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		leftActionsRetreat.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		JPanel leftActionsAggro = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-		leftActionsAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel leftActionsMax = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+		leftActionsMax.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		colourIndicatorSpawn.setToolTipText("Edit spawn colour");
+		colourIndicatorSpawn.setToolTipText("Edit spawn point colour");
 		colourIndicatorSpawn.setForeground(marker.getSpawnColour());
 		colourIndicatorSpawn.addMouseListener(new MouseAdapter()
 		{
@@ -294,7 +294,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		colourIndicatorWander.setToolTipText("Edit wander colour");
+		colourIndicatorWander.setToolTipText("Edit wander range colour");
 		colourIndicatorWander.setForeground(marker.getWanderColour());
 		colourIndicatorWander.addMouseListener(new MouseAdapter()
 		{
@@ -317,7 +317,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		colourIndicatorRetreat.setToolTipText("Edit retreat colour");
+		colourIndicatorRetreat.setToolTipText("Edit retreat range colour");
 		colourIndicatorRetreat.setForeground(marker.getRetreatColour());
 		colourIndicatorRetreat.addMouseListener(new MouseAdapter()
 		{
@@ -340,26 +340,26 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		colourIndicatorAggro.setToolTipText("Edit aggro colour");
-		colourIndicatorAggro.setForeground(marker.getAggroColour());
-		colourIndicatorAggro.addMouseListener(new MouseAdapter()
+		colourIndicatorMax.setToolTipText("Edit max range colour");
+		colourIndicatorMax.setForeground(marker.getMaxColour());
+		colourIndicatorMax.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				openColourPickerAggro();
+				openColourPickerMax();
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent mouseEvent)
 			{
-				colourIndicatorAggro.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_HOVER_ICON : BORDER_COLOR_HOVER_ICON);
+				colourIndicatorMax.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_HOVER_ICON : BORDER_COLOR_HOVER_ICON);
 			}
 
 			@Override
 			public void mouseExited(MouseEvent mouseEvent)
 			{
-				colourIndicatorAggro.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
+				colourIndicatorMax.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
 			}
 		});
 
@@ -379,9 +379,9 @@ class RadiusMarkerPanel extends JPanel
 		spinnerRadiusRetreat.setPreferredSize(new Dimension(80, 20));
 		spinnerRadiusRetreat.addChangeListener(ce -> updateMarker());
 
-		spinnerRadiusAggro.setValue(marker.getAggroRadius());
-		spinnerRadiusAggro.setPreferredSize(new Dimension(80, 20));
-		spinnerRadiusAggro.addChangeListener(ce -> updateMarker());
+		spinnerRadiusMax.setValue(marker.getMaxRadius());
+		spinnerRadiusMax.setPreferredSize(new Dimension(80, 20));
+		spinnerRadiusMax.addChangeListener(ce -> updateMarker());
 
 		leftActionsSpawn.add(colourIndicatorSpawn);
 		leftActionsSpawn.add(spinnerX);
@@ -393,8 +393,8 @@ class RadiusMarkerPanel extends JPanel
 		leftActionsRetreat.add(colourIndicatorRetreat);
 		leftActionsRetreat.add(spinnerRadiusRetreat);
 
-		leftActionsAggro.add(colourIndicatorAggro);
-		leftActionsAggro.add(spinnerRadiusAggro);
+		leftActionsMax.add(colourIndicatorMax);
+		leftActionsMax.add(spinnerRadiusMax);
 
 		JPanel rightActionsSpawn = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
 		rightActionsSpawn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -405,8 +405,8 @@ class RadiusMarkerPanel extends JPanel
 		JPanel rightActionsRetreat = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
 		rightActionsRetreat.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		JPanel rightActionsAggro = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-		rightActionsAggro.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel rightActionsMax = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+		rightActionsMax.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		expandToggle = new JButton(marker.isCollapsed() ? COLLAPSE_ICON : EXPAND_ICON);
 		expandToggle.setRolloverIcon(marker.isCollapsed() ? COLLAPSE_HOVER_ICON : EXPAND_HOVER_ICON);
@@ -476,7 +476,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		visibilityLabelSpawn.setToolTipText(marker.isSpawnVisible() ? "Hide spawn" : "Show spawn");
+		visibilityLabelSpawn.setToolTipText(marker.isSpawnVisible() ? "Hide spawn point" : "Show spawn point");
 		visibilityLabelSpawn.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -500,7 +500,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		visibilityLabelWander.setToolTipText(marker.isVisible() ? "Hide wander" : "Show wander");
+		visibilityLabelWander.setToolTipText(marker.isVisible() ? "Hide wander range" : "Show wander range");
 		visibilityLabelWander.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -524,7 +524,7 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		visibilityLabelRetreat.setToolTipText(marker.isVisible() ? "Hide retreat" : "Show retreat");
+		visibilityLabelRetreat.setToolTipText(marker.isVisible() ? "Hide retreat range" : "Show retreat range");
 		visibilityLabelRetreat.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -548,13 +548,13 @@ class RadiusMarkerPanel extends JPanel
 			}
 		});
 
-		visibilityLabelAggro.setToolTipText(marker.isVisible() ? "Hide aggro" : "Show aggro");
-		visibilityLabelAggro.addMouseListener(new MouseAdapter()
+		visibilityLabelMax.setToolTipText(marker.isVisible() ? "Hide max range" : "Show max range");
+		visibilityLabelMax.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				marker.setAggroVisible(!marker.isAggroVisible());
+				marker.setMaxVisible(!marker.isMaxVisible());
 				updateVisibility();
 				plugin.saveMarkers(marker.getWorldPoint().getRegionID());
 			}
@@ -562,7 +562,7 @@ class RadiusMarkerPanel extends JPanel
 			@Override
 			public void mouseEntered(MouseEvent mouseEvent)
 			{
-				visibilityLabelAggro.setIcon(marker.isAggroVisible() ? VISIBLE_HOVER_ICON : INVISIBLE_HOVER_ICON);
+				visibilityLabelMax.setIcon(marker.isMaxVisible() ? VISIBLE_HOVER_ICON : INVISIBLE_HOVER_ICON);
 			}
 
 			@Override
@@ -585,7 +585,7 @@ class RadiusMarkerPanel extends JPanel
 		rightActionsSpawn.add(visibilityLabelSpawn);
 		rightActionsWander.add(visibilityLabelWander);
 		rightActionsRetreat.add(visibilityLabelRetreat);
-		rightActionsAggro.add(visibilityLabelAggro);
+		rightActionsMax.add(visibilityLabelMax);
 
 		containerSpawn.add(leftActionsSpawn, BorderLayout.WEST);
 		containerSpawn.add(rightActionsSpawn, BorderLayout.EAST);
@@ -596,8 +596,8 @@ class RadiusMarkerPanel extends JPanel
 		containerRetreat.add(leftActionsRetreat, BorderLayout.WEST);
 		containerRetreat.add(rightActionsRetreat, BorderLayout.EAST);
 
-		containerAggro.add(leftActionsAggro, BorderLayout.WEST);
-		containerAggro.add(rightActionsAggro, BorderLayout.EAST);
+		containerMax.add(leftActionsMax, BorderLayout.WEST);
+		containerMax.add(rightActionsMax, BorderLayout.EAST);
 
 		JPanel markerContainer = new JPanel();
 		markerContainer.setLayout(new BoxLayout(markerContainer, BoxLayout.Y_AXIS));
@@ -607,7 +607,7 @@ class RadiusMarkerPanel extends JPanel
 		markerContainer.add(containerSpawn);
 		markerContainer.add(containerWander);
 		markerContainer.add(containerRetreat);
-		markerContainer.add(containerAggro);
+		markerContainer.add(containerMax);
 
 		add(markerContainer);
 
@@ -668,12 +668,12 @@ class RadiusMarkerPanel extends JPanel
 
 		marker.setWanderRadius((Integer) spinnerRadiusWander.getValue());
 		marker.setRetreatRadius((Integer) spinnerRadiusRetreat.getValue());
-		marker.setAggroRadius((Integer) spinnerRadiusAggro.getValue());
+		marker.setMaxRadius((Integer) spinnerRadiusMax.getValue());
 
 		marker.setSpawnColour(colourIndicatorSpawn.getForeground());
 		marker.setWanderColour(colourIndicatorWander.getForeground());
 		marker.setRetreatColour(colourIndicatorRetreat.getForeground());
-		marker.setAggroColour(colourIndicatorAggro.getForeground());
+		marker.setMaxColour(colourIndicatorMax.getForeground());
 
 		updateColourIndicators();
 		updateVisibility();
@@ -687,7 +687,7 @@ class RadiusMarkerPanel extends JPanel
 		visibilityLabelSpawn.setIcon(marker.isSpawnVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
 		visibilityLabelWander.setIcon(marker.isWanderVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
 		visibilityLabelRetreat.setIcon(marker.isRetreatVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
-		visibilityLabelAggro.setIcon(marker.isAggroVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
+		visibilityLabelMax.setIcon(marker.isMaxVisible() ? VISIBLE_ICON : INVISIBLE_ICON);
 	}
 
 	private void updateCollapsed()
@@ -699,7 +699,7 @@ class RadiusMarkerPanel extends JPanel
 		containerSpawn.setVisible(open);
 		containerWander.setVisible(open);
 		containerRetreat.setVisible(open);
-		containerAggro.setVisible(open);
+		containerMax.setVisible(open);
 
 		expandToggle.setIcon(open ? COLLAPSE_ICON : EXPAND_ICON);
 		expandToggle.setRolloverIcon(open ? COLLAPSE_HOVER_ICON : EXPAND_HOVER_ICON);
@@ -713,20 +713,20 @@ class RadiusMarkerPanel extends JPanel
 			colourIndicatorSpawn.setBorder(null);
 			colourIndicatorWander.setBorder(null);
 			colourIndicatorRetreat.setBorder(null);
-			colourIndicatorAggro.setBorder(null);
+			colourIndicatorMax.setBorder(null);
 		}
 		else
 		{
 			colourIndicatorSpawn.setBorder(new MatteBorder(0, 0, 3, 0, marker.getSpawnColour()));
 			colourIndicatorWander.setBorder(new MatteBorder(0, 0, 3, 0, marker.getWanderColour()));
 			colourIndicatorRetreat.setBorder(new MatteBorder(0, 0, 3, 0, marker.getRetreatColour()));
-			colourIndicatorAggro.setBorder(new MatteBorder(0, 0, 3, 0, marker.getAggroColour()));
+			colourIndicatorMax.setBorder(new MatteBorder(0, 0, 3, 0, marker.getMaxColour()));
 		}
 
 		colourIndicatorSpawn.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
 		colourIndicatorWander.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
 		colourIndicatorRetreat.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
-		colourIndicatorAggro.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
+		colourIndicatorMax.setIcon(config.borderWidth() == 0 ? NO_BORDER_COLOR_ICON : BORDER_COLOR_ICON);
 	}
 
 	private void openColourPickerSpawn()
@@ -762,12 +762,12 @@ class RadiusMarkerPanel extends JPanel
 		colourPicker.setVisible(true);
 	}
 
-	private void openColourPickerAggro()
+	private void openColourPickerMax()
 	{
-		RuneliteColorPicker colourPicker = getColourPicker(marker.getAggroColour(), " - Aggro range colour");
+		RuneliteColorPicker colourPicker = getColourPicker(marker.getMaxColour(), " - Max range colour");
 		colourPicker.setOnColorChange(c ->
 		{
-			marker.setAggroColour(c);
+			marker.setMaxColour(c);
 			updateColourIndicators();
 		});
 		colourPicker.setVisible(true);

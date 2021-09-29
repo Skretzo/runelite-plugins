@@ -42,13 +42,13 @@ public interface RadiusMarkerConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "defaultRadiusAggro",
-		name = "Aggro radius",
-		description = "Default NPC aggro range radius",
+		keyName = "defaultRadiusMax",
+		name = "Max radius",
+		description = "Default NPC max range radius",
 		position = 3,
 		section = defaultRadiusSection
 	)
-	default int defaultRadiusAggro()
+	default int defaultRadiusMax()
 	{
 		return 8;
 	}
@@ -101,13 +101,13 @@ public interface RadiusMarkerConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		keyName = "defaultColourAggro",
-		name = "Aggro range",
-		description = "Default NPC aggro range colour",
+		keyName = "defaultColourMax",
+		name = "Max range",
+		description = "Default NPC max range colour",
 		position = 8,
 		section = defaultColourSection
 	)
-	default Color defaultColourAggro()
+	default Color defaultColourMax()
 	{
 		return Color.RED;
 	}
@@ -121,5 +121,27 @@ public interface RadiusMarkerConfig extends Config
 	default int borderWidth()
 	{
 		return 3;
+	}
+
+	@ConfigItem(
+		keyName = "showMinimap",
+		name = "Show on minimap",
+		description = "Show radius markers on the minimap",
+		position = 10
+	)
+	default boolean showMinimap()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "showWorldMap",
+		name = "Show on world map",
+		description = "Show radius markers on the world map",
+		position = 11
+	)
+	default boolean showWorldMap()
+	{
+		return true;
 	}
 }

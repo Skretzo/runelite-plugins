@@ -3,6 +3,7 @@ package com.radiusmarkers;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,8 +35,8 @@ import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
 	name = "Radius Markers",
-	description = "Highlight NPC radius regions like spawn, wander, retreat and aggro range",
-	tags = {"radius", "region", "marker", "box", "square", "spawn", "wander", "retreat", "aggro", "range"}
+	description = "Highlight NPC radius regions like spawn, wander, retreat and max range",
+	tags = {"radius", "region", "marker", "box", "square", "spawn", "wander", "retreat", "max", "aggro", "range"}
 )
 public class RadiusMarkerPlugin extends Plugin
 {
@@ -60,7 +60,13 @@ public class RadiusMarkerPlugin extends Plugin
 	private RadiusMarkerConfig config;
 
 	@Inject
-	private RadiusMarkerOverlay overlay;
+	private RadiusMarkerMapOverlay mapOverlay;
+
+	@Inject
+	private RadiusMarkerSceneOverlay sceneOverlay;
+
+	@Inject
+	private RadiusMarkerMinimapOverlay minimapOverlay;
 
 	@Inject
 	private ConfigManager configManager;
@@ -90,7 +96,10 @@ public class RadiusMarkerPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(overlay);
+		overlayManager.add(mapOverlay);
+		overlayManager.add(sceneOverlay);
+		overlayManager.add(minimapOverlay);
+
 		loadMarkers();
 
 		pluginPanel = new RadiusMarkerPluginPanel(this, config);
@@ -111,8 +120,12 @@ public class RadiusMarkerPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		overlayManager.remove(overlay);
+		overlayManager.remove(mapOverlay);
+		overlayManager.remove(sceneOverlay);
+		overlayManager.remove(minimapOverlay);
+
 		markers.clear();
+
 		clientToolbar.removeNavigation(navigationButton);
 
 		pluginPanel = null;
@@ -266,9 +279,9 @@ public class RadiusMarkerPlugin extends Plugin
 			colourRadiusMarker.getRetreatRadius(),
 			colourRadiusMarker.getRetreatColour(),
 			colourRadiusMarker.isRetreatVisible(),
-			colourRadiusMarker.getAggroRadius(),
-			colourRadiusMarker.getAggroColour(),
-			colourRadiusMarker.isAggroVisible());
+			colourRadiusMarker.getMaxRadius(),
+			colourRadiusMarker.getMaxColour(),
+			colourRadiusMarker.isMaxVisible());
 	}
 
 	public void saveMarkers(int regionId)
@@ -318,8 +331,8 @@ public class RadiusMarkerPlugin extends Plugin
 			config.defaultRadiusRetreat(),
 			config.defaultColourRetreat(),
 			true,
-			config.defaultRadiusAggro(),
-			config.defaultColourAggro(),
+			config.defaultRadiusMax(),
+			config.defaultColourMax(),
 			true);
 
 		List<RadiusMarker> radiusMarkers = new ArrayList<>(getMarkers(regionId));
