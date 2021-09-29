@@ -13,11 +13,11 @@ A radius marker is a way to display the spawn point, wander range, retreat range
   - Observe the NPC pathfind freely around without being blocked. Alternatively bring the NPC to the max range line, step outside the max range line and observe where the NPC's first successful path back to the wander range ends.  
   ![animation_wander_range](https://user-images.githubusercontent.com/53493631/134697674-613b397b-7587-48aa-a4d0-8770f1b52a6b.gif)
 - Retreat range
-  - Also known as: *fleeing range*
+  - Also known as: *fleeing range*.
   - Attack the NPC from outside its max range and observe where it is pathing to.  
   ![animation_retreat_range](https://user-images.githubusercontent.com/53493631/134697790-86aaebe2-1209-49ff-97be-ac44d90c2294.gif)
 - Max range
-  - Also known as: *aggression range*
+  - Also known as: *aggression range*.
   - Let the NPC attack you and bring it step-by-step away from its spawn point until it stops attacking you.  
   ![animation_max_range](https://user-images.githubusercontent.com/53493631/134697819-1e7b5be2-76a1-4265-ae32-a0e4489abf6c.gif)
 
