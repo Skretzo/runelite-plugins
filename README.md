@@ -25,8 +25,10 @@ A radius marker is a way to display the spawn point, wander range, retreat range
 - Hunt range
 - Attack range
 
-## Config options
+## Panel
 ![Example of radius marker in the plugin panel](https://user-images.githubusercontent.com/53493631/135182247-5cd2dbe6-25f6-4e11-ba64-1896dbc373e7.png)
+
+## Config options
 - Default radiuses
   - Wander radius: `5`
   - Retreat radius: `7`
