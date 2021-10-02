@@ -143,7 +143,7 @@ class RadiusMarkerMinimapOverlay extends Overlay
 		final int offsetY = playerLocalPoint.getY() - localLocation.getY();
 
 		final int x = (worldPoint.getX() - playerLocation.getX()) * TILE_SIZE + offsetX / 32 - TILE_SIZE / 2 - dx;
-		final int y = (worldPoint.getY() - playerLocation.getY()) * TILE_SIZE + offsetY / 32 - TILE_SIZE / 2 - dy;
+		final int y = (worldPoint.getY() - playerLocation.getY()) * TILE_SIZE + offsetY / 32 - TILE_SIZE / 2 - dy + 1;
 
 		final int angle = client.getMapAngle() & 0x7FF;
 
