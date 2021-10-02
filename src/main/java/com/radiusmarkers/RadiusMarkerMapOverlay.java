@@ -9,6 +9,7 @@ import java.awt.geom.Area;
 import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
+import net.runelite.api.RenderOverview;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -52,7 +53,12 @@ class RadiusMarkerMapOverlay extends Overlay
 
 	private void drawWorldMap(Graphics2D graphics)
 	{
-		final Rectangle bounds = client.getWidget(WidgetInfo.WORLD_MAP_VIEW).getBounds();
+		final Widget worldMapView = client.getWidget(WidgetInfo.WORLD_MAP_VIEW);
+		if (worldMapView == null)
+		{
+			return;
+		}
+		final Rectangle bounds = worldMapView.getBounds();
 		if (bounds == null)
 		{
 			return;
@@ -102,10 +108,15 @@ class RadiusMarkerMapOverlay extends Overlay
 			return;
 		}
 
-		final int x = start.getX();
-		final int y = start.getY();
-		final int width = end.getX() - x;
-		final int height = end.getY() - y;
+		RenderOverview renderOverview = client.getRenderOverview();
+		float pixelsPerTile = renderOverview.getWorldMapZoom();
+
+		int x = start.getX();
+		int y = start.getY();
+		final int width = end.getX() - x - 1;
+		final int height = end.getY() - y - 1;
+		x = x - (int) pixelsPerTile / 2;
+		y = y - (int) pixelsPerTile / 2 + 1;
 
 		graphics.setColor(color);
 		graphics.setClip(mapClipArea);
