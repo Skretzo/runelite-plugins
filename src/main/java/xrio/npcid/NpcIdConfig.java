@@ -55,9 +55,20 @@ public interface NpcIdConfig extends Config
 		return false;
 	}
 
-	@Alpha
 	@ConfigItem(
 		position = 2,
+		keyName = "hideInvisible",
+		name = "Hide invisible NPCs",
+		description = "Hide invisible NPCs with NPC ID = -1"
+	)
+	default boolean hideInvisible()
+	{
+		return true;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 3,
 		keyName = "textColour",
 		name = "Text colour",
 		description = "The colour of the NPC identification text."
