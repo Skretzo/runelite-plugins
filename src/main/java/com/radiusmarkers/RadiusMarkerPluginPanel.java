@@ -220,7 +220,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 		if (empty && plugin.getMarkers().size() > 0)
 		{
 			noMarkersPanel.setContent("Radius Markers",
-				"No radius markers are available for the selected filter.");
+				"No radius markers are available for the current search term and/or selected filter.");
 			searchPanel.setVisible(true);
 		}
 
