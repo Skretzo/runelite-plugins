@@ -670,12 +670,6 @@ class RadiusMarkerPanel extends JPanel
 		marker.setRetreatRadius((Integer) spinnerRadiusRetreat.getValue());
 		marker.setMaxRadius((Integer) spinnerRadiusMax.getValue());
 
-		marker.setSpawnColour(colourIndicatorSpawn.getForeground());
-		marker.setWanderColour(colourIndicatorWander.getForeground());
-		marker.setRetreatColour(colourIndicatorRetreat.getForeground());
-		marker.setMaxColour(colourIndicatorMax.getForeground());
-
-		updateColourIndicators();
 		updateVisibility();
 
 		plugin.saveMarkers(marker.getWorldPoint().getRegionID());

@@ -12,13 +12,14 @@ import net.runelite.api.coords.WorldPoint;
  */
 @Getter
 @Setter
-@EqualsAndHashCode
-class ColourRadiusMarker
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 {
 	private WorldPoint worldPoint;
 
 	private RadiusMarkerPanel panel;
 
+	@EqualsAndHashCode.Include
 	private String name;
 	private boolean visible;
 	private boolean collapsed;
@@ -63,5 +64,11 @@ class ColourRadiusMarker
 		this.maxVisible = radiusMarker.isMaxVisible();
 
 		this.worldPoint = worldPoint;
+	}
+
+	@Override
+	public int compareTo(ColourRadiusMarker other)
+	{
+		return this.name.compareTo(other.name);
 	}
 }
