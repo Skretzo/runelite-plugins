@@ -2,7 +2,7 @@
 ![Icon](icon.png)
 
 ## Info
-Track skill level dependant action success rates.
+Track and display skill level dependant action success rates.
 
 | **Skill**  |    Action    |
 |:----------:|:------------:|
