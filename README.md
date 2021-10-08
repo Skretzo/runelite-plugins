@@ -1,3 +1,9 @@
-# [RuneLite](https://github.com/runelite/runelite) plugins
-- [Invalid Movement](../../tree/invalid-movement)
-- [Radius Markers](../../tree/radius-markers)
+# Success Rates
+![Icon](icon.png)
+
+## Info
+Track skill level dependant action success rates.
+
+**Skill** | Action
+:-:|:-:
+Firemaking | Log lighting
