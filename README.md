@@ -4,6 +4,6 @@
 ## Info
 Track skill level dependant action success rates.
 
-**Skill** | Action
-:-:|:-:
-Firemaking | Log lighting
+| **Skill**  |    Action    |
+|:----------:|:------------:|
+| Firemaking | Log lighting |
