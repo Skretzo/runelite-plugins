@@ -4,6 +4,7 @@
 ## Info
 Track and display skill level dependant action success rates.
 
-| **Skill**  |    Action    |
-|:----------:|:------------:|
-| Firemaking | Log lighting |
+| **Skill**  |    Action     |
+|:----------:|---------------|
+| Crafting   | Firing bowl<br>Firing pie dish<br>Firing pot |
+| Firemaking | Lighting logs |
