@@ -10,6 +10,7 @@ A radius marker is a way to display the spawn point, wander range, retreat range
   - Observe the NPC respawn 1 or more times. The [NPC Indicators](https://github.com/runelite/runelite/wiki/NPC-Indicators) plugin can be helpful for this.  
   ![animation_spawn_point](https://user-images.githubusercontent.com/53493631/134697466-45f9882f-92f2-4ed1-913c-58f722c088d9.gif)
 - Wander range
+  - Also known as: *roaming area*.
   - Observe the NPC pathfind freely around without being blocked. Alternatively bring the NPC to the max range line, step outside the max range line and observe where the NPC's first successful path back to the wander range ends.  
   ![animation_wander_range](https://user-images.githubusercontent.com/53493631/134697674-613b397b-7587-48aa-a4d0-8770f1b52a6b.gif)
 - Retreat range
