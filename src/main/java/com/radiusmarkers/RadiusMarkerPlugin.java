@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,17 +36,17 @@ import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
 	name = "Radius Markers",
-	description = "Highlight NPC radius regions like spawn, wander, retreat and max range",
-	tags = {"radius", "region", "marker", "box", "square", "spawn", "wander", "retreat", "max", "aggro", "range"}
+	description = "Highlight NPC radius regions like attack, hunt, max and wander range",
+	tags = {"npc", "range", "region", "aggression", "attack", "hunt", "interaction", "max", "retreat", "wander"}
 )
 public class RadiusMarkerPlugin extends Plugin
 {
+	public static final String CONFIG_GROUP = "radiusmarkers";
+	private static final String CONFIG_KEY = "markers";
 	private static final String PLUGIN_NAME = "Radius Markers";
-	private static final String CONFIG_GROUP = "radiusmarkers";
 	private static final String ICON_FILE = "panel_icon.png";
-	private static final String REGION_PREFIX = "region_";
 	private static final String DEFAULT_MARKER_NAME = "Marker";
-	private static final String RENAME_MARKER = "Rename marker";
+	private static final String UPDATE_MARKER = "Update marker";
 
 	@Getter(AccessLevel.PACKAGE)
 	private final List<ColourRadiusMarker> markers = new ArrayList<>();
@@ -160,8 +161,8 @@ public class RadiusMarkerPlugin extends Plugin
 			menuEntries = Arrays.copyOf(menuEntries, menuEntries.length + 1);
 
 			final MenuEntry renameEntry = menuEntries[menuEntries.length - 1] = new MenuEntry();
-			renameEntry.setOption(RENAME_MARKER);
-			renameEntry.setTarget(event.getTarget().split("  ")[0] + " " + npc.getId() + "#" + npc.getIndex());
+			renameEntry.setOption(UPDATE_MARKER);
+			renameEntry.setTarget(event.getTarget());
 			renameEntry.setParam0(event.getActionParam0());
 			renameEntry.setParam1(event.getActionParam1());
 			renameEntry.setIdentifier(event.getIdentifier());
@@ -174,7 +175,7 @@ public class RadiusMarkerPlugin extends Plugin
 	@Subscribe
 	public void onMenuOptionClicked(final MenuOptionClicked click)
 	{
-		if (!MenuAction.RUNELITE.equals(click.getMenuAction()) || !click.getMenuOption().equals(RENAME_MARKER))
+		if (!MenuAction.RUNELITE.equals(click.getMenuAction()) || !click.getMenuOption().equals(UPDATE_MARKER))
 		{
 			return;
 		}
@@ -188,7 +189,8 @@ public class RadiusMarkerPlugin extends Plugin
 			return;
 		}
 
-		renameMarker.getPanel().setMarkerText(npc.getName() + " " + npc.getId() + "#" + npc.getIndex());
+		renameMarker.getPanel().setMarkerText(npc.getName());
+		renameMarker.getPanel().setNpcId(npc.getId());
 
 		click.consume();
 	}
@@ -197,35 +199,16 @@ public class RadiusMarkerPlugin extends Plugin
 	{
 		markers.clear();
 
-		final int[] regions = getAllRegions();
-
-		if (regions == null)
-		{
-			return;
-		}
-
-		for (int regionId : regions)
-		{
-			final Collection<RadiusMarker> radiusMarkers = getMarkers(regionId);
-			final List<ColourRadiusMarker> colourRadiusMarkers = translateToColourRadiusMarker(radiusMarkers, regionId);
-			markers.addAll(colourRadiusMarkers);
-		}
+		final Collection<RadiusMarker> radiusMarkers = getRadiusMarkers();
+		final List<ColourRadiusMarker> colourRadiusMarkers = translateToColourRadiusMarker(radiusMarkers);
+		markers.addAll(colourRadiusMarkers);
 
 		Collections.sort(markers);
 	}
 
-	private int[] getAllRegions()
+	private Collection<RadiusMarker> getRadiusMarkers()
 	{
-		final String prefix = ConfigManager.getWholeKey(CONFIG_GROUP, null, REGION_PREFIX);
-
-		List<String> keys = configManager.getConfigurationKeys(prefix);
-
-		return keys.stream().map(k -> k.substring(prefix.length())).mapToInt(Integer::parseInt).toArray();
-	}
-
-	private Collection<RadiusMarker> getMarkers(int regionId)
-	{
-		String json = configManager.getConfiguration(CONFIG_GROUP, REGION_PREFIX + regionId);
+		String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
 
 		if (Strings.isNullOrEmpty(json))
 		{
@@ -235,78 +218,99 @@ public class RadiusMarkerPlugin extends Plugin
 		return gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
 	}
 
-	private void saveMarkers(int regionId, Collection<RadiusMarker> markers)
+	private void saveMarkers(Collection<RadiusMarker> markers)
 	{
 		if (markers == null || markers.isEmpty())
 		{
-			configManager.unsetConfiguration(CONFIG_GROUP, REGION_PREFIX + regionId);
+			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY);
 			return;
 		}
 
 		String json = gson.toJson(markers);
-		configManager.setConfiguration(CONFIG_GROUP, REGION_PREFIX + regionId, json);
+		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
 	}
 
-	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers, int regionId)
+	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers)
 	{
 		if (markers.isEmpty())
 		{
 			return Collections.emptyList();
 		}
 
-		return markers.stream()
-			.flatMap(marker ->
-			{
-				final Collection<WorldPoint> localWorldPoints = WorldPoint.toLocalInstance(client,
-					WorldPoint.fromRegion(regionId, marker.getSpawnRegionX(), marker.getSpawnRegionY(), marker.getZ()));
-				return localWorldPoints.stream().map(worldPoint -> new ColourRadiusMarker(marker, worldPoint));
-			})
-			.collect(Collectors.toList());
+		return markers.stream().map(ColourRadiusMarker::new).collect(Collectors.toList());
 	}
 
 	private RadiusMarker translateToRadiusMarker(ColourRadiusMarker colourRadiusMarker)
 	{
 		return new RadiusMarker(
+			colourRadiusMarker.getId(),
 			colourRadiusMarker.getName(),
 			colourRadiusMarker.isVisible(),
 			colourRadiusMarker.isCollapsed(),
 			colourRadiusMarker.getZ(),
-			colourRadiusMarker.getWorldPoint().getRegionX(),
-			colourRadiusMarker.getWorldPoint().getRegionY(),
+			colourRadiusMarker.getSpawnX(),
+			colourRadiusMarker.getSpawnY(),
 			colourRadiusMarker.getSpawnColour(),
 			colourRadiusMarker.isSpawnVisible(),
 			colourRadiusMarker.getWanderRadius(),
 			colourRadiusMarker.getWanderColour(),
 			colourRadiusMarker.isWanderVisible(),
-			colourRadiusMarker.getRetreatRadius(),
-			colourRadiusMarker.getRetreatColour(),
-			colourRadiusMarker.isRetreatVisible(),
 			colourRadiusMarker.getMaxRadius(),
 			colourRadiusMarker.getMaxColour(),
-			colourRadiusMarker.isMaxVisible());
+			colourRadiusMarker.isMaxVisible(),
+			colourRadiusMarker.getAggressionColour(),
+			colourRadiusMarker.isAggressionVisible(),
+			colourRadiusMarker.getRetreatInteractionColour(),
+			colourRadiusMarker.isRetreatInteractionVisible(),
+			colourRadiusMarker.getNpcId(),
+			colourRadiusMarker.getAttackRadius(),
+			colourRadiusMarker.getAttackColour(),
+			colourRadiusMarker.getAttackType(),
+			colourRadiusMarker.isAttackVisible(),
+			colourRadiusMarker.getHuntRadius(),
+			colourRadiusMarker.getHuntColour(),
+			colourRadiusMarker.isHuntVisible(),
+			colourRadiusMarker.getInteractionRadius(),
+			colourRadiusMarker.getInteractionColour(),
+			colourRadiusMarker.getInteractionOrigin(),
+			colourRadiusMarker.isInteractionVisible());
 	}
 
 	private ColourRadiusMarker findColourRadiusMarker(RadiusMarker radiusMarker)
 	{
 		for (final ColourRadiusMarker colourRadiusMarker : markers)
 		{
-			if (radiusMarker.getName().equals(colourRadiusMarker.getName()) &&
+			if (radiusMarker.getId() == colourRadiusMarker.getId() &&
+				radiusMarker.getName().equals(colourRadiusMarker.getName()) &&
 				radiusMarker.isVisible() == colourRadiusMarker.isVisible() &&
 				radiusMarker.isCollapsed() == colourRadiusMarker.isCollapsed() &&
 				radiusMarker.getZ() == colourRadiusMarker.getZ() &&
-				radiusMarker.getSpawnRegionX() == colourRadiusMarker.getWorldPoint().getRegionX() &&
-				radiusMarker.getSpawnRegionY() == colourRadiusMarker.getWorldPoint().getRegionY() &&
+				radiusMarker.getSpawnX() == colourRadiusMarker.getSpawnX() &&
+				radiusMarker.getSpawnY() == colourRadiusMarker.getSpawnY() &&
 				radiusMarker.getSpawnColour().equals(colourRadiusMarker.getSpawnColour()) &&
 				radiusMarker.isSpawnVisible() == colourRadiusMarker.isSpawnVisible() &&
 				radiusMarker.getWanderRadius() == colourRadiusMarker.getWanderRadius() &&
 				radiusMarker.getWanderColour().equals(colourRadiusMarker.getWanderColour()) &&
 				radiusMarker.isWanderVisible() == colourRadiusMarker.isWanderVisible() &&
-				radiusMarker.getRetreatRadius() == colourRadiusMarker.getRetreatRadius() &&
-				radiusMarker.getRetreatColour().equals(colourRadiusMarker.getRetreatColour()) &&
-				radiusMarker.isRetreatVisible() == colourRadiusMarker.isRetreatVisible() &&
 				radiusMarker.getMaxRadius() == colourRadiusMarker.getMaxRadius() &&
 				radiusMarker.getMaxColour().equals(colourRadiusMarker.getMaxColour()) &&
-				radiusMarker.isMaxVisible() == colourRadiusMarker.isMaxVisible())
+				radiusMarker.isMaxVisible() == colourRadiusMarker.isMaxVisible() &&
+				radiusMarker.getAggressionColour().equals(colourRadiusMarker.getAggressionColour()) &&
+				radiusMarker.isAggressionVisible() == colourRadiusMarker.isAggressionVisible() &&
+				radiusMarker.getRetreatInteractionColour().equals(colourRadiusMarker.getRetreatInteractionColour()) &&
+				radiusMarker.isRetreatInteractionVisible() == colourRadiusMarker.isRetreatInteractionVisible() &&
+				radiusMarker.getNpcId() == colourRadiusMarker.getNpcId() &&
+				radiusMarker.getAttackRadius() == colourRadiusMarker.getAttackRadius() &&
+				radiusMarker.getAttackColour().equals(colourRadiusMarker.getAttackColour()) &&
+				radiusMarker.getAttackType().equals(colourRadiusMarker.getAttackType()) &&
+				radiusMarker.isAttackVisible() == colourRadiusMarker.isAttackVisible() &&
+				radiusMarker.getHuntRadius() == colourRadiusMarker.getHuntRadius() &&
+				radiusMarker.getHuntColour().equals(colourRadiusMarker.getHuntColour()) &&
+				radiusMarker.isHuntVisible() == colourRadiusMarker.isHuntVisible() &&
+				radiusMarker.getInteractionRadius() == colourRadiusMarker.getInteractionRadius() &&
+				radiusMarker.getInteractionColour().equals(colourRadiusMarker.getInteractionColour()) &&
+				radiusMarker.getInteractionOrigin().equals(colourRadiusMarker.getInteractionOrigin()) &&
+				radiusMarker.isInteractionVisible() == colourRadiusMarker.isInteractionVisible())
 			{
 				return colourRadiusMarker;
 			}
@@ -314,20 +318,16 @@ public class RadiusMarkerPlugin extends Plugin
 		return null;
 	}
 
-	public void saveMarkers(int regionId)
+	public void saveMarkers()
 	{
 		List<RadiusMarker> radiusMarkers = new ArrayList<>();
 
 		for (ColourRadiusMarker cm : markers)
 		{
-			if (cm.getWorldPoint().getRegionID() != regionId)
-			{
-				continue;
-			}
 			radiusMarkers.add(translateToRadiusMarker(cm));
 		}
 
-		saveMarkers(regionId, radiusMarkers);
+		saveMarkers(radiusMarkers);
 	}
 
 	public ColourRadiusMarker addMarker()
@@ -344,34 +344,46 @@ public class RadiusMarkerPlugin extends Plugin
 
 	public RadiusMarker addMarker(WorldPoint worldPoint)
 	{
-		final int regionId = worldPoint.getRegionID();
-
 		final RadiusMarker marker = new RadiusMarker(
+			Instant.now().toEpochMilli(),
 			DEFAULT_MARKER_NAME + " " + (markers.size() + 1),
 			true,
 			false,
 			worldPoint.getPlane(),
-			worldPoint.getRegionX(),
-			worldPoint.getRegionY(),
+			worldPoint.getX(),
+			worldPoint.getY(),
 			config.defaultColourSpawn(),
 			true,
 			config.defaultRadiusWander(),
 			config.defaultColourWander(),
 			true,
-			config.defaultRadiusRetreat(),
-			config.defaultColourRetreat(),
-			true,
 			config.defaultRadiusMax(),
 			config.defaultColourMax(),
+			true,
+			config.defaultColourAggression(),
+			true,
+			config.defaultColourRetreatInteraction(),
+			true,
+			0,
+			config.defaultRadiusAttack(),
+			config.defaultColourAttack(),
+			AttackType.MELEE,
+			true,
+			config.defaultRadiusHunt(),
+			config.defaultColourHunt(),
+			true,
+			config.defaultRadiusInteraction(),
+			config.defaultColourInteraction(),
+			RadiusOrigin.DYNAMIC,
 			true);
 
-		List<RadiusMarker> radiusMarkers = new ArrayList<>(getMarkers(regionId));
+		List<RadiusMarker> radiusMarkers = new ArrayList<>(getRadiusMarkers());
 		if (!radiusMarkers.contains(marker))
 		{
 			radiusMarkers.add(marker);
 		}
 
-		saveMarkers(regionId, radiusMarkers);
+		saveMarkers(radiusMarkers);
 
 		loadMarkers();
 
@@ -384,13 +396,11 @@ public class RadiusMarkerPlugin extends Plugin
 	{
 		RadiusMarker radiusMarker = translateToRadiusMarker(colourRadiusMarker);
 
-		final int regionId = colourRadiusMarker.getWorldPoint().getRegionID();
-
-		List<RadiusMarker> radiusMarkers = new ArrayList<>(getMarkers(regionId));
+		List<RadiusMarker> radiusMarkers = new ArrayList<>(getRadiusMarkers());
 
 		radiusMarkers.remove(radiusMarker);
 
-		saveMarkers(regionId, radiusMarkers);
+		saveMarkers(radiusMarkers);
 
 		loadMarkers();
 

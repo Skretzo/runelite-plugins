@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.NPC;
 import net.runelite.api.Point;
 import net.runelite.api.RenderOverview;
 import net.runelite.api.coords.WorldPoint;
@@ -66,6 +67,7 @@ class RadiusMarkerMapOverlay extends Overlay
 		final Area mapClipArea = getWorldMapClipArea(bounds);
 
 		final List<ColourRadiusMarker> markers = plugin.getMarkers();
+		final List<NPC> npcs = client.getNpcs();
 
 		for (final ColourRadiusMarker marker : markers)
 		{
@@ -74,34 +76,78 @@ class RadiusMarkerMapOverlay extends Overlay
 				continue;
 			}
 
+			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType()) ||
+				AttackType.HALBERD.equals(marker.getAttackType());
+
 			final WorldPoint worldPoint = marker.getWorldPoint();
+
+			if (marker.isRetreatInteractionVisible())
+			{
+				drawSquare(graphics, worldPoint, marker.getRetreatInteractionColour(), mapClipArea,
+					marker.getRetreatInteractionRadius(), 1, false);
+			}
+
+			if (marker.isAggressionVisible())
+			{
+				drawSquare(graphics, worldPoint, marker.getAggressionColour(), mapClipArea,
+					marker.getAggressionRadius(), client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
+			}
 
 			if (marker.isMaxVisible())
 			{
-				drawSquare(graphics, worldPoint, marker.getMaxColour(), mapClipArea, marker.getMaxRadius());
-			}
-
-			if (marker.isRetreatVisible())
-			{
-				drawSquare(graphics, worldPoint, marker.getRetreatColour(), mapClipArea, marker.getRetreatRadius());
+				drawSquare(graphics, worldPoint, marker.getMaxColour(), mapClipArea,
+					marker.getMaxRadius(), 1, false);
 			}
 
 			if (marker.isWanderVisible())
 			{
-				drawSquare(graphics, worldPoint, marker.getWanderColour(), mapClipArea, marker.getWanderRadius());
+				drawSquare(graphics, worldPoint, marker.getWanderColour(), mapClipArea,
+					marker.getWanderRadius(), 1, false);
 			}
 
 			if (marker.isSpawnVisible())
 			{
-				drawSquare(graphics, worldPoint, marker.getSpawnColour(), mapClipArea, 0);
+				drawSquare(graphics, worldPoint, marker.getSpawnColour(), mapClipArea, 0, 1, false);
+			}
+
+			for (NPC npc : npcs)
+			{
+				if (npc.getId() != marker.getNpcId())
+				{
+					continue;
+				}
+
+				final WorldPoint npcLocation = npc.getWorldLocation();
+				final int size = npc.getComposition().getSize();
+
+				if (marker.isInteractionVisible())
+				{
+					WorldPoint worldLocation = RadiusOrigin.DYNAMIC.equals(marker.getInteractionOrigin()) ?
+						npcLocation : worldPoint;
+					drawSquare(graphics, worldLocation, marker.getInteractionColour(), mapClipArea,
+						marker.getInteractionRadius(), size, false);
+				}
+
+				if (marker.isHuntVisible())
+				{
+					drawSquare(graphics, npcLocation, marker.getHuntColour(), mapClipArea,
+						marker.getHuntRadius(), 1, false);
+				}
+
+				if (marker.isAttackVisible())
+				{
+					drawSquare(graphics, npcLocation, marker.getAttackColour(), mapClipArea,
+						marker.getAttackRadius(), size, excludeCorner);
+				}
 			}
 		}
 	}
 
-	private void drawSquare(Graphics2D graphics, WorldPoint worldPoint, Color color, Area mapClipArea, int radius)
+	private void drawSquare(Graphics2D graphics, WorldPoint worldPoint, Color color, Area mapClipArea,
+		int radius, int size, boolean excludeCorner)
 	{
-		final Point start = worldMapOverlay.mapWorldPointToGraphicsPoint(worldPoint.dx(-radius).dy(radius));
-		final Point end = worldMapOverlay.mapWorldPointToGraphicsPoint(worldPoint.dx(radius + 1).dy(-(radius + 1)));
+		final Point start = worldMapOverlay.mapWorldPointToGraphicsPoint(worldPoint.dx(-radius).dy(radius + size - 1));
+		final Point end = worldMapOverlay.mapWorldPointToGraphicsPoint(worldPoint.dx(radius + size).dy(-(radius + 1)));
 
 		if (start == null || end == null)
 		{
@@ -110,17 +156,30 @@ class RadiusMarkerMapOverlay extends Overlay
 
 		RenderOverview renderOverview = client.getRenderOverview();
 		float pixelsPerTile = renderOverview.getWorldMapZoom();
+		final int tileSize = (int) pixelsPerTile;
 
 		int x = start.getX();
 		int y = start.getY();
 		final int width = end.getX() - x - 1;
 		final int height = end.getY() - y - 1;
-		x = x - (int) pixelsPerTile / 2;
-		y = y - (int) pixelsPerTile / 2 + 1;
+		x = x - tileSize / 2;
+		y = y - tileSize / 2 + 1;
 
 		graphics.setColor(color);
 		graphics.setClip(mapClipArea);
-		graphics.draw(new Area(new Rectangle(x, y, width, height)));
+
+		Area square = new Area(new Rectangle(x, y, width, height));
+		if (radius > 0 && excludeCorner)
+		{
+			Area corners = new Area(new Rectangle(x, y, tileSize, tileSize));
+			corners.add(new Area(new Rectangle(x, y + height - tileSize, tileSize, tileSize)));
+			corners.add(new Area(new Rectangle(x + width - tileSize, y, tileSize, tileSize)));
+			corners.add(new Area(new Rectangle(x + width - tileSize, y + height - tileSize, tileSize, tileSize)));
+			Rectangle r = new Rectangle();
+			square.subtract(corners);
+		}
+
+		graphics.draw(square);
 	}
 
 	private Area getWorldMapClipArea(Rectangle baseRectangle)

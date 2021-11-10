@@ -214,7 +214,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		boolean empty = markerView.getComponentCount() == 0;
 		noMarkersPanel.setContent("Radius Markers",
-			"Click the '+' button to add a region marker at the feet of your character.");
+			"Click the '+' button to add a radius marker at the feet of your character.");
 		noMarkersPanel.setVisible(empty);
 		searchPanel.setVisible(!empty);
 		if (empty && plugin.getMarkers().size() > 0)

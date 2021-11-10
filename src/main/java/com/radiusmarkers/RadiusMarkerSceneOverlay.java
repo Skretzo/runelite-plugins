@@ -8,7 +8,9 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.util.Collection;
+import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
@@ -45,6 +47,7 @@ class RadiusMarkerSceneOverlay extends Overlay
 	public Dimension render(Graphics2D graphics)
 	{
 		final Collection<ColourRadiusMarker> markers = plugin.getMarkers();
+		final List<NPC> npcs = client.getNpcs();
 
 		if (markers.isEmpty())
 		{
@@ -61,89 +64,151 @@ class RadiusMarkerSceneOverlay extends Overlay
 				continue;
 			}
 
-			if (marker.isMaxVisible())
+			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType()) ||
+				AttackType.HALBERD.equals(marker.getAttackType());
+
+			if (marker.isRetreatInteractionVisible())
 			{
-				drawBox(graphics, worldPoint, marker.getMaxRadius(), marker.getMaxColour(), stroke);
+				drawBox(graphics, worldPoint, marker.getRetreatInteractionRadius(),
+					marker.getRetreatInteractionColour(), stroke, 1, false);
 			}
 
-			if (marker.isRetreatVisible())
+			if (marker.isAggressionVisible())
 			{
-				drawBox(graphics, worldPoint, marker.getRetreatRadius(), marker.getRetreatColour(), stroke);
+				drawBox(graphics, worldPoint, marker.getAggressionRadius(), marker.getAggressionColour(),
+					stroke, client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
+			}
+
+			if (marker.isMaxVisible())
+			{
+				drawBox(graphics, worldPoint, marker.getMaxRadius(), marker.getMaxColour(), stroke, 1, false);
 			}
 
 			if (marker.isWanderVisible())
 			{
-				drawBox(graphics, worldPoint, marker.getWanderRadius(), marker.getWanderColour(), stroke);
+				drawBox(graphics, worldPoint, marker.getWanderRadius(), marker.getWanderColour(), stroke, 1, false);
 			}
 
 			if (marker.isSpawnVisible())
 			{
-				drawBox(graphics, worldPoint, 0, marker.getSpawnColour(), stroke);
+				drawBox(graphics, worldPoint, 0, marker.getSpawnColour(), stroke, 1, false);
+			}
+
+			for (NPC npc : npcs)
+			{
+				if (npc.getId() != marker.getNpcId())
+				{
+					continue;
+				}
+
+				final WorldPoint npcLocation = npc.getWorldLocation();
+				final int size = npc.getComposition().getSize();
+
+				if (marker.isInteractionVisible())
+				{
+					WorldPoint worldLocation = RadiusOrigin.DYNAMIC.equals(marker.getInteractionOrigin()) ?
+						npcLocation : worldPoint;
+					drawBox(graphics, worldLocation, marker.getInteractionRadius(),
+						marker.getInteractionColour(), stroke, size, false);
+				}
+
+				if (marker.isHuntVisible())
+				{
+					drawBox(graphics, npcLocation, marker.getHuntRadius(), marker.getHuntColour(), stroke, 1, false);
+				}
+
+				if (marker.isAttackVisible())
+				{
+					drawBox(graphics, npcLocation, marker.getAttackRadius(), marker.getAttackColour(),
+						stroke, size, excludeCorner);
+				}
 			}
 		}
 
 		return null;
 	}
 
-	private void drawBox(Graphics2D graphics, WorldPoint worldPoint, int radius, Color borderColour, Stroke borderStroke)
+	private void drawBox(Graphics2D graphics, WorldPoint worldPoint, int radius,
+		Color borderColour, Stroke borderStroke, int size, boolean excludeCorner)
 	{
-		if (client.getLocalPlayer() == null)
-		{
-			return;
-		}
-
-		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
-
 		graphics.setStroke(borderStroke);
 		graphics.setColor(borderColour);
+		graphics.draw(getSquare(worldPoint, radius, size, excludeCorner));
+	}
 
-		final GeneralPath path = new GeneralPath();
+	private GeneralPath getSquare(final WorldPoint worldPoint, final int radius, final int size, boolean excludeCorner)
+	{
+		GeneralPath path = new GeneralPath();
+
+		if (client.getLocalPlayer() == null)
+		{
+			return path;
+		}
 
 		final int startX = worldPoint.getX() - radius;
 		final int startY = worldPoint.getY() - radius;
 		final int z = worldPoint.getPlane();
 
-		final int diameter = 2 * radius + 1;
+		final int diameter = 2 * radius + size;
+
+		excludeCorner = excludeCorner && radius > 0;
 
 		x = startX;
 		y = startY;
 
-		drawBoxSide(path, playerLocation, z, startX, startY, diameter, 1, 1, false, false, true, false);
-		drawBoxSide(path, playerLocation, z, startX, startY, diameter, 1, 1, true, false, false, true);
-		drawBoxSide(path, playerLocation, z, startX, startY, diameter, diameter - 1, -1, false, true, true, false);
-		drawBoxSide(path, playerLocation, z, startX, startY, diameter, diameter - 1, -1, true, false, false, false);
+		final WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 
-		graphics.draw(path);
-	}
+		final int[] xs = new int[4 * diameter + 1];
+		final int[] ys = new int[xs.length];
 
-	private void drawBoxSide(
-		final GeneralPath path, final WorldPoint playerLocation,
-		final int z, final int startX, final int startY,
-		final int diameter, final int start, final int increment,
-		final boolean useXI, final boolean useXDiameter,
-		final boolean useYI, final boolean useYDiameter)
-	{
-		final int xUseI = useXI ? 1 : 0;
-		final int yUseI = useYI ? 1 : 0;
-		final int xUseDiameter = useXDiameter ? 1 : 0;
-		final int yUseDiameter = useYDiameter ? 1 : 0;
-
-		for (int i = start; i >= 0 && i <= diameter; i += increment)
+		for (int i = 0; i < xs.length; i++)
 		{
+			if (i < diameter)
+			{
+				xs[0 * diameter + i] = startX + i;
+				xs[1 * diameter + i] = startX + diameter;
+				xs[2 * diameter + i] = startX + diameter - i;
+				xs[3 * diameter + i] = startX;
+				ys[0 * diameter + i] = startY;
+				ys[1 * diameter + i] = startY + i;
+				ys[2 * diameter + i] = startY + diameter;
+				ys[3 * diameter + i] = startY + diameter - i;
+			}
+			else if (i == diameter)
+			{
+				xs[xs.length - 1] = xs[0];
+				ys[ys.length - 1] = ys[0];
+			}
+			if (excludeCorner && i == 0)
+			{
+				xs[0 * diameter + i] += 1;
+				xs[1 * diameter + i] -= 1;
+				xs[2 * diameter + i] -= 1;
+				xs[3 * diameter + i] += 1;
+				ys[0 * diameter + i] += 1;
+				ys[1 * diameter + i] += 1;
+				ys[2 * diameter + i] -= 1;
+				ys[3 * diameter + i] -= 1;
+				x = xs[i];
+				y = ys[i];
+			}
+
 			boolean hasFirst = false;
 			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
 			{
 				hasFirst = moveTo(path, x, y, z);
 			}
 
-			x = startX + i * xUseI + diameter * xUseDiameter;
-			y = startY + i * yUseI + diameter * yUseDiameter;
+			x = xs[i];
+			y = ys[i];
 
 			if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
 			{
 				lineTo(path, x, y, z);
 			}
 		}
+
+		return path;
 	}
 
 	private boolean moveTo(GeneralPath path, final int x, final int y, final int z)

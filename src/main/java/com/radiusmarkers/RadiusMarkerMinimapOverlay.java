@@ -7,8 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.Varbits;
@@ -54,6 +56,7 @@ class RadiusMarkerMinimapOverlay extends Overlay
 	private void drawMinimap(Graphics2D graphics)
 	{
 		final List<ColourRadiusMarker> markers = plugin.getMarkers();
+		final List<NPC> npcs = client.getNpcs();
 
 		for (final ColourRadiusMarker marker : markers)
 		{
@@ -63,32 +66,73 @@ class RadiusMarkerMinimapOverlay extends Overlay
 			}
 
 			final WorldPoint worldPoint = marker.getWorldPoint();
+			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType()) ||
+				AttackType.HALBERD.equals(marker.getAttackType());
+
+			if (marker.isRetreatInteractionVisible())
+			{
+				drawSquare(graphics, worldPoint, marker.getRetreatInteractionColour(),
+					marker.getRetreatInteractionRadius(), 1, false);
+			}
+
+			if (marker.isAggressionVisible())
+			{
+				drawSquare(graphics, worldPoint, marker.getAggressionColour(),
+					marker.getAggressionRadius(), client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
+			}
 
 			if (marker.isMaxVisible())
 			{
-				drawSquare(graphics, worldPoint, marker.getMaxColour(), marker.getMaxRadius());
-			}
-
-			if (marker.isRetreatVisible())
-			{
-				drawSquare(graphics, worldPoint, marker.getRetreatColour(), marker.getRetreatRadius());
+				drawSquare(graphics, worldPoint, marker.getMaxColour(), marker.getMaxRadius(), 1, false);
 			}
 
 			if (marker.isWanderVisible())
 			{
-				drawSquare(graphics, worldPoint, marker.getWanderColour(), marker.getWanderRadius());
+				drawSquare(graphics, worldPoint, marker.getWanderColour(), marker.getWanderRadius(), 1, false);
 			}
 
 			if (marker.isSpawnVisible())
 			{
-				drawSquare(graphics, worldPoint, marker.getSpawnColour(), 0);
+				drawSquare(graphics, worldPoint, marker.getSpawnColour(), 0, 1, false);
+			}
+
+			for (NPC npc : npcs)
+			{
+				if (npc.getId() != marker.getNpcId())
+				{
+					continue;
+				}
+
+				final WorldPoint npcLocation = npc.getWorldLocation();
+				final int size = npc.getComposition().getSize();
+
+				if (marker.isInteractionVisible())
+				{
+					WorldPoint worldLocation = RadiusOrigin.DYNAMIC.equals(marker.getInteractionOrigin()) ?
+						npcLocation : worldPoint;
+					drawSquare(graphics, worldLocation, marker.getInteractionColour(),
+						marker.getInteractionRadius(), size, false);
+				}
+
+				if (marker.isHuntVisible())
+				{
+					drawSquare(graphics, npcLocation, marker.getHuntColour(), marker.getHuntRadius(), 1, false);
+				}
+
+				if (marker.isAttackVisible())
+				{
+					drawSquare(graphics, npcLocation, marker.getAttackColour(),
+						marker.getAttackRadius(), size, excludeCorner);
+				}
 			}
 		}
 	}
 
-	private void drawSquare(Graphics2D graphics, WorldPoint center, Color color, int radius)
+	private void drawSquare(Graphics2D graphics, WorldPoint center, Color color,
+		int radius, int size, boolean excludeCorner)
 	{
 		final WorldPoint southWest = center.dx(-radius).dy(-radius);
+		final int diameter = 2 * radius + size;
 
 		Area minimapClipArea = getMinimapClipArea();
 		if (minimapClipArea == null)
@@ -99,31 +143,58 @@ class RadiusMarkerMinimapOverlay extends Overlay
 		graphics.setColor(color);
 		graphics.setClip(minimapClipArea);
 
-		drawSquareSide(graphics, southWest, radius, 0, 0, 1, 0);
-		drawSquareSide(graphics, southWest, radius, 0, 0, 0, 1);
-		drawSquareSide(graphics, southWest, radius, 0, 1, 1, 0);
-		drawSquareSide(graphics, southWest, radius, 1, 0, 0, 1);
-	}
-
-	private void drawSquareSide(Graphics2D graphics, WorldPoint southWest,
-		int radius, int dx1, int dy1, int dx2, int dy2)
-	{
-		final int diameter = radius * 2 + 1;
-		final WorldPoint worldPointStart = southWest.dx(dx1 * diameter).dy(dy1 * diameter);
-		final WorldPoint worldPointEnd = worldPointStart.dx(dx2 * diameter).dy(dy2 * diameter);
-
-		Point start = worldToMinimap(worldPointStart, dx1, dy1);
-		Point end = worldToMinimap(worldPointEnd, dx1 + dx2, dy1 + dy2);
-
-		if (start == null || end == null)
+		GeneralPath path = new GeneralPath();
+		if (radius > 0 && excludeCorner)
 		{
-			return;
+			updateLine(path, new WorldPoint[]
+			{
+				southWest.dx(1).dy(1), southWest.dx(1), southWest.dx(diameter - 1), southWest.dx(diameter - 1).dy(1)
+			});
+			updateLine(path, new WorldPoint[]
+			{
+				southWest.dx(diameter - 1).dy(1), southWest.dx(diameter).dy(1),
+				southWest.dx(diameter).dy(diameter - 1), southWest.dx(diameter - 1).dy(diameter - 1)
+			});
+			updateLine(path, new WorldPoint[]
+			{
+				southWest.dx(1).dy(1), southWest.dy(1), southWest.dy(diameter - 1), southWest.dx(1).dy(diameter - 1)
+			});
+			updateLine(path, new WorldPoint[]
+			{
+				southWest.dx(1).dy(diameter - 1), southWest.dx(1).dy(diameter),
+				southWest.dx(diameter - 1).dy(diameter), southWest.dx(diameter - 1).dy(diameter - 1)
+			});
 		}
-
-		graphics.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
+		else
+		{
+			updateLine(path, new WorldPoint[] { southWest, southWest.dx(diameter) });
+			updateLine(path, new WorldPoint[] { southWest.dx(diameter), southWest.dx(diameter).dy(diameter) });
+			updateLine(path, new WorldPoint[] { southWest, southWest.dy(diameter) });
+			updateLine(path, new WorldPoint[] { southWest.dy(diameter), southWest.dx(diameter).dy(diameter) });
+		}
+		graphics.draw(path);
 	}
 
-	private Point worldToMinimap(final WorldPoint worldPoint, final int dx, final int dy)
+	private void updateLine(GeneralPath path, WorldPoint[] worldPoints)
+	{
+		for (int i = 1; i < worldPoints.length; i++)
+		{
+			Point previous = worldToMinimap(worldPoints[i - 1]);
+			boolean hasFirst = false;
+			if (previous != null)
+			{
+				path.moveTo(previous.getX(), previous.getY());
+				hasFirst = true;
+			}
+			Point current = worldToMinimap(worldPoints[i]);
+			if (hasFirst && current != null)
+			{
+				path.lineTo(current.getX(), current.getY());
+			}
+		}
+	}
+
+	private Point worldToMinimap(final WorldPoint worldPoint)
 	{
 		if (client.getLocalPlayer() == null)
 		{
@@ -142,8 +213,8 @@ class RadiusMarkerMinimapOverlay extends Overlay
 		final int offsetX = playerLocalPoint.getX() - localLocation.getX();
 		final int offsetY = playerLocalPoint.getY() - localLocation.getY();
 
-		final int x = (worldPoint.getX() - playerLocation.getX()) * TILE_SIZE + offsetX / 32 - TILE_SIZE / 2 - dx;
-		final int y = (worldPoint.getY() - playerLocation.getY()) * TILE_SIZE + offsetY / 32 - TILE_SIZE / 2 - dy + 1;
+		final int x = (worldPoint.getX() - playerLocation.getX()) * TILE_SIZE + offsetX / 32 - TILE_SIZE / 2;
+		final int y = (worldPoint.getY() - playerLocation.getY()) * TILE_SIZE + offsetY / 32 - TILE_SIZE / 2 + 1;
 
 		final int angle = client.getMapAngle() & 0x7FF;
 
