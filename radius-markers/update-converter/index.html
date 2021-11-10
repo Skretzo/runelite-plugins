@@ -1,0 +1,296 @@
+<html>
+
+  <head>
+
+    <title>
+      Radius Marker update converter
+    </title>
+
+    <link rel = "icon" href = "https://raw.githubusercontent.com/Skretzo/runelite-plugins/radius-markers/icon.png">
+
+    <style>
+
+      body
+      {
+        font-family: arial, sans-serif;
+      }
+
+      table
+      {
+        border-collapse: collapse;
+        text-align: center;
+      }
+
+      td, th
+      {
+        border: 1px solid rgba(0, 0, 0, 0);
+        padding: 8px;
+      }
+
+      th
+      {
+        font-size: 22px;
+      }
+
+      textarea
+      {
+        height: 170px;
+        min-width: 700px;
+        max-width: 1200px;
+        min-height: 20px;
+        max-height: 500px;
+      }
+
+      #codetext
+      {
+        font-family: consolas, sans-serif;
+        font-weight: bold;
+      }
+
+    </style>
+
+    <script>
+/*
+Input example:
+radiusmarkers.region_12851=[{"name"\:"Lonely chicken","visible"\:false,"collapsed"\:true,"z"\:0,"spawnRegionX"\:37,"spawnRegionY"\:59,"spawnColour"\:"\#FF00FFFF","spawnVisible"\:true,"wanderRadius"\:5,"wanderColour"\:"\#FFFFFF00","wanderVisible"\:true,"retreatRadius"\:7,"retreatColour"\:"\#FFFF00FF","retreatVisible"\:true,"maxRadius"\:8,"maxColour"\:"\#FFFF0000","maxVisible"\:true}]
+
+radiusmarkers.region_12341=[{"name"\:"Barbarian","visible"\:false,"collapsed"\:true,"z"\:0,"spawnRegionX"\:6,"spawnRegionY"\:50,"spawnColour"\:"\#FF00FFFF","spawnVisible"\:true,"wanderRadius"\:5,"wanderColour"\:"\#FFFFFF00","wanderVisible"\:true,"retreatRadius"\:7,"retreatColour"\:"\#FFFF00FF","retreatVisible"\:true,"maxRadius"\:8,"maxColour"\:"\#FFFF0000","maxVisible"\:true}]
+*/
+
+      function prepare()
+      {
+        document.getElementById("input").placeholder = 'radiusmarkers.region_12851=[{"name"\\:"Lonely chicken","visible"\\:false,"collapsed"\\:true,"z"\\:0,"spawnRegionX"\\:37,"spawnRegionY"\\:59,"spawnColour"\\:"\\#FF00FFFF","spawnVisible"\\:true,"wanderRadius"\\:5,"wanderColour"\\:"\\#FFFFFF00","wanderVisible"\\:true,"retreatRadius"\\:7,"retreatColour"\\:"\\#FFFF00FF","retreatVisible"\\:true,"maxRadius"\\:8,"maxColour"\\:"\\#FFFF0000","maxVisible"\\:true}]\n\nradiusmarkers.region_12341=[{"name"\\:"Barbarian","visible"\\:false,"collapsed"\\:true,"z"\\:0,"spawnRegionX"\\:6,"spawnRegionY"\\:50,"spawnColour"\\:"\\#FF00FFFF","spawnVisible"\\:true,"wanderRadius"\\:5,"wanderColour"\\:"\\#FFFFFF00","wanderVisible"\\:true,"retreatRadius"\\:7,"retreatColour"\\:"\\#FFFF00FF","retreatVisible"\\:true,"maxRadius"\\:8,"maxColour"\\:"\\#FFFF0000","maxVisible"\\:true}]';
+
+        document.getElementById("output").placeholder = 'radiusmarkers.markers=[{"id"\\:1636075022083,"name"\\:"Lonely chicken","visible"\\:false,"collapsed"\\:true,"z"\\:0,"spawnX"\\:3237,"spawnY"\\:3323,"spawnColour"\\:"\\#FF00FFFF","spawnVisible"\\:true,"wanderRadius"\\:5,"wanderColour"\\:"\\#FFFFFF00","wanderVisible"\\:true,"maxRadius"\\:7,"maxColour"\\:"\\#FFFF00FF","maxVisible"\\:true,"aggressionColour"\\:"\\#FFFF0000","aggressionVisible"\\:true,"retreatInteractionColour"\\:"#FF0000FF","retreatInteractionVisible"\\:false,"attackRadius"\\:1,"attackColour"\\:"#FF7F0000","attackType"\\:"MELEE","attackVisible"\\:true,"huntRadius"\\:1,"huntColour"\\:"#FFFF7F00","huntVisible"\\:false,"interactionRadius"\\:1,"interactionColour"\\:"#FF00C800","interactionOrigin"\\:"DYNAMIC","interactionVisible"\\:false},{"id"\\:1636075022084,"name"\\:"Barbarian","visible"\\:false,"collapsed"\\:true,"z"\\:0,"spawnX"\\:3078,"spawnY"\\:3442,"spawnColour"\\:"\\#FF00FFFF","spawnVisible"\\:true,"wanderRadius"\\:5,"wanderColour"\\:"\\#FFFFFF00","wanderVisible"\\:true,"maxRadius"\\:7,"maxColour"\\:"\\#FFFF00FF","maxVisible"\\:true,"aggressionColour"\\:"\\#FFFF0000","aggressionVisible"\\:true,"retreatInteractionColour"\\:"#FF0000FF","retreatInteractionVisible"\\:false,"attackRadius"\\:1,"attackColour"\\:"#FF7F0000","attackType"\\:"MELEE","attackVisible"\\:true,"huntRadius"\\:1,"huntColour"\\:"#FFFF7F00","huntVisible"\\:false,"interactionRadius"\\:1,"interactionColour"\\:"#FF00C800","interactionOrigin"\\:"DYNAMIC","interactionVisible"\\:false}]';
+      }
+
+      function fixText(text)
+      {
+        if (text.indexOf("=[{") >= 0)
+        {
+          text = text.substring(text.indexOf("=[{") + 3);
+        }
+        if (text.endsWith("}]"))
+        {
+          text = text.substring(0, text.length - 2);
+        }
+        return text;
+      }
+
+      function idToX(regionId, regionX)
+      {
+        return (regionId >> 8) * 64 + regionX;
+      }
+
+      function idToY(regionId, regionY)
+      {
+        return (regionId - ((regionId >> 8) << 8)) * 64 + regionY;
+      }
+
+      function textToDict(fullText)
+      {
+        var newMarkers = [];
+        var regionParts = fullText.replaceAll("\n\n\n", "\n").replaceAll("\n\n", "\n").split("\n");
+        var counter = 0;
+        for (var k = 0; k < regionParts.length; k++)
+        {
+          var text = regionParts[k];
+          var regionId = parseInt(text.substring("radiusmarkers.region_".length, text.indexOf("=")));
+          text = fixText(text);
+          var oldMarkers = text.split("},{");
+          for (var j = 0; j < oldMarkers.length; j++)
+          {
+            counter++;
+            var newMarker = [];
+            var marker = {
+              '"id"' : (Date.now() + counter).toString(),
+              '"name"' : '"' + "Marker " + (counter) + '"',
+              '"visible"' : 'false',
+              '"collapsed"' : 'true',
+              '"z"' : '0',
+              '"spawnX"' : '0',
+              '"spawnY"' : '0',
+              '"spawnColour"' : '"\#FF00FFFF"',
+              '"spawnVisible"' : 'true',
+              '"wanderRadius"' : '5',
+              '"wanderColour"' : '"\#FFFFFF00"',
+              '"wanderVisible"' : 'true',
+              '"maxRadius"' : '7',
+              '"maxColour"' : '"\#FFFF00FF"',
+              '"maxVisible"' : 'true',
+              '"aggressionColour"' : '"\#FFFF0000"',
+              '"aggressionVisible"' : 'true',
+              '"retreatInteractionColour"' : '"\#FF0000FF"',
+              '"retreatInteractionVisible"' : 'false',
+              '"attackRadius"' : '1',
+              '"attackColour"' : '"\#FF7F0000"',
+              '"attackType"' : '"MELEE"',
+              '"attackVisible"' : 'true',
+              '"huntRadius"' : '1',
+              '"huntColour"' : '"\#FFFF7F00"',
+              '"huntVisible"' : 'false',
+              '"interactionRadius"' : '1',
+              '"interactionColour"' : '"\#FF00C800"',
+              '"interactionOrigin"' : '"DYNAMIC"',
+              '"interactionVisible"' : 'false'
+            };
+            var parts = oldMarkers[j].split(",");
+            for (var i = 0; i < parts.length; i++)
+            {
+              var pair = parts[i].split("\\:");
+              var key = pair[0];
+              var val = pair[1];
+              if (key in marker)
+              {
+                if (key == '"maxColour"')
+                {
+                  marker['"aggressionColour"'] = val;
+                }
+                else if (key == '"maxVisible"')
+                {
+                  marker['"aggressionVisible"'] = val;
+                }
+                else if (key != '"maxRadius"')
+                {
+                  marker[key] = val;
+                }
+              }
+              else
+              {
+                if (key == '"spawnRegionX"')
+                {
+                  marker['"spawnX"'] = idToX(regionId, parseInt(val));
+                }
+                else if (key == '"spawnRegionY"')
+                {
+                  marker['"spawnY"'] = idToY(regionId, parseInt(val));
+                }
+                else if (key == '"retreatRadius"')
+                {
+                  marker['"maxRadius"'] = val;
+                }
+                else if (key == '"retreatColour"')
+                {
+                  marker['"maxColour"'] = val;
+                }
+                else if (key == '"retreatVisible"')
+                {
+                  marker['"maxVisible"'] = val;
+                }
+              }
+            }
+            var pairs = Object.entries(marker);
+            for (var i = 0; i < pairs.length; i++)
+            {
+              var key = pairs[i][0];
+              var val = pairs[i][1];
+              newMarker.push(key + "\\:" + val);
+            }
+            newMarker[0] = "{" + newMarker[0];
+            newMarker[newMarker.length - 1] = newMarker[newMarker.length - 1] + "}";
+            newMarkers.push(newMarker.join(","));
+          }
+        }
+        var textMarkers = "radiusmarkers.markers=[" + newMarkers.join(",") + "]";
+        return textMarkers;
+      }
+
+      function convert()
+      {
+        document.getElementById("output").value = textToDict(document.getElementById("input").value);
+      }
+
+    </script>
+
+  </head>
+
+  <body onload = "prepare();">
+
+  <center>
+
+    <table>
+
+      <tr>
+        <th colspan = 3>Radius Marker update converter (1.1 &#8680; 1.2)</th>
+      </tr>
+
+      <tr>
+        <td>
+          You can find your saved radius markers in the <span id = "codetext">settings.properties</span> file in your <span id = "codetext">.runelite</span> folder.<br>Find all the lines in the file that looks like this: <span id = "codetext">radiusmarkers.region_#=[...]</span>,<br>where <span id = "codetext">#</span> is a region id like 12850 and <span id = "codetext">...</span> is the radius marker information.<br>Add each of these lines as the input in the textfield below, separated by a line break.<br>The output will appear as one big continuous line in the bottom textfield.<br>Add it as a separate line in the <span id = "codetext">settings.properties</span> file.<br>You can now delete the old radius marker lines as they are no longer in use.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <button onclick = "convert()">
+            CONVERT
+          </button>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <textarea id = "input" name = "input" placeholder = 'Input example:
+radiusmarkers.region_12851=[{"name"\:"Lonely chicken",
+                             "visible"\:false,
+                             "collapsed"\:true,
+                             "z"\:0,
+                             "spawnRegionX"\:37,
+                             "spawnRegionY"\:59,
+                             "spawnColour"\:"\#FF00FFFF",
+                             "spawnVisible"\:true,
+                             "wanderRadius"\:5,
+                             "wanderColour"\:"\#FFFFFF00",
+                             "wanderVisible"\:true,
+                             "retreatRadius"\:7,
+                             "retreatColour"\:"\#FFFF00FF",
+                             "retreatVisible"\:true,
+                             "maxRadius"\:8,
+                             "maxColour"\:"\#FFFF0000",
+                             "maxVisible"\:true}]'></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <textarea id = "output" name = "output" placeholder = 'Output example:
+radiusmarkers.markers=[{"id"\:1636038307618,
+                        "name"\:"Lonely chicken",
+                        "visible"\:false,
+                        "collapsed"\:true,
+                        "z"\:0,
+                        "spawnX"\:3237,
+                        "spawnY"\:3323,
+                        "spawnColour"\:"\#FF00FFFF",
+                        "spawnVisible"\:true,
+                        "wanderRadius"\:5,
+                        "wanderColour"\:"\#FFFFFF00",
+                        "wanderVisible"\:true,
+                        "maxRadius"\:7,
+                        "maxColour"\:"\#FFFF00FF",
+                        "maxVisible"\:true,
+                        "aggressionColour"\:"\#FFFF0000",
+                        "aggressionVisible"\:true,
+                        "retreatInteractionColour"\:"\#FF0000FF",
+                        "retreatInteractionVisible"\:true,
+                        "attackRadius"\:1,
+                        "attackColour"\:"\#FF7F0000",
+                        "attackType"\:"MELEE",
+                        "attackVisible"\:true,
+                        "huntRadius"\:1,
+                        "huntColour"\:"\#FFFF7F00",
+                        "huntVisible"\:false,
+                        "interactionRadius"\:1,
+                        "interactionColour"\:"\#FF00C800",
+                        "interactionOrigin"\:"DYNAMIC",
+                        "interactionVisible"\:false}]' readOnly = "true"></textarea>
+        </td>
+      </tr>
+
+    </table>
+
+  </center>
+
+  </body>
+
+</html>
