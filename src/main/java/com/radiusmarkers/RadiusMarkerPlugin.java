@@ -8,7 +8,6 @@ import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +22,6 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -156,33 +154,21 @@ public class RadiusMarkerPlugin extends Plugin
 				return;
 			}
 
-			MenuEntry[] menuEntries = client.getMenuEntries();
-
-			menuEntries = Arrays.copyOf(menuEntries, menuEntries.length + 1);
-
-			final MenuEntry renameEntry = menuEntries[menuEntries.length - 1] = new MenuEntry();
-			renameEntry.setOption(UPDATE_MARKER);
-			renameEntry.setTarget(event.getTarget());
-			renameEntry.setParam0(event.getActionParam0());
-			renameEntry.setParam1(event.getActionParam1());
-			renameEntry.setIdentifier(event.getIdentifier());
-			renameEntry.setType(MenuAction.RUNELITE.getId());
-
-			client.setMenuEntries(menuEntries);
+			client.createMenuEntry(-1)
+				.setOption(UPDATE_MARKER)
+				.setTarget(event.getTarget())
+				.setParam0(event.getActionParam0())
+				.setParam1(event.getActionParam1())
+				.setIdentifier(event.getIdentifier())
+				.setType(MenuAction.RUNELITE)
+				.onClick(this::updateMarkerInfo);
 		}
 	}
 
-	@Subscribe
-	public void onMenuOptionClicked(final MenuOptionClicked click)
+	private void updateMarkerInfo(MenuEntry entry)
 	{
-		if (!MenuAction.RUNELITE.equals(click.getMenuAction()) || !click.getMenuOption().equals(UPDATE_MARKER))
-		{
-			return;
-		}
-
-		final int id = click.getId();
 		final NPC[] cachedNPCs = client.getCachedNPCs();
-		final NPC npc = cachedNPCs[id];
+		final NPC npc = cachedNPCs[entry.getIdentifier()];
 
 		if (npc == null || npc.getName() == null || renameMarker == null)
 		{
@@ -191,8 +177,6 @@ public class RadiusMarkerPlugin extends Plugin
 
 		renameMarker.getPanel().setMarkerText(npc.getName());
 		renameMarker.getPanel().setNpcId(npc.getId());
-
-		click.consume();
 	}
 
 	private void loadMarkers()
