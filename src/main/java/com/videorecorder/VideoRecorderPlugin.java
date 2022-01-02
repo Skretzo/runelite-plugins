@@ -177,7 +177,7 @@ public class VideoRecorderPlugin extends Plugin
 				{
 					log.warn("Error while writing video", ex);
 				}
-			}, delay, delay, TimeUnit.MILLISECONDS);
+			}, 0, delay, TimeUnit.MILLISECONDS);
 		}
 		if (!start && running)
 		{
