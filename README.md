@@ -11,16 +11,6 @@ The output video file is encoded with the [TechSmith Screen Capture Codec](https
 ## Config options
 - FPS
   - The framerate (frames/second) for the video.
-- Keyframe interval
-  - The interval (number of frames) between keyframes (versus delta/prediction frames)
-    - A lower interval (e.g. 1) gives a bigger output file, but faster seeking (good for editing)
-    - A moderate interval (e.g. 80) gives a good trade-off between output file size and seeking (recommended)
-    - A higher interval (e.g. 50 FPS * 60 seconds = 3000) gives a smaller output file, but slower seeking (good for archiving)
-- Compression level
-  - The amount of compression for each video frame
-    - 1: fast compression (bigger file size, faster seeking)
-    - 6: default compression (recommended)
-    - 9: high compression (smaller file size, slower seeking)
 - Start video hotkey
   - The hotkey that will start the video recording. Alternatively use the start button in the plugin panel.
 - Stop video hotkey

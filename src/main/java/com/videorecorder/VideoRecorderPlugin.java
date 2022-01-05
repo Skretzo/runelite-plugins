@@ -2,19 +2,6 @@ package com.videorecorder;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import com.videorecorder.video.avi.AVIWriter;
-import com.videorecorder.video.Format;
-import com.videorecorder.video.FormatKeys;
-import com.videorecorder.video.math.Rational;
-import static com.videorecorder.video.FormatKeys.EncodingKey;
-import static com.videorecorder.video.FormatKeys.FrameRateKey;
-import static com.videorecorder.video.FormatKeys.KeyFrameIntervalKey;
-import static com.videorecorder.video.FormatKeys.MediaTypeKey;
-import static com.videorecorder.video.VideoFormatKeys.CompressionLevelKey;
-import static com.videorecorder.video.VideoFormatKeys.DepthKey;
-import static com.videorecorder.video.VideoFormatKeys.ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE;
-import static com.videorecorder.video.VideoFormatKeys.HeightKey;
-import static com.videorecorder.video.VideoFormatKeys.WidthKey;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -42,6 +29,17 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
+import org.monte.media.avi.AVIWriter;
+import org.monte.media.Format;
+import org.monte.media.FormatKeys;
+import org.monte.media.math.Rational;
+import static org.monte.media.FormatKeys.EncodingKey;
+import static org.monte.media.FormatKeys.FrameRateKey;
+import static org.monte.media.FormatKeys.MediaTypeKey;
+import static org.monte.media.VideoFormatKeys.DepthKey;
+import static org.monte.media.VideoFormatKeys.ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE;
+import static org.monte.media.VideoFormatKeys.HeightKey;
+import static org.monte.media.VideoFormatKeys.WidthKey;
 
 @Slf4j
 @PluginDescriptor(
@@ -213,9 +211,7 @@ public class VideoRecorderPlugin extends Plugin
 					WidthKey, frame.getWidth(),
 					HeightKey, frame.getHeight(),
 					EncodingKey, ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE,
-					DepthKey, 24,
-					KeyFrameIntervalKey, config.keyframeInterval(),
-					CompressionLevelKey, config.compressionLevel()
+					DepthKey, 24
 				);
 
 				video.addTrack(videoFormat);
