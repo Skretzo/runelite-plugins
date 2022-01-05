@@ -22,9 +22,7 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 
-	implementation ('com.pojosontheweb:monte-repack:1.0.1') {
-		exclude group: 'javax.media.jai'
-	}
+	implementation 'com.github.stephenc.monte:monte-screen-recorder:0.7.7.0'
 }
 
 group = 'com.videorecorder'
