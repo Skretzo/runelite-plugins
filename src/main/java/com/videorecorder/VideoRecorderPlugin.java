@@ -165,6 +165,7 @@ public class VideoRecorderPlugin extends Plugin
 					else
 					{
 						timerExecutor.shutdown();
+						timerExecutor.awaitTermination(2 * delay, TimeUnit.MILLISECONDS);
 						if (video != null)
 						{
 							video.close();
