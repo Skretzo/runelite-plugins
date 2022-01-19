@@ -1,3 +1,3 @@
-# [RuneLite](https://github.com/runelite/runelite) plugins
-- [Invalid Movement](../../tree/invalid-movement)
-- [Radius Markers](../../tree/radius-markers)
+# Shortest Path Experimental
+
+Draws the shortest path on foot between two selected tiles. Right click on the world map or shift right click in the game scene to create a path.
