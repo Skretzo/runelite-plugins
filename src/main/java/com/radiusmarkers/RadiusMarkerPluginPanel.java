@@ -201,7 +201,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		for (final ColourRadiusMarker marker : plugin.getMarkers())
 		{
-			if (marker.getName().contains(searchBar.getText()) &&
+			if (marker.getName().toLowerCase().contains(searchBar.getText().toLowerCase()) &&
 				(PanelFilter.ALL.equals(panelFilter) ||
 				(PanelFilter.REGION.equals(panelFilter) && marker.getWorldPoint().getRegionID() == regionId) ||
 				(PanelFilter.VISIBLE.equals(panelFilter) && marker.isVisible()) ||

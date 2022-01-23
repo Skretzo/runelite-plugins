@@ -21,12 +21,20 @@ A radius marker is a way to display the spawn point, attack range, hunt range, m
 - Hunt range
   - The area in which an aggressive NPC can detect a nearby player and initiate combat.
 - Interaction range (*talking range*)
-  - The area in which the player can interact (e.g. talk-to) the NPC.
+  - The area in which the player can interact with (e.g. talk-to) the NPC.
 
 ## Panel
-![Example of radius marker in the plugin panel](https://user-images.githubusercontent.com/53493631/141155950-e9c3f4a8-72b8-427e-adcf-e1a0cadb829d.PNG)
+![Example of radius marker in the plugin panel](https://user-images.githubusercontent.com/53493631/150693312-4709f979-845c-4492-bf3f-d9f4a62c3fc1.png)
 
 ## Config options
+- Marker features
+  - Include wander range: ✅ `true`
+  - Include max range: ✅ `true`
+  - Include aggression range: ✅ `true`
+  - Include retreat interaction range: ⬜️ `false`
+  - Include attack range: ✅ `true`
+  - Include hunt range: ⬜️ `false`
+  - Include interaction range: ⬜️ `false`
 - Default radiuses
   - Wander radius: `5`
   - Max radius: `7`

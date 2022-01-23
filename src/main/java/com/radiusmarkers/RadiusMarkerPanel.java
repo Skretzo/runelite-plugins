@@ -502,11 +502,13 @@ class RadiusMarkerPanel extends JPanel
 		};
 		for (JSpinner spinner : spinners)
 		{
-			spinner.setPreferredSize(new Dimension(62, 20));
+			spinner.setPreferredSize(new Dimension(53, 20));
 			spinner.addChangeListener(ce -> updateMarker());
 		}
 		spinnerX.setPreferredSize(new Dimension(70, 20));
 		spinnerY.setPreferredSize(new Dimension(70, 20));
+		spinnerRadiusWander.setPreferredSize(new Dimension(62, 20));
+		spinnerRadiusMax.setPreferredSize(new Dimension(62, 20));
 		spinnerNpcId.setPreferredSize(new Dimension(80, 20));
 
 		JLabel labelWander = new JLabel("Wander range");
@@ -515,17 +517,18 @@ class RadiusMarkerPanel extends JPanel
 		JLabel labelRetreatInteraction = new JLabel("Retreat interaction range");
 		JLabel labelNpcId = new JLabel("NPC ID");
 		JLabel labelHunt = new JLabel("Hunt range");
+		JLabel labelInteraction = new JLabel("Interaction range");
 
 		final JLabel[] labels = new JLabel[]
 		{
-			labelWander, labelMax, labelAggression, labelRetreatInteraction, labelNpcId, labelHunt
+			labelWander, labelMax, labelAggression, labelRetreatInteraction, labelNpcId, labelHunt, labelInteraction
 		};
 		for (JLabel label : labels)
 		{
 			label.setFont(FontManager.getRunescapeSmallFont());
 			label.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 		}
-		labelNpcId.setPreferredSize(new Dimension(60, 21));
+		labelNpcId.setPreferredSize(new Dimension(58, 21));
 
 		JComboBox<AttackType> selectionAttackType = new JComboBox<>(AttackType.values());
 		selectionAttackType.setRenderer(new ComboBoxListRenderer<>());
@@ -535,17 +538,6 @@ class RadiusMarkerPanel extends JPanel
 		selectionAttackType.addActionListener(e ->
 		{
 			marker.setAttackType((AttackType) selectionAttackType.getSelectedItem());
-			plugin.saveMarkers();
-		});
-
-		JComboBox<RadiusOrigin> selectionRadiusOrigin = new JComboBox<>(RadiusOrigin.values());
-		selectionRadiusOrigin.setRenderer(new ComboBoxListRenderer<>());
-		selectionRadiusOrigin.setPreferredSize(new Dimension(84, 20));
-		selectionRadiusOrigin.setSelectedIndex(marker.getInteractionOrigin() == null ? 0 : marker.getInteractionOrigin().ordinal());
-		selectionRadiusOrigin.setToolTipText("Interaction range origin");
-		selectionRadiusOrigin.addActionListener(e ->
-		{
-			marker.setInteractionOrigin((RadiusOrigin) selectionRadiusOrigin.getSelectedItem());
 			plugin.saveMarkers();
 		});
 
@@ -573,7 +565,7 @@ class RadiusMarkerPanel extends JPanel
 		leftActionsHunt.add(labelHunt);
 
 		leftActionsInteraction.add(colourInteraction);
-		leftActionsInteraction.add(selectionRadiusOrigin);
+		leftActionsInteraction.add(labelInteraction);
 
 		JPanel rightActionsSpawn = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
 		JPanel rightActionsWander = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -921,14 +913,38 @@ class RadiusMarkerPanel extends JPanel
 
 		markerContainer.add(nameWrapper);
 		markerContainer.add(containerSpawn);
-		markerContainer.add(containerWander);
-		markerContainer.add(containerMax);
-		markerContainer.add(containerAggression);
-		markerContainer.add(containerRetreatInteraction);
-		markerContainer.add(containerNpcId);
-		markerContainer.add(containerAttack);
-		markerContainer.add(containerHunt);
-		markerContainer.add(containerInteraction);
+		if (config.includeWanderRange())
+		{
+			markerContainer.add(containerWander);
+		}
+		if (config.includeMaxRange())
+		{
+			markerContainer.add(containerMax);
+		}
+		if (config.includeAggressionRange())
+		{
+			markerContainer.add(containerAggression);
+		}
+		if (config.includeRetreatInteractionRange())
+		{
+			markerContainer.add(containerRetreatInteraction);
+		}
+		if (config.includeAttackRange() || config.includeHuntRange() || config.includeInteractionRange())
+		{
+			markerContainer.add(containerNpcId);
+		}
+		if (config.includeAttackRange())
+		{
+			markerContainer.add(containerAttack);
+		}
+		if (config.includeHuntRange())
+		{
+			markerContainer.add(containerHunt);
+		}
+		if (config.includeInteractionRange())
+		{
+			markerContainer.add(containerInteraction);
+		}
 
 		add(markerContainer);
 

@@ -81,25 +81,25 @@ class RadiusMarkerMapOverlay extends Overlay
 
 			final WorldPoint worldPoint = marker.getWorldPoint();
 
-			if (marker.isRetreatInteractionVisible())
+			if (config.includeRetreatInteractionRange() && marker.isRetreatInteractionVisible())
 			{
 				drawSquare(graphics, worldPoint, marker.getRetreatInteractionColour(), mapClipArea,
 					marker.getRetreatInteractionRadius(), 1, false);
 			}
 
-			if (marker.isAggressionVisible())
+			if (config.includeAggressionRange() && marker.isAggressionVisible())
 			{
 				drawSquare(graphics, worldPoint, marker.getAggressionColour(), mapClipArea,
 					marker.getAggressionRadius(), client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
 			}
 
-			if (marker.isMaxVisible())
+			if (config.includeMaxRange() && marker.isMaxVisible())
 			{
 				drawSquare(graphics, worldPoint, marker.getMaxColour(), mapClipArea,
 					marker.getMaxRadius(), 1, false);
 			}
 
-			if (marker.isWanderVisible())
+			if (config.includeWanderRange() && marker.isWanderVisible())
 			{
 				drawSquare(graphics, worldPoint, marker.getWanderColour(), mapClipArea,
 					marker.getWanderRadius(), 1, false);
@@ -120,21 +120,19 @@ class RadiusMarkerMapOverlay extends Overlay
 				final WorldPoint npcLocation = npc.getWorldLocation();
 				final int size = npc.getComposition().getSize();
 
-				if (marker.isInteractionVisible())
+				if (config.includeInteractionRange() && marker.isInteractionVisible())
 				{
-					WorldPoint worldLocation = RadiusOrigin.DYNAMIC.equals(marker.getInteractionOrigin()) ?
-						npcLocation : worldPoint;
-					drawSquare(graphics, worldLocation, marker.getInteractionColour(), mapClipArea,
+					drawSquare(graphics, npcLocation, marker.getInteractionColour(), mapClipArea,
 						marker.getInteractionRadius(), size, false);
 				}
 
-				if (marker.isHuntVisible())
+				if (config.includeHuntRange() && marker.isHuntVisible())
 				{
 					drawSquare(graphics, npcLocation, marker.getHuntColour(), mapClipArea,
 						marker.getHuntRadius(), 1, false);
 				}
 
-				if (marker.isAttackVisible())
+				if (config.includeAttackRange() && marker.isAttackVisible())
 				{
 					drawSquare(graphics, npcLocation, marker.getAttackColour(), mapClipArea,
 						marker.getAttackRadius(), size, excludeCorner);

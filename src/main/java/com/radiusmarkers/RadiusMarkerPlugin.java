@@ -256,7 +256,6 @@ public class RadiusMarkerPlugin extends Plugin
 			colourRadiusMarker.isHuntVisible(),
 			colourRadiusMarker.getInteractionRadius(),
 			colourRadiusMarker.getInteractionColour(),
-			colourRadiusMarker.getInteractionOrigin(),
 			colourRadiusMarker.isInteractionVisible());
 	}
 
@@ -264,37 +263,7 @@ public class RadiusMarkerPlugin extends Plugin
 	{
 		for (final ColourRadiusMarker colourRadiusMarker : markers)
 		{
-			if (radiusMarker.getId() == colourRadiusMarker.getId() &&
-				radiusMarker.getName().equals(colourRadiusMarker.getName()) &&
-				radiusMarker.isVisible() == colourRadiusMarker.isVisible() &&
-				radiusMarker.isCollapsed() == colourRadiusMarker.isCollapsed() &&
-				radiusMarker.getZ() == colourRadiusMarker.getZ() &&
-				radiusMarker.getSpawnX() == colourRadiusMarker.getSpawnX() &&
-				radiusMarker.getSpawnY() == colourRadiusMarker.getSpawnY() &&
-				radiusMarker.getSpawnColour().equals(colourRadiusMarker.getSpawnColour()) &&
-				radiusMarker.isSpawnVisible() == colourRadiusMarker.isSpawnVisible() &&
-				radiusMarker.getWanderRadius() == colourRadiusMarker.getWanderRadius() &&
-				radiusMarker.getWanderColour().equals(colourRadiusMarker.getWanderColour()) &&
-				radiusMarker.isWanderVisible() == colourRadiusMarker.isWanderVisible() &&
-				radiusMarker.getMaxRadius() == colourRadiusMarker.getMaxRadius() &&
-				radiusMarker.getMaxColour().equals(colourRadiusMarker.getMaxColour()) &&
-				radiusMarker.isMaxVisible() == colourRadiusMarker.isMaxVisible() &&
-				radiusMarker.getAggressionColour().equals(colourRadiusMarker.getAggressionColour()) &&
-				radiusMarker.isAggressionVisible() == colourRadiusMarker.isAggressionVisible() &&
-				radiusMarker.getRetreatInteractionColour().equals(colourRadiusMarker.getRetreatInteractionColour()) &&
-				radiusMarker.isRetreatInteractionVisible() == colourRadiusMarker.isRetreatInteractionVisible() &&
-				radiusMarker.getNpcId() == colourRadiusMarker.getNpcId() &&
-				radiusMarker.getAttackRadius() == colourRadiusMarker.getAttackRadius() &&
-				radiusMarker.getAttackColour().equals(colourRadiusMarker.getAttackColour()) &&
-				radiusMarker.getAttackType().equals(colourRadiusMarker.getAttackType()) &&
-				radiusMarker.isAttackVisible() == colourRadiusMarker.isAttackVisible() &&
-				radiusMarker.getHuntRadius() == colourRadiusMarker.getHuntRadius() &&
-				radiusMarker.getHuntColour().equals(colourRadiusMarker.getHuntColour()) &&
-				radiusMarker.isHuntVisible() == colourRadiusMarker.isHuntVisible() &&
-				radiusMarker.getInteractionRadius() == colourRadiusMarker.getInteractionRadius() &&
-				radiusMarker.getInteractionColour().equals(colourRadiusMarker.getInteractionColour()) &&
-				radiusMarker.getInteractionOrigin().equals(colourRadiusMarker.getInteractionOrigin()) &&
-				radiusMarker.isInteractionVisible() == colourRadiusMarker.isInteractionVisible())
+			if (colourRadiusMarker.equals(radiusMarker))
 			{
 				return colourRadiusMarker;
 			}
@@ -347,7 +316,7 @@ public class RadiusMarkerPlugin extends Plugin
 			config.defaultColourAggression(),
 			true,
 			config.defaultColourRetreatInteraction(),
-			true,
+			false,
 			0,
 			config.defaultRadiusAttack(),
 			config.defaultColourAttack(),
@@ -355,11 +324,10 @@ public class RadiusMarkerPlugin extends Plugin
 			true,
 			config.defaultRadiusHunt(),
 			config.defaultColourHunt(),
-			true,
+			false,
 			config.defaultRadiusInteraction(),
 			config.defaultColourInteraction(),
-			RadiusOrigin.DYNAMIC,
-			true);
+			false);
 
 		List<RadiusMarker> radiusMarkers = new ArrayList<>(getRadiusMarkers());
 		if (!radiusMarkers.contains(marker))

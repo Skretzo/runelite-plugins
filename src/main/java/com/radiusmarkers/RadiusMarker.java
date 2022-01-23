@@ -49,6 +49,5 @@ class RadiusMarker
 
 	int interactionRadius;
 	Color interactionColour;
-	RadiusOrigin interactionOrigin;
 	boolean interactionVisible;
 }

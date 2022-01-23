@@ -11,9 +11,100 @@ import net.runelite.client.config.ConfigSection;
 public interface RadiusMarkerConfig extends Config
 {
 	@ConfigSection(
+		name = "Marker features",
+		description = "Customize the marker range parameters to be displayed in the panel",
+		position = 0
+	)
+	String markerFeaturesSection = "markerFeaturesSection";
+
+	@ConfigItem(
+		keyName = "includeWanderRange",
+		name = "Include wander range",
+		description = "Whether the markers should have the wander range parameter",
+		position = 1,
+		section = markerFeaturesSection
+	)
+	default boolean includeWanderRange()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "includeMaxRange",
+		name = "Include max range",
+		description = "Whether the markers should have the max range parameter",
+		position = 2,
+		section = markerFeaturesSection
+	)
+	default boolean includeMaxRange()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "includeAggressionRange",
+		name = "Include aggression range",
+		description = "Whether the markers should have the aggression range parameter",
+		position = 3,
+		section = markerFeaturesSection
+	)
+	default boolean includeAggressionRange()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "includeRetreatInteractionRange",
+		name = "Include retreat interaction range",
+		description = "Whether the markers should have the retreat interaction range parameter",
+		position = 4,
+		section = markerFeaturesSection
+	)
+	default boolean includeRetreatInteractionRange()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "includeAttackRange",
+		name = "Include attack range",
+		description = "Whether the markers should have the attack range parameter",
+		position = 5,
+		section = markerFeaturesSection
+	)
+	default boolean includeAttackRange()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "includeHuntRange",
+		name = "Include hunt range",
+		description = "Whether the markers should have the hunt range parameter",
+		position = 6,
+		section = markerFeaturesSection
+	)
+	default boolean includeHuntRange()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "includeInteractionRange",
+		name = "Include interaction range",
+		description = "Whether the markers should have the interaction range parameter",
+		position = 7,
+		section = markerFeaturesSection
+	)
+	default boolean includeInteractionRange()
+	{
+		return false;
+	}
+
+	@ConfigSection(
 		name = "Default radiuses",
 		description = "Default radius values",
-		position = 0
+		position = 8
 	)
 	String defaultRadiusSection = "defaultRadiusSection";
 
@@ -21,7 +112,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultRadiusWander",
 		name = "Wander radius",
 		description = "Default NPC wander range radius",
-		position = 1,
+		position = 9,
 		section = defaultRadiusSection
 	)
 	default int defaultRadiusWander()
@@ -33,7 +124,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultRadiusMax",
 		name = "Max radius",
 		description = "Default NPC max range radius",
-		position = 2,
+		position = 10,
 		section = defaultRadiusSection
 	)
 	default int defaultRadiusMax()
@@ -45,7 +136,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultRadiusAttack",
 		name = "Attack radius",
 		description = "Default NPC attack range radius",
-		position = 3,
+		position = 11,
 		section = defaultRadiusSection
 	)
 	default int defaultRadiusAttack()
@@ -57,7 +148,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultRadiusHunt",
 		name = "Hunt radius",
 		description = "Default NPC hunt range radius",
-		position = 4,
+		position = 12,
 		section = defaultRadiusSection
 	)
 	default int defaultRadiusHunt()
@@ -69,7 +160,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultRadiusInteraction",
 		name = "Interaction radius",
 		description = "Default NPC interaction range radius",
-		position = 5,
+		position = 13,
 		section = defaultRadiusSection
 	)
 	default int defaultRadiusInteraction()
@@ -80,7 +171,7 @@ public interface RadiusMarkerConfig extends Config
 	@ConfigSection(
 		name = "Default colours",
 		description = "Default radius colour values",
-		position = 6
+		position = 14
 	)
 	String defaultColourSection = "defaultColourSection";
 
@@ -89,7 +180,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourSpawn",
 		name = "Spawn point",
 		description = "Default NPC spawn tile colour",
-		position = 5,
+		position = 15,
 		section = defaultColourSection
 	)
 	default Color defaultColourSpawn()
@@ -102,7 +193,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourWander",
 		name = "Wander range",
 		description = "Default NPC wander range colour",
-		position = 6,
+		position = 16,
 		section = defaultColourSection
 	)
 	default Color defaultColourWander()
@@ -115,7 +206,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourMax",
 		name = "Max range",
 		description = "Default NPC max range colour",
-		position = 7,
+		position = 17,
 		section = defaultColourSection
 	)
 	default Color defaultColourMax()
@@ -128,7 +219,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourAggression",
 		name = "Aggression range",
 		description = "Default NPC aggression range colour",
-		position = 8,
+		position = 18,
 		section = defaultColourSection
 	)
 	default Color defaultColourAggression()
@@ -141,7 +232,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourRetreatInteraction",
 		name = "Retreat interaction range",
 		description = "Default NPC retreat interaction range colour",
-		position = 9,
+		position = 19,
 		section = defaultColourSection
 	)
 	default Color defaultColourRetreatInteraction()
@@ -154,7 +245,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourAttack",
 		name = "Attack range",
 		description = "Default NPC attack range colour",
-		position = 10,
+		position = 20,
 		section = defaultColourSection
 	)
 	default Color defaultColourAttack()
@@ -167,7 +258,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourHunt",
 		name = "Hunt range",
 		description = "Default NPC hunt range colour",
-		position = 11,
+		position = 21,
 		section = defaultColourSection
 	)
 	default Color defaultColourHunt()
@@ -180,7 +271,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "defaultColourInteraction",
 		name = "Interaction range",
 		description = "Default NPC interaction range colour",
-		position = 12,
+		position = 22,
 		section = defaultColourSection
 	)
 	default Color defaultColourInteraction()
@@ -192,7 +283,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "borderWidth",
 		name = "Border width",
 		description = "Radius marker border width",
-		position = 13
+		position = 23
 	)
 	default int borderWidth()
 	{
@@ -203,7 +294,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "showMinimap",
 		name = "Show on minimap",
 		description = "Show radius markers on the minimap",
-		position = 14
+		position = 24
 	)
 	default boolean showMinimap()
 	{
@@ -214,7 +305,7 @@ public interface RadiusMarkerConfig extends Config
 		keyName = "showWorldMap",
 		name = "Show on world map",
 		description = "Show radius markers on the world map",
-		position = 15
+		position = 25
 	)
 	default boolean showWorldMap()
 	{

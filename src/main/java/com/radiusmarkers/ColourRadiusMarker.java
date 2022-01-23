@@ -12,7 +12,6 @@ import net.runelite.api.coords.WorldPoint;
  */
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 {
 	static final int RETREAT_INTERACTION_RANGE = 11;
@@ -21,7 +20,6 @@ class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 
 	private long id;
 
-	@EqualsAndHashCode.Include
 	private String name;
 	private boolean visible;
 	private boolean collapsed;
@@ -62,7 +60,6 @@ class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 
 	private int interactionRadius;
 	private Color interactionColour;
-	private RadiusOrigin interactionOrigin;
 	private boolean interactionVisible;
 
 	ColourRadiusMarker(RadiusMarker radiusMarker)
@@ -108,7 +105,6 @@ class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 
 		this.interactionRadius = radiusMarker.getInteractionRadius();
 		this.interactionColour = radiusMarker.getInteractionColour();
-		this.interactionOrigin = radiusMarker.getInteractionOrigin();
 		this.interactionVisible = radiusMarker.isInteractionVisible();
 	}
 
@@ -134,5 +130,10 @@ class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 	public int compareTo(ColourRadiusMarker other)
 	{
 		return this.name.compareTo(other.name);
+	}
+
+	public boolean equals(RadiusMarker other)
+	{
+		return id == other.getId();
 	}
 }

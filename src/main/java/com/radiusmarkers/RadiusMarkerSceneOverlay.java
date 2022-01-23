@@ -67,24 +67,24 @@ class RadiusMarkerSceneOverlay extends Overlay
 			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType()) ||
 				AttackType.HALBERD.equals(marker.getAttackType());
 
-			if (marker.isRetreatInteractionVisible())
+			if (config.includeRetreatInteractionRange() && marker.isRetreatInteractionVisible())
 			{
 				drawBox(graphics, worldPoint, marker.getRetreatInteractionRadius(),
 					marker.getRetreatInteractionColour(), stroke, 1, false);
 			}
 
-			if (marker.isAggressionVisible())
+			if (config.includeAggressionRange() && marker.isAggressionVisible())
 			{
 				drawBox(graphics, worldPoint, marker.getAggressionRadius(), marker.getAggressionColour(),
 					stroke, client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
 			}
 
-			if (marker.isMaxVisible())
+			if (config.includeMaxRange() && marker.isMaxVisible())
 			{
 				drawBox(graphics, worldPoint, marker.getMaxRadius(), marker.getMaxColour(), stroke, 1, false);
 			}
 
-			if (marker.isWanderVisible())
+			if (config.includeWanderRange() && marker.isWanderVisible())
 			{
 				drawBox(graphics, worldPoint, marker.getWanderRadius(), marker.getWanderColour(), stroke, 1, false);
 			}
@@ -104,20 +104,18 @@ class RadiusMarkerSceneOverlay extends Overlay
 				final WorldPoint npcLocation = npc.getWorldLocation();
 				final int size = npc.getComposition().getSize();
 
-				if (marker.isInteractionVisible())
+				if (config.includeInteractionRange() && marker.isInteractionVisible())
 				{
-					WorldPoint worldLocation = RadiusOrigin.DYNAMIC.equals(marker.getInteractionOrigin()) ?
-						npcLocation : worldPoint;
-					drawBox(graphics, worldLocation, marker.getInteractionRadius(),
+					drawBox(graphics, npcLocation, marker.getInteractionRadius(),
 						marker.getInteractionColour(), stroke, size, false);
 				}
 
-				if (marker.isHuntVisible())
+				if (config.includeHuntRange() && marker.isHuntVisible())
 				{
 					drawBox(graphics, npcLocation, marker.getHuntRadius(), marker.getHuntColour(), stroke, 1, false);
 				}
 
-				if (marker.isAttackVisible())
+				if (config.includeAttackRange() && marker.isAttackVisible())
 				{
 					drawBox(graphics, npcLocation, marker.getAttackRadius(), marker.getAttackColour(),
 						stroke, size, excludeCorner);
