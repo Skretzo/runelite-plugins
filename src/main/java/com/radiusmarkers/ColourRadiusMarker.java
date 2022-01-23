@@ -1,7 +1,6 @@
 package com.radiusmarkers;
 
 import java.awt.Color;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.coords.WorldPoint;
