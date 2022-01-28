@@ -76,8 +76,7 @@ class RadiusMarkerMapOverlay extends Overlay
 				continue;
 			}
 
-			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType()) ||
-				AttackType.HALBERD.equals(marker.getAttackType());
+			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType());
 
 			final WorldPoint worldPoint = marker.getWorldPoint();
 
