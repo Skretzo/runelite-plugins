@@ -5,6 +5,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.Instant;
@@ -23,6 +27,8 @@ import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Model;
 import net.runelite.api.RuneLiteObject;
+import net.runelite.api.SpriteID;
+import net.runelite.api.Varbits;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
@@ -30,11 +36,14 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.StatChanged;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.JagexColors;
@@ -56,6 +65,7 @@ public class SnakemanModePlugin extends Plugin
 	private static final String CHUNK = ColorUtil.wrapWithColorTag("Chunk", JagexColors.MENU_TARGET);
 	private static final String PATH_FRUITS = "fruits.txt";
 	private static final String PATH_FRUIT_IMAGE = "fruit_image.png";
+	private static final String PATH_FRUIT_IMAGE_ICON = "fruit_image_icon.png";
 	private static final String UNLOCK = "Unlock";
 	private static final String WALK_HERE = "Walk here";
 	private static final int FRUIT_MODEL_ID = 30124;
@@ -78,6 +88,11 @@ public class SnakemanModePlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private SnakemanModeChunk fruitChunk;
 	private BufferedImage fruitImage;
+	private BufferedImage fruitImageIcon;
+	private BufferedImage minimapSpriteFixed;
+	private BufferedImage minimapSpriteResizeable;
+	private Area minimapClipFixed;
+	private Area minimapClipResizeable;
 	private RuneLiteObject fruit;
 
 	@Inject
@@ -102,10 +117,16 @@ public class SnakemanModePlugin extends Plugin
 	private ItemManager itemManager;
 
 	@Inject
+	private SnakemanModeMinimapOverlay minimapOverlay;
+
+	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
 	private SnakemanModeSceneOverlay sceneOverlay;
+
+	@Inject
+	private SpriteManager spriteManager;
 
 	@Inject
 	private SnakemanModeWorldMapOverlay worldMapOverlay;
@@ -129,6 +150,7 @@ public class SnakemanModePlugin extends Plugin
 		clientThread.invokeLater(this::showFruit);
 
 		overlayManager.add(infoOverlay);
+		overlayManager.add(minimapOverlay);
 		overlayManager.add(sceneOverlay);
 		overlayManager.add(worldMapOverlay);
 	}
@@ -137,6 +159,7 @@ public class SnakemanModePlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		overlayManager.remove(infoOverlay);
+		overlayManager.remove(minimapOverlay);
 		overlayManager.remove(sceneOverlay);
 		overlayManager.remove(worldMapOverlay);
 
@@ -243,6 +266,50 @@ public class SnakemanModePlugin extends Plugin
 			return Integer.MAX_VALUE;
 		}
 		return (now - last) / unlockXp;
+	}
+
+	public BufferedImage getFruitImageIcon()
+	{
+		if (fruitImageIcon != null)
+		{
+			return fruitImageIcon;
+		}
+
+		fruitImageIcon = ImageUtil.loadImageResource(getClass(), PATH_FRUIT_IMAGE_ICON);
+
+		return  fruitImageIcon;
+	}
+
+	public Widget getMinimapDrawWidget()
+	{
+		if (client.isResized())
+		{
+			if (client.getVar(Varbits.SIDE_PANELS) == 1)
+			{
+				return client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_DRAW_AREA);
+			}
+			return client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_STONES_DRAW_AREA);
+		}
+		return client.getWidget(WidgetInfo.FIXED_VIEWPORT_MINIMAP_DRAW_AREA);
+	}
+
+	public Area getMinimapClipArea()
+	{
+		if (client.isResized())
+		{
+			if (minimapClipResizeable != null)
+			{
+				return minimapClipResizeable;
+			}
+			minimapClipResizeable = new Area(bufferedImageToPolygon(getMinimapSprite()));
+			return minimapClipResizeable;
+		}
+		if (minimapClipFixed != null)
+		{
+			return minimapClipFixed;
+		}
+		minimapClipFixed = new Area(bufferedImageToPolygon(getMinimapSprite()));
+		return minimapClipFixed;
 	}
 
 	public boolean isUnlockedChunk(WorldPoint worldPoint, boolean includeWhitelistedAreas)
@@ -524,5 +591,74 @@ public class SnakemanModePlugin extends Plugin
 		}
 
 		return gson.fromJson(json, new TypeToken<List<Integer>>(){}.getType());
+	}
+
+	private BufferedImage getMinimapSprite()
+	{
+		if (client.isResized())
+		{
+			if (minimapSpriteResizeable != null)
+			{
+				return minimapSpriteResizeable;
+			}
+			minimapSpriteResizeable = spriteManager.getSprite(SpriteID.RESIZEABLE_MODE_MINIMAP_ALPHA_MASK, 0);
+			return minimapSpriteResizeable;
+		}
+		if (minimapSpriteFixed != null)
+		{
+			return minimapSpriteFixed;
+		}
+		minimapSpriteFixed = spriteManager.getSprite(SpriteID.FIXED_MODE_MINIMAP_ALPHA_MASK, 0);
+		return minimapSpriteFixed;
+	}
+
+	private Polygon bufferedImageToPolygon(BufferedImage image)
+	{
+		Color outsideColour = null;
+		Color previousColour;
+		final int width = image.getWidth();
+		final int height = image.getHeight();
+		List<Point> points = new ArrayList<>();
+		for (int y = 0; y < height; y++)
+		{
+			previousColour = outsideColour;
+			for (int x = 0; x < width; x++)
+			{
+				int rgb = image.getRGB(x, y);
+				int a = (rgb & 0xff000000) >>> 24;
+				int r   = (rgb & 0x00ff0000) >> 16;
+				int g = (rgb & 0x0000ff00) >> 8;
+				int b  = (rgb & 0x000000ff) >> 0;
+				Color colour = new Color(r, g, b, a);
+				if (x == 0 && y == 0)
+				{
+					outsideColour = colour;
+					previousColour = colour;
+				}
+				if (!colour.equals(outsideColour) && previousColour.equals(outsideColour))
+				{
+					points.add(new Point(x, y));
+				}
+				if ((colour.equals(outsideColour) || x == (width - 1)) && !previousColour.equals(outsideColour))
+				{
+					points.add(0, new Point(x, y));
+				}
+				previousColour = colour;
+			}
+		}
+		int offsetX = 0;
+		int offsetY = 0;
+		Widget minimapDrawWidget = getMinimapDrawWidget();
+		if (minimapDrawWidget != null)
+		{
+			offsetX = minimapDrawWidget.getBounds().x;
+			offsetY = minimapDrawWidget.getBounds().y;
+		}
+		Polygon polygon = new Polygon();
+		for (Point point : points)
+		{
+			polygon.addPoint(point.x + offsetX, point.y + offsetY);
+		}
+		return polygon;
 	}
 }

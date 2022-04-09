@@ -110,7 +110,7 @@ public class SnakemanModeSceneOverlay extends Overlay
 				chunks.contains(neighbourChunks.get(1)), chunks.contains(neighbourChunks.get(3))
 			};
 			drawChunk(graphics, chunk.getBottomLeft(), chunk.getSize(),
-				config.unlockedBorderColour(), neighbours);
+				config.unlockedFillColour(), config.unlockedBorderColour(), neighbours);
 		}
 
 		SnakemanModeChunk fruitChunk = plugin.getFruitChunk();
@@ -123,13 +123,13 @@ public class SnakemanModeSceneOverlay extends Overlay
 				chunks.contains(neighbourChunks.get(1)), chunks.contains(neighbourChunks.get(3))
 			};
 			drawChunk(graphics, fruitChunk.getBottomLeft(), fruitChunk.getSize(),
-				config.fruitChunkBorderColour(), neighbours);
+				config.fruitChunkFillColour(), config.fruitChunkBorderColour(), neighbours);
 		}
 
 		return null;
 	}
 
-	private void drawChunk(Graphics2D graphics, WorldPoint bottomLeft, int diameter, Color borderColour, boolean[] neighbours)
+	private void drawChunk(Graphics2D graphics, WorldPoint bottomLeft, int diameter, Color fillColour, Color borderColour, boolean[] neighbours)
 	{
 		if (client.getPlane() != bottomLeft.getPlane() || client.getLocalPlayer() == null)
 		{
