@@ -50,9 +50,10 @@ public class SnakemanModeSceneOverlay extends Overlay
 			return null;
 		}
 
-		final boolean fillUnlocked = config.unlockedFillColour().getAlpha() > 0;
-		final boolean fillLocked = config.drawLockedArea() && config.lockedFillColour().getAlpha() > 0;
-		final boolean fillFruitChunk = config.fruitChunkFillColour().getAlpha() > 0;
+		final boolean fillUnlocked = config.unlockedFillColourScene().getAlpha() > 0;
+		final boolean fillLocked = config.lockedFillColourScene().getAlpha() > 0;
+		final boolean fillFruitChunk = config.fruitChunkFillColourScene().getAlpha() > 0;
+
 		if (fillUnlocked || fillLocked || fillFruitChunk)
 		{
 			Tile[][] tiles = client.getScene().getTiles()[client.getPlane()];
@@ -82,17 +83,17 @@ public class SnakemanModeSceneOverlay extends Overlay
 
 					if (fillUnlocked && isUnlocked)
 					{
-						graphics.setColor(config.unlockedFillColour());
+						graphics.setColor(config.unlockedFillColourScene());
 						graphics.fill(tilePolygon);
 					}
 					else if (fillLocked && !isUnlocked && !isFruitChunk)
 					{
-						graphics.setColor(config.lockedFillColour());
+						graphics.setColor(config.lockedFillColourScene());
 						graphics.fill(tilePolygon);
 					}
 					else if (fillFruitChunk && isFruitChunk)
 					{
-						graphics.setColor(config.fruitChunkFillColour());
+						graphics.setColor(config.fruitChunkFillColourScene());
 						graphics.fill(tilePolygon);
 					}
 				}
@@ -101,27 +102,36 @@ public class SnakemanModeSceneOverlay extends Overlay
 
 		graphics.setStroke(new BasicStroke((float) config.chunkBorderWidth()));
 
-		for (SnakemanModeChunk chunk : chunks)
+		final boolean outlineUnlocked = config.unlockedBorderColourScene().getAlpha() > 0;
+		final boolean outlineFruitChunk = config.fruitChunkBorderColourScene().getAlpha() > 0;
+
+		if (outlineUnlocked)
 		{
-			List<SnakemanModeChunk> neighbourChunks = chunk.getNeighbourChunks(client);
-			boolean[] neighbours = new boolean[]
+			for (SnakemanModeChunk chunk : chunks)
 			{
-				chunks.contains(neighbourChunks.get(6)), chunks.contains(neighbourChunks.get(4)),
-				chunks.contains(neighbourChunks.get(1)), chunks.contains(neighbourChunks.get(3))
-			};
-			drawChunk(graphics, chunk.getBottomLeft(), chunk.getSize(), config.unlockedBorderColour(), neighbours);
+				List<SnakemanModeChunk> neighbourChunks = chunk.getNeighbourChunks(client);
+				boolean[] neighbours = new boolean[]
+				{
+					chunks.contains(neighbourChunks.get(6)), chunks.contains(neighbourChunks.get(4)),
+					chunks.contains(neighbourChunks.get(1)), chunks.contains(neighbourChunks.get(3))
+				};
+				drawChunk(graphics, chunk.getBottomLeft(), chunk.getSize(), config.unlockedBorderColourScene(), neighbours);
+			}
 		}
 
-		SnakemanModeChunk fruitChunk = plugin.getFruitChunk();
-		if (fruitChunk != null)
+		if (outlineFruitChunk)
 		{
-			List<SnakemanModeChunk> neighbourChunks = fruitChunk.getNeighbourChunks(client);
-			boolean[] neighbours = new boolean[]
+			SnakemanModeChunk fruitChunk = plugin.getFruitChunk();
+			if (fruitChunk != null)
 			{
-				chunks.contains(neighbourChunks.get(6)), chunks.contains(neighbourChunks.get(4)),
-				chunks.contains(neighbourChunks.get(1)), chunks.contains(neighbourChunks.get(3))
-			};
-			drawChunk(graphics, fruitChunk.getBottomLeft(), fruitChunk.getSize(), config.fruitChunkBorderColour(), neighbours);
+				List<SnakemanModeChunk> neighbourChunks = fruitChunk.getNeighbourChunks(client);
+				boolean[] neighbours = new boolean[]
+				{
+					chunks.contains(neighbourChunks.get(6)), chunks.contains(neighbourChunks.get(4)),
+					chunks.contains(neighbourChunks.get(1)), chunks.contains(neighbourChunks.get(3))
+				};
+				drawChunk(graphics, fruitChunk.getBottomLeft(), fruitChunk.getSize(), config.fruitChunkBorderColourScene(), neighbours);
+			}
 		}
 
 		return null;

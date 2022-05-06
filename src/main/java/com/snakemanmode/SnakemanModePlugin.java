@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,6 +26,7 @@ import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Model;
 import net.runelite.api.RuneLiteObject;
+import net.runelite.api.Skill;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
 import net.runelite.api.coords.LocalPoint;
@@ -60,10 +60,11 @@ import net.runelite.client.util.ImageUtil;
 public class SnakemanModePlugin extends Plugin
 {
 	public static final String CONFIG_GROUP = "snakemanmode";
+	public static final String CONFIG_RESET_KEY = "lastUnlockXp";
+	public static final int CONFIG_RESET_VALUE = 0;
 	private static final String CONFIG_KEY_FRUIT_CHUNK = "fruit_chunk";
 	private static final String CONFIG_KEY_CHUNKS = "chunks";
 	private static final String CHUNK = ColorUtil.wrapWithColorTag("Chunk", JagexColors.MENU_TARGET);
-	private static final String PATH_FRUITS = "fruits.txt";
 	private static final String PATH_FRUIT_IMAGE = "fruit_image.png";
 	private static final String PATH_FRUIT_IMAGE_ICON = "fruit_image_icon.png";
 	private static final String UNLOCK = "Unlock";
@@ -71,19 +72,9 @@ public class SnakemanModePlugin extends Plugin
 	private static final int FRUIT_MODEL_ID = 30124;
 	private static final WorldPoint FIRST_FRUIT_LOCATION = new WorldPoint(3227, 3244, 0);
 	private static final WorldPoint LUMBRIDGE_SPAWN_POINT = new WorldPoint(3221, 3219, 0);
-	@Getter
-	private static final WorldArea[] whitelistedAreas = new WorldArea[]
-	{
-		new WorldArea(3008, 3008, 128, 128, 0),
-		new WorldArea(3136, 3072, 64, 64, 0),
-		new WorldArea(3072, 9472, 64, 64, 0),
-		new WorldArea(1600, 6016, 192, 192, 0),
-		new WorldArea(1664, 12480, 64, 64, 0)
-	};
 
 	@Getter(AccessLevel.PACKAGE)
 	private final List<SnakemanModeChunk> chunks = new ArrayList<>();
-	private final List<SnakemanModeChunk> fruitChunks = new ArrayList<>();
 
 	@Getter(AccessLevel.PACKAGE)
 	private SnakemanModeChunk fruitChunk;
@@ -94,6 +85,8 @@ public class SnakemanModePlugin extends Plugin
 	private Area minimapClipFixed;
 	private Area minimapClipResizeable;
 	private RuneLiteObject fruit;
+	private long lastOverallExperience;
+	private int startTickCount;
 
 	@Inject
 	private Client client;
@@ -145,7 +138,6 @@ public class SnakemanModePlugin extends Plugin
 	{
 		loadChunks();
 		loadFruitChunk();
-		loadFruitChunks();
 
 		clientThread.invokeLater(this::showFruit);
 
@@ -153,6 +145,13 @@ public class SnakemanModePlugin extends Plugin
 		overlayManager.add(minimapOverlay);
 		overlayManager.add(sceneOverlay);
 		overlayManager.add(worldMapOverlay);
+
+		if (lastOverallExperience == 0)
+		{
+			lastOverallExperience = client.getOverallExperience();
+		}
+
+		startTickCount = client.getTickCount();
 	}
 
 	@Override
@@ -167,7 +166,6 @@ public class SnakemanModePlugin extends Plugin
 		clientThread.invokeLater(this::removeFruit);
 
 		chunks.clear();
-		fruitChunks.clear();
 	}
 
 	@Subscribe
@@ -197,6 +195,11 @@ public class SnakemanModePlugin extends Plugin
 		if (GameState.LOGGED_IN.equals(event.getGameState()))
 		{
 			showFruit();
+
+			if (lastOverallExperience == 0)
+			{
+				lastOverallExperience = client.getOverallExperience();
+			}
 		}
 	}
 
@@ -210,7 +213,7 @@ public class SnakemanModePlugin extends Plugin
 
 		// Unlock chunks automatically when walking into not yet unlocked chunks with enough xp gained
 		SnakemanModeChunk chunk = new SnakemanModeChunk(client, client.getLocalPlayer().getWorldLocation());
-		if (getAvailableUnlocks() >= 1 && !chunks.contains(chunk))
+		if (getAvailableUnlocks() >= 1)
 		{
 			addChunk(chunk);
 		}
@@ -219,17 +222,48 @@ public class SnakemanModePlugin extends Plugin
 	@Subscribe
 	public void onStatChanged(final StatChanged event)
 	{
-		if (client.getLocalPlayer() == null)
+		if (client.getLocalPlayer() == null || !GameState.LOGGED_IN.equals(client.getGameState()))
 		{
 			return;
 		}
 
-		// Punish gaining xp outside your unlocked chunks by resetting the xp until the next unlock
-		if (client.getOverallExperience() > config.lastUnlockXp() &&
-			!chunks.contains(new SnakemanModeChunk(client, client.getLocalPlayer().getWorldLocation())))
+		Skill skill = event.getSkill();
+
+		long xpGained = client.getOverallExperience() - lastOverallExperience;
+
+		// Do not progress the xp until the next unlock if the skill has been excluded by the user,
+		// and only account for xp gained in your unlocked chunks
+		if (xpGained > 0 &&
+			startTickCount != client.getTickCount() &&
+			((Skill.AGILITY.equals(skill) && !config.excludeAgility()) ||
+			(Skill.ATTACK.equals(skill) && !config.excludeAttack()) ||
+			(Skill.CONSTRUCTION.equals(skill) && !config.excludeConstruction()) ||
+			(Skill.COOKING.equals(skill) && !config.excludeCooking()) ||
+			(Skill.CRAFTING.equals(skill) && !config.excludeCrafting()) ||
+			(Skill.DEFENCE.equals(skill) && !config.excludeDefence()) ||
+			(Skill.FARMING.equals(skill) && !config.excludeFarming()) ||
+			(Skill.FIREMAKING.equals(skill) && !config.excludeFiremaking()) ||
+			(Skill.FISHING.equals(skill) && !config.excludeFishing()) ||
+			(Skill.FLETCHING.equals(skill) && !config.excludeFletching()) ||
+			(Skill.HERBLORE.equals(skill) && !config.excludeHerblore()) ||
+			(Skill.HITPOINTS.equals(skill) && !config.excludeHitpoints()) ||
+			(Skill.HUNTER.equals(skill) && !config.excludeHunter()) ||
+			(Skill.MAGIC.equals(skill) && !config.excludeMagic()) ||
+			(Skill.MINING.equals(skill) && !config.excludeMining()) ||
+			(Skill.PRAYER.equals(skill) && !config.excludePrayer()) ||
+			(Skill.RANGED.equals(skill) && !config.excludeRanged()) ||
+			(Skill.RUNECRAFT.equals(skill) && !config.excludeRunecraft()) ||
+			(Skill.SLAYER.equals(skill) && !config.excludeSlayer()) ||
+			(Skill.SMITHING.equals(skill) && !config.excludeSmithing()) ||
+			(Skill.STRENGTH.equals(skill) && !config.excludeStrength()) ||
+			(Skill.THIEVING.equals(skill) && !config.excludeThieving()) ||
+			(Skill.WOODCUTTING.equals(skill) && !config.excludeWoodcutting())) &&
+			chunks.contains(new SnakemanModeChunk(client, client.getLocalPlayer().getWorldLocation())))
 		{
-			config.lastUnlockXp(client.getOverallExperience());
+			config.unlockProgress(config.unlockProgress() + xpGained);
 		}
+
+		lastOverallExperience = client.getOverallExperience();
 	}
 
 	@Subscribe
@@ -246,26 +280,47 @@ public class SnakemanModePlugin extends Plugin
 		{
 			worldMapPointManager.add(new SnakemanModeWorldMapPoint(fruitChunk.getCenter(), getFruitImage()));
 		}
+
+		// Add additional plugin resetting to the config reset button
+		if (CONFIG_RESET_KEY.equals(event.getKey()))
+		{
+			if (Integer.toString(CONFIG_RESET_VALUE).equals(event.getNewValue()))
+			{
+				lastOverallExperience = client.getOverallExperience();
+				config.unlockProgress(0);
+				config.lastUnlockXp(lastOverallExperience);
+
+				// Reset all unlocked chunks and restart in Lumbridge
+				chunks.clear();
+				saveChunks(null);
+				loadChunks();
+
+				// Reset to initial fruit chunk in Lumbridge
+				removeFruit();
+				saveFruitChunk();
+				loadFruitChunk();
+				showFruit();
+			}
+		}
 	}
 
 	public long getXpToUnlock()
 	{
-		long now = client.getOverallExperience();
-		long last = config.lastUnlockXp();
 		int unlockXp = config.unlockXp();
-		return Math.max(unlockXp - (now - last), 0);
+		long unlockProgress = config.unlockProgress();
+		return Math.min(Math.max(unlockXp - unlockProgress, 0), config.unlockXp());
 	}
 
 	public long getAvailableUnlocks()
 	{
-		long now = client.getOverallExperience();
-		long last = config.lastUnlockXp();
+		long unlockProgress = config.unlockProgress();
 		int unlockXp = config.unlockXp();
 		if (unlockXp <= 0)
 		{
 			return Integer.MAX_VALUE;
 		}
-		return (now - last) / unlockXp;
+
+		return unlockProgress / unlockXp;
 	}
 
 	public BufferedImage getFruitImageIcon()
@@ -316,7 +371,7 @@ public class SnakemanModePlugin extends Plugin
 	{
 		if (includeWhitelistedAreas)
 		{
-			for (WorldArea area : whitelistedAreas)
+			for (WorldArea area : SnakemanModeAreas.WHITELISTED_AREA)
 			{
 				if (includeWhitelistedAreas = area.distanceTo(worldPoint) == 0)
 				{
@@ -339,8 +394,11 @@ public class SnakemanModePlugin extends Plugin
 
 	private void saveChunks()
 	{
-		List<Integer> chunkIds = getChunkIds();
+		saveChunks(getChunkIds());
+	}
 
+	private void saveChunks(List<Integer> chunkIds)
+	{
 		if (chunkIds == null || chunkIds.isEmpty())
 		{
 			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_CHUNKS);
@@ -348,34 +406,6 @@ public class SnakemanModePlugin extends Plugin
 		}
 
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_CHUNKS, gson.toJson(chunkIds));
-	}
-
-	private void loadFruitChunks()
-	{
-		fruitChunks.clear();
-
-		Scanner scanner = new Scanner(SnakemanModePlugin.class.getResourceAsStream(PATH_FRUITS));
-		while (scanner.hasNextLine())
-		{
-			String line = scanner.nextLine();
-
-			if (line.isEmpty() || line.startsWith("#"))
-			{
-				continue;
-			}
-
-			String[] parts = line.replace(" ", "").split(",");
-
-			if (parts.length != 3)
-			{
-				continue;
-			}
-
-			final int x = Integer.parseInt(parts[0]);
-			final int y = Integer.parseInt(parts[1]);
-			final int z = Integer.parseInt(parts[2]);
-			fruitChunks.add(new SnakemanModeChunk(client, new WorldPoint(x, y, z)));
-		}
 	}
 
 	private void loadFruitChunk()
@@ -420,6 +450,7 @@ public class SnakemanModePlugin extends Plugin
 		}
 
 		chunks.add(0, chunk);
+		config.unlockProgress(0);
 		config.lastUnlockXp(client.getOverallExperience());
 		if (chunk.equals(fruitChunk))
 		{
@@ -509,30 +540,43 @@ public class SnakemanModePlugin extends Plugin
 
 	private void rollFruitChunk()
 	{
-		List<Integer> indices = new ArrayList<>(fruitChunks.size());
-		for (int i = 0; i < fruitChunks.size(); i++)
+		int lastId = -1;
+		if (fruitChunk != null)
 		{
-			indices.add(i);
+			lastId = fruitChunk.getId();
 		}
 
-		fruitChunk = new SnakemanModeChunk(client, FIRST_FRUIT_LOCATION);
-		if (fruit != null)
-		{
-			fruit.setActive(false);
-		}
+		removeFruit();
 
 		Random random = new Random();
 
-		while (!indices.isEmpty())
+		List<Integer> fruitChunks = config.onlyFreeToPlay() ? SnakemanModeAreas.FREE_TO_PLAY : SnakemanModeAreas.FRUIT_AREA;
+
+		int idx = 0;
+		int size = fruitChunks.size();
+		while (++idx < Integer.MAX_VALUE)
 		{
-			int idx = random.nextInt(indices.size());
-			SnakemanModeChunk chunk = fruitChunks.get(indices.get(idx));
+			int i = random.nextInt(size);
+
+			int id = fruitChunks.get(i);
+
+			if (id == lastId || (config.onlyFreeToPlay() && !SnakemanModeAreas.FRUIT_AREA.contains(id)))
+			{
+				continue;
+			}
+
+			SnakemanModeChunk chunk = new SnakemanModeChunk(id);
+
 			if (!chunks.contains(chunk))
 			{
 				fruitChunk = chunk;
 				break;
 			}
-			indices.remove(idx);
+		}
+
+		if (fruitChunk == null)
+		{
+			fruitChunk = new SnakemanModeChunk(client, FIRST_FRUIT_LOCATION);
 		}
 
 		saveFruitChunk();

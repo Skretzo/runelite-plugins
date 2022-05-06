@@ -50,34 +50,41 @@ public class SnakemanModeWorldMapOverlay extends Overlay
 			return null;
 		}
 
-		List<SnakemanModeChunk> chunks = plugin.getChunks();
-
-		if (chunks.isEmpty())
-		{
-			return null;
-		}
-
 		Area lockedArea = getWorldMapClipArea(worldMapView.getBounds());
 
-		graphics.setColor(config.unlockedBorderColour());
 		graphics.setClip(lockedArea);
+
+		List<SnakemanModeChunk> chunks = plugin.getChunks();
+
+		final boolean fillUnlocked = config.unlockedFillColourWorldmap().getAlpha() > 0;
+		final boolean fillLocked = config.lockedFillColourWorldmap().getAlpha() > 0;
+		final boolean fillFruitChunk = config.fruitChunkFillColourWorldmap().getAlpha() > 0;
+
+		final boolean outlineUnlocked = config.unlockedBorderColourWorldmap().getAlpha() > 0;
+		final boolean outlineFruitChunk = config.fruitChunkBorderColourWorldmap().getAlpha() > 0;
 
 		Area chunkArea = new Area();
 		for (SnakemanModeChunk chunk : chunks)
 		{
 			drawChunk(graphics, chunk.getBottomLeft(), chunk.getSize(), chunkArea,
-				config.unlockedFillColour(), config.unlockedBorderColour(), chunks.indexOf(chunk));
+				config.unlockedFillColourWorldmap(), config.unlockedBorderColourWorldmap(), chunks.indexOf(chunk));
 		}
 		if (config.drawOutlineOnly())
 		{
-			graphics.setColor(config.unlockedFillColour());
-			graphics.fill(chunkArea);
-			graphics.setColor(config.unlockedBorderColour());
-			graphics.draw(chunkArea);
+			if (fillUnlocked)
+			{
+				graphics.setColor(config.unlockedFillColourWorldmap());
+				graphics.fill(chunkArea);
+			}
+			if (outlineUnlocked)
+			{
+				graphics.setColor(config.unlockedBorderColourWorldmap());
+				graphics.draw(chunkArea);
+			}
 		}
 
 		lockedArea.subtract(chunkArea);
-		for (WorldArea worldArea : SnakemanModePlugin.getWhitelistedAreas())
+		for (WorldArea worldArea : SnakemanModeAreas.WHITELISTED_AREA)
 		{
 			lockedArea.subtract(getArea(worldArea.toWorldPoint(), worldArea.getWidth(), worldArea.getHeight()));
 		}
@@ -87,19 +94,28 @@ public class SnakemanModeWorldMapOverlay extends Overlay
 		{
 			Area fruitChunkArea = new Area();
 			drawChunk(graphics, fruitChunk.getBottomLeft(), fruitChunk.getSize(), fruitChunkArea,
-				config.fruitChunkFillColour(), config.fruitChunkBorderColour(), -1);
+				config.fruitChunkFillColourWorldmap(), config.fruitChunkBorderColourWorldmap(), -1);
 			if (config.drawOutlineOnly())
 			{
-				graphics.setColor(config.fruitChunkFillColour());
-				graphics.fill(fruitChunkArea);
-				graphics.setColor(config.fruitChunkBorderColour());
-				graphics.draw(fruitChunkArea);
+				if (fillFruitChunk)
+				{
+					graphics.setColor(config.fruitChunkFillColourWorldmap());
+					graphics.fill(fruitChunkArea);
+				}
+				if (outlineFruitChunk)
+				{
+					graphics.setColor(config.fruitChunkBorderColourWorldmap());
+					graphics.draw(fruitChunkArea);
+				}
 			}
 			lockedArea.subtract(fruitChunkArea);
 		}
 
-		graphics.setColor(config.lockedFillColour());
-		graphics.fill(lockedArea);
+		if (fillLocked)
+		{
+			graphics.setColor(config.lockedFillColourWorldmap());
+			graphics.fill(lockedArea);
+		}
 
 		return null;
 	}
@@ -111,13 +127,22 @@ public class SnakemanModeWorldMapOverlay extends Overlay
 			return;
 		}
 
+		boolean drawFill = fillColour.getAlpha() > 0;
+		boolean drawOutline = borderColour.getAlpha() > 0;
+
 		Area chunk = getArea(bottomLeft, diameter, diameter);
 		if (!config.drawOutlineOnly())
 		{
-			graphics.setColor(fillColour);
-			graphics.fill(chunk);
-			graphics.setColor(borderColour);
-			graphics.draw(chunk);
+			if (drawFill)
+			{
+				graphics.setColor(fillColour);
+				graphics.fill(chunk);
+			}
+			if (drawOutline)
+			{
+				graphics.setColor(borderColour);
+				graphics.draw(chunk);
+			}
 		}
 		if (config.showChunkNumber() && idx >= 0)
 		{

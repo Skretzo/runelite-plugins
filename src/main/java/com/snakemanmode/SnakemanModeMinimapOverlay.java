@@ -69,43 +69,66 @@ public class SnakemanModeMinimapOverlay extends Overlay
 		fruitChunks.add(plugin.getFruitChunk());
 		List<Area> fruitChunkAreas = getAreas(fruitChunks);
 
-		Area lockedArea = new Area(plugin.getMinimapDrawWidget().getBounds());
-		for (WorldArea worldArea : SnakemanModePlugin.getWhitelistedAreas())
+		final boolean fillUnlocked = config.unlockedFillColourMinimap().getAlpha() > 0;
+		final boolean fillLocked = config.lockedFillColourMinimap().getAlpha() > 0;
+		final boolean fillFruitChunk = config.fruitChunkFillColourMinimap().getAlpha() > 0;
+		final boolean outlineUnlocked = config.unlockedBorderColourMinimap().getAlpha() > 0;
+		final boolean outlineFruitChunk = config.fruitChunkBorderColourMinimap().getAlpha() > 0;
+
+		if (fillLocked)
 		{
-			lockedArea.subtract(getArea(worldArea.toWorldPoint(), worldArea.getWidth(), worldArea.getHeight()));
-		}
-		for (Area area : fruitChunkAreas)
-		{
-			lockedArea.subtract(area);
-		}
-		for (Area area : unlockAreas)
-		{
-			lockedArea.subtract(area);
+			Area lockedArea = new Area(plugin.getMinimapDrawWidget().getBounds());
+			for (WorldArea worldArea : SnakemanModeAreas.WHITELISTED_AREA)
+			{
+				lockedArea.subtract(getArea(worldArea.toWorldPoint(), worldArea.getWidth(), worldArea.getHeight()));
+			}
+			for (Area area : fruitChunkAreas)
+			{
+				lockedArea.subtract(area);
+			}
+			for (Area area : unlockAreas)
+			{
+				lockedArea.subtract(area);
+			}
+
+			graphics.setColor(config.lockedFillColourMinimap());
+			graphics.fill(lockedArea);
 		}
 
-		graphics.setColor(config.lockedFillColour());
-		graphics.fill(lockedArea);
-
-		graphics.setColor(config.fruitChunkFillColour());
-		for (Area area : fruitChunkAreas)
+		if (fillFruitChunk)
 		{
-			graphics.fill(area);
-		}
-		graphics.setColor(config.fruitChunkBorderColour());
-		for (Area area : fruitChunkAreas)
-		{
-			graphics.draw(area);
+			graphics.setColor(config.fruitChunkFillColourMinimap());
+			for (Area area : fruitChunkAreas)
+			{
+				graphics.fill(area);
+			}
 		}
 
-		graphics.setColor(config.unlockedFillColour());
-		for (Area area : unlockAreas)
+		if (fillUnlocked)
 		{
-			graphics.fill(area);
+			graphics.setColor(config.unlockedFillColourMinimap());
+			for (Area area : unlockAreas)
+			{
+				graphics.fill(area);
+			}
 		}
-		graphics.setColor(config.unlockedBorderColour());
-		for (Area area : unlockAreas)
+
+		if (outlineFruitChunk)
 		{
-			graphics.draw(area);
+			graphics.setColor(config.fruitChunkBorderColourMinimap());
+			for (Area area : fruitChunkAreas)
+			{
+				graphics.draw(area);
+			}
+		}
+
+		if (outlineUnlocked)
+		{
+			graphics.setColor(config.unlockedBorderColourMinimap());
+			for (Area area : unlockAreas)
+			{
+				graphics.draw(area);
+			}
 		}
 
 		if (config.showChunkNumber() && !config.drawOutlineOnly())
@@ -130,6 +153,18 @@ public class SnakemanModeMinimapOverlay extends Overlay
 		Area outline = new Area();
 		for (SnakemanModeChunk chunk : chunks)
 		{
+			if (client == null) // todo: remove these 3
+			{
+				System.out.println("client == null");
+			}
+			if (chunk == null)
+			{
+				System.out.println("chunk == null");
+			}
+			else if (chunk.getBottomLeft() == null)
+			{
+				System.out.println("bottom left == null");
+			}
 			if (client.getPlane() != chunk.getBottomLeft().getPlane())
 			{
 				continue;

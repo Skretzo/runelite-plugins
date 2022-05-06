@@ -45,6 +45,11 @@ public class SnakemanModeChunk
 
 	int getId()
 	{
+		return getId(z, i, j, x, y);
+	}
+
+	static int getId(int z, int i, int j, int x, int y)
+	{
 		int Z = (z << (32 - 9 - 2));
 		int I = (i << (32 - 9 - 2 - 7));
 		int J = (j << (32 - 9 - 2 - 7 - 8));
