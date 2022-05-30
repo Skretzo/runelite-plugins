@@ -4,33 +4,36 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.MenuShouldLeftClick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.PluginInstantiationException;
 import net.runelite.client.plugins.PluginManager;
+import net.runelite.client.plugins.config.ConfigPlugin;
+import net.runelite.client.plugins.config.ConfigService;
 import net.runelite.client.ui.overlay.OverlayManager;
-import org.apache.commons.text.CaseUtils;
 
 @Slf4j
 @PluginDescriptor(
 	name = "Plugin Toggler",
-	description = "Adds the ability to toggle plugins in-game in appropriate right-click menus",
+	description = "Find and toggle plugins in-game in appropriate right-click menus",
 	tags = {"plugin", "toggle", "enable", "disable"}
 )
+@PluginDependency(ConfigPlugin.class)
 public class PluginTogglerPlugin extends Plugin
 {
 	public static final String CONFIG_GROUP = "plugintoggler";
@@ -42,6 +45,9 @@ public class PluginTogglerPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private ConfigService configService;
+
+	@Inject
 	private Gson gson;
 
 	@Inject
@@ -51,7 +57,7 @@ public class PluginTogglerPlugin extends Plugin
 	private PluginManager pluginManager;
 
 	@Inject
-	private CombatLevelOverlay combatLevelOverlay;
+	private PluginTogglerConfig config;
 
 	@Provides
 	PluginTogglerConfig provideConfig(ConfigManager configManager)
@@ -62,14 +68,7 @@ public class PluginTogglerPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		overlayManager.add(combatLevelOverlay);
 		updateConfigStates();
-	}
-
-	@Override
-	protected void shutDown() throws Exception
-	{
-		overlayManager.remove(combatLevelOverlay);
 	}
 
 	@Subscribe
@@ -98,51 +97,83 @@ public class PluginTogglerPlugin extends Plugin
 
 		for (final PluginTogglerMenu pluginTogglerMenu : PluginTogglerMenu.values())
 		{
-			if (pluginTogglerMenu.equals(menuAction, menuFindOption, menuFindTarget))
+			if (pluginTogglerMenu.equals(menuAction, client, menuFindOption, menuFindTarget))
 			{
 				addMenuEntry(event, pluginTogglerMenu.getMenuDisplayTarget());
+				break;
 			}
 		}
 	}
 
 	@Subscribe
-	public void onMenuOptionClicked(final MenuOptionClicked click)
+	public void onMenuShouldLeftClick(final MenuShouldLeftClick event)
 	{
-		if (!MenuAction.RUNELITE.equals(click.getMenuAction()) &&
-			!MenuAction.RUNELITE_OVERLAY.equals(click.getMenuAction()))
+		if (!config.forceRightClick())
 		{
 			return;
 		}
 
-		final String menuShowTarget = click.getMenuTarget();
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		PluginTogglerMenu[] pluginTogglerMenus = PluginTogglerMenu.values();
+		for (MenuEntry menuEntry : menuEntries)
+		{
+			final String menuDisplayOption = menuEntry.getOption();
+			final String menuDisplayTarget = menuEntry.getTarget();
+			for (PluginTogglerMenu pluginTogglerMenu : pluginTogglerMenus)
+			{
+				if (pluginTogglerMenu.displayEquals(menuDisplayOption, menuDisplayTarget))
+				{
+					event.setForceRightClick(true);
+					return;
+				}
+			}
+		}
+	}
+
+	private void onMenuEntryClicked(final MenuEntry menuEntry)
+	{
+		if (!MenuAction.RUNELITE.equals(menuEntry.getType()))
+		{
+			return;
+		}
+
+		final String menuDisplayOption = menuEntry.getOption();
+		final String menuDisplayTarget = menuEntry.getTarget();
 
 		for (final PluginTogglerMenu pluginTogglerMenu : PluginTogglerMenu.values())
 		{
-			if (pluginTogglerMenu.displayEquals(menuShowTarget))
+			if (pluginTogglerMenu.displayEquals(menuDisplayOption, menuDisplayTarget))
 			{
 				togglePlugin(pluginTogglerMenu.getPluginName());
 				break;
 			}
 		}
-
-		click.consume();
 	}
 
 	private void addMenuEntry(final MenuEntryAdded event, final String target)
 	{
-		MenuEntry[] menuEntries = client.getMenuEntries();
+		if (config.requireShift() && !client.isKeyPressed(KeyCode.KC_SHIFT))
+		{
+			return;
+		}
 
-		menuEntries = Arrays.copyOf(menuEntries, menuEntries.length + 1);
+		final String option = PluginTogglerMenu.MENU_DISPLAY_OPTION;
+		for (MenuEntry menuEntry : client.getMenuEntries())
+		{
+			if (option.equals(menuEntry.getOption()) && target.equals(menuEntry.getTarget()))
+			{
+				return;
+			}
+		}
 
-		final MenuEntry newEntry = menuEntries[menuEntries.length - 1] = new MenuEntry();
-		newEntry.setOption(PluginTogglerMenu.MENU_DISPLAY_OPTION);
-		newEntry.setTarget(target);
-		newEntry.setParam0(event.getActionParam0());
-		newEntry.setParam1(event.getActionParam1());
-		newEntry.setIdentifier(event.getIdentifier());
-		newEntry.setType(MenuAction.RUNELITE.getId());
-
-		client.setMenuEntries(menuEntries);
+		client.createMenuEntry(-1)
+			.setOption(PluginTogglerMenu.MENU_DISPLAY_OPTION)
+			.setTarget(target)
+			.setParam0(event.getActionParam0())
+			.setParam1(event.getActionParam1())
+			.setIdentifier(event.getIdentifier())
+			.setType(MenuAction.RUNELITE)
+			.onClick(this::onMenuEntryClicked);
 	}
 
 	private void togglePlugin(final String name)
@@ -172,7 +203,6 @@ public class PluginTogglerPlugin extends Plugin
 					else
 					{
 						pluginManager.startPlugin(finalPlugin);
-						// Add finalPlugin.getName() to the plugin panel search bar ?
 					}
 				}
 				catch (PluginInstantiationException e)
@@ -180,6 +210,10 @@ public class PluginTogglerPlugin extends Plugin
 					log.warn("Error when toggling plugin {}", finalPlugin.getClass().getSimpleName(), e);
 				}
 			});
+			if (config.openConfig())
+			{
+				configService.openConfig(finalPlugin.getName());
+			}
 		}
 	}
 
@@ -198,7 +232,7 @@ public class PluginTogglerPlugin extends Plugin
 
 		for (final PluginTogglerMenu pluginTogglerMenu : PluginTogglerMenu.values())
 		{
-			final String keyName = CaseUtils.toCamelCase(pluginTogglerMenu.getPluginName(), false, ' ');
+			final String keyName = pluginTogglerMenu.getConfigName();
 			if (configStates.containsKey(keyName))
 			{
 				pluginTogglerMenu.setConfigEnabled(configStates.get(keyName));
