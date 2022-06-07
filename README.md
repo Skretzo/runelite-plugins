@@ -1,8 +1,6 @@
-# [RuneLite](https://github.com/runelite/runelite) plugins
-|Icon|Plugin name|
-|:---|:----------|
-|[![icon](../../blob/chat-success-rates/icon.png)](../../tree/chat-success-rates)|[Chat Success Rates](../../tree/chat-success-rates)|
-|[![icon](../../blob/invalid-movement/icon.png)](../../tree/invalid-movement)|[Invalid Movement](../../tree/invalid-movement)|
-|[![icon](../../blob/radius-markers/icon.png)](../../tree/radius-markers)|[Radius Markers](../../tree/radius-markers)|
-|[![icon](../../blob/snakeman-mode/icon.png)](../../tree/snakeman-mode)|[Snakeman Mode](../../tree/snakeman-mode)|
-|[![icon](../../blob/tick-timestamp/icon.png)](../../tree/tick-timestamp)|[Tick Timestamp](../../tree/tick-timestamp)|
+# No Examine
+![icon](icon.png)
+
+## Info
+![illustration](https://user-images.githubusercontent.com/53493631/172361332-44c4e88f-76e3-420a-8050-b2be82321308.png)  
+Remove examine menu options to never missclick again.
