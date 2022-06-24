@@ -3,10 +3,11 @@ package com.noexamine;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.util.Arrays;
+import java.util.function.Predicate;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.ClientTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -33,19 +34,31 @@ public class NoExaminePlugin extends Plugin
 		return configManager.getConfig(NoExamineConfig.class);
 	}
 
-	@Subscribe
-	public void onMenuEntryAdded(MenuEntryAdded event)
+	private final Predicate<MenuEntry> filterMenuEntries = entry ->
 	{
-		MenuAction menuAction = MenuAction.of(event.getType());
+		MenuAction menuAction = MenuAction.of(entry.getType().getId());
 
-		if ((MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) && config.itemsGround()) ||
-			(MenuAction.EXAMINE_NPC.equals(menuAction) && config.npcs()) ||
-			(MenuAction.EXAMINE_OBJECT.equals(menuAction) && config.objects()) ||
-			(MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) && config.itemInventory() && EXAMINE.equals(event.getOption())))
+		return (!MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) || !config.itemsGround()) &&
+			(!MenuAction.EXAMINE_NPC.equals(menuAction) || !config.npcs()) &&
+			(!MenuAction.EXAMINE_OBJECT.equals(menuAction) || !config.objects()) &&
+			(!MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) || !config.itemInventory() ||
+			!EXAMINE.equals(entry.getOption()) || entry.getParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId());
+	};
+
+
+	private MenuEntry[] updateMenuEntries(MenuEntry[] menuEntries)
+	{
+		return Arrays.stream(menuEntries)
+			.filter(filterMenuEntries).sorted((o1, o2) -> 0)
+			.toArray(MenuEntry[]::new);
+	}
+
+	@Subscribe
+	public void onClientTick(ClientTick clientTick)
+	{
+		if (client.getGameState().equals(GameState.LOGGED_IN) && !client.isMenuOpen())
 		{
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			MenuEntry[] newMenuEntries = Arrays.copyOf(menuEntries, menuEntries.length - 1);
-			client.setMenuEntries(newMenuEntries);
+			client.setMenuEntries(updateMenuEntries(client.getMenuEntries()));
 		}
 	}
 }
