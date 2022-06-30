@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.events.ClientTick;
@@ -40,11 +41,16 @@ public class NoExaminePlugin extends Plugin
 	{
 		MenuAction menuAction = MenuAction.of(entry.getType().getId());
 
-		return (!MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) || !config.itemsGround()) &&
-			(!MenuAction.EXAMINE_NPC.equals(menuAction) || !config.npcs()) &&
-			(!MenuAction.EXAMINE_OBJECT.equals(menuAction) || !config.objects()) &&
-			(!MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) || !config.itemInventory() ||
-			!EXAMINE.equals(entry.getOption()) || entry.getParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId());
+		if (!shiftModifier())
+		{
+			return (!MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) || !config.itemsGround()) &&
+				(!MenuAction.EXAMINE_NPC.equals(menuAction) || !config.npcs()) &&
+				(!MenuAction.EXAMINE_OBJECT.equals(menuAction) || !config.objects()) &&
+				(!MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) || !config.itemInventory()
+					|| !EXAMINE.equals(entry.getOption()) || entry.getParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId());
+		}
+
+		return true;
 	};
 
 
@@ -62,5 +68,10 @@ public class NoExaminePlugin extends Plugin
 		{
 			client.setMenuEntries(updateMenuEntries(client.getMenuEntries()));
 		}
+	}
+
+	private boolean shiftModifier()
+	{
+		return client.isKeyPressed(KeyCode.KC_SHIFT);
 	}
 }
