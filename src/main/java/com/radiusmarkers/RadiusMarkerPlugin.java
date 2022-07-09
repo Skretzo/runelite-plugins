@@ -5,6 +5,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -20,10 +26,15 @@ import net.runelite.api.MenuAction;
 import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
+import net.runelite.api.SpriteID;
+import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -79,12 +90,20 @@ public class RadiusMarkerPlugin extends Plugin
 	@Inject
 	private Gson gson;
 
+	@Inject
+	private SpriteManager spriteManager;
+
 	@Getter
 	@Inject
 	private ColorPickerManager colourPickerManager;
 
 	private RadiusMarkerPluginPanel pluginPanel;
 	private NavigationButton navigationButton;
+	private BufferedImage minimapSpriteFixed;
+	private BufferedImage minimapSpriteResizeable;
+	private Shape minimapClipFixed;
+	private Shape minimapClipResizeable;
+	private Rectangle minimapRectangle = new Rectangle();
 
 	@Provides
 	RadiusMarkerConfig providesConfig(ConfigManager configManager)
@@ -271,6 +290,70 @@ public class RadiusMarkerPlugin extends Plugin
 		return null;
 	}
 
+	private Polygon bufferedImageToPolygon(BufferedImage image)
+	{
+		Color outsideColour = null;
+		Color previousColour;
+		final int width = image.getWidth();
+		final int height = image.getHeight();
+		List<Point> points = new ArrayList<>();
+		for (int y = 0; y < height; y++)
+		{
+			previousColour = outsideColour;
+			for (int x = 0; x < width; x++)
+			{
+				int rgb = image.getRGB(x, y);
+				int a = (rgb & 0xff000000) >>> 24;
+				int r = (rgb & 0x00ff0000) >> 16;
+				int g = (rgb & 0x0000ff00) >> 8;
+				int b = (rgb & 0x000000ff) >> 0;
+				Color colour = new Color(r, g, b, a);
+				if (x == 0 && y == 0)
+				{
+					outsideColour = colour;
+					previousColour = colour;
+				}
+				if (!colour.equals(outsideColour) && previousColour.equals(outsideColour))
+				{
+					points.add(new Point(x, y));
+				}
+				if ((colour.equals(outsideColour) || x == (width - 1)) && !previousColour.equals(outsideColour))
+				{
+					points.add(0, new Point(x, y));
+				}
+				previousColour = colour;
+			}
+		}
+		int offsetX = 0;
+		int offsetY = 0;
+		Widget minimapDrawWidget = getMinimapDrawWidget();
+		if (minimapDrawWidget != null)
+		{
+			offsetX = minimapDrawWidget.getBounds().x;
+			offsetY = minimapDrawWidget.getBounds().y;
+		}
+		Polygon polygon = new Polygon();
+		for (Point point : points)
+		{
+			polygon.addPoint(point.x + offsetX, point.y + offsetY);
+		}
+		return polygon;
+	}
+
+	private Shape getMinimapClipAreaSimple()
+	{
+		Widget minimapDrawArea = getMinimapDrawWidget();
+
+		if (minimapDrawArea == null || minimapDrawArea.isHidden())
+		{
+			return null;
+		}
+
+		Rectangle bounds = minimapDrawArea.getBounds();
+
+		return new Ellipse2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+	}
+
 	public void saveMarkers()
 	{
 		List<RadiusMarker> radiusMarkers = new ArrayList<>();
@@ -357,5 +440,71 @@ public class RadiusMarkerPlugin extends Plugin
 		loadMarkers();
 
 		pluginPanel.rebuild();
+	}
+
+	public Collection<WorldPoint> getInstanceWorldPoints(WorldPoint worldPointTemplate)
+	{
+		if (!client.isInInstancedRegion())
+		{
+			return Collections.singleton(worldPointTemplate);
+		}
+
+		return WorldPoint.toLocalInstance(client, worldPointTemplate);
+	}
+
+	public Shape getMinimapClipArea()
+	{
+		Widget minimapWidget = getMinimapDrawWidget();
+
+		if (minimapWidget == null || minimapWidget.isHidden() || minimapRectangle != (minimapRectangle = minimapWidget.getBounds()))
+		{
+			minimapClipFixed = null;
+			minimapClipResizeable = null;
+			minimapSpriteFixed = null;
+			minimapSpriteResizeable = null;
+		}
+
+		if (client.isResized())
+		{
+			if (minimapClipResizeable != null)
+			{
+				return minimapClipResizeable;
+			}
+			if (minimapSpriteResizeable == null)
+			{
+				minimapSpriteResizeable = spriteManager.getSprite(SpriteID.RESIZEABLE_MODE_MINIMAP_ALPHA_MASK, 0);
+			}
+			if (minimapSpriteResizeable != null)
+			{
+				return minimapClipResizeable = bufferedImageToPolygon(minimapSpriteResizeable);
+			}
+			return getMinimapClipAreaSimple();
+		}
+		if (minimapClipFixed != null)
+		{
+			return minimapClipFixed;
+		}
+		if (minimapSpriteFixed == null)
+		{
+			minimapSpriteFixed = spriteManager.getSprite(SpriteID.FIXED_MODE_MINIMAP_ALPHA_MASK, 0);
+		}
+		if (minimapSpriteFixed != null)
+		{
+			return minimapClipFixed = bufferedImageToPolygon(minimapSpriteFixed);
+		}
+		return getMinimapClipAreaSimple();
+	}
+
+	public Widget getMinimapDrawWidget()
+	{
+		if (client.isResized())
+		{
+			if (client.getVarbitValue(Varbits.SIDE_PANELS) == 1)
+			{
+				return client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_DRAW_AREA);
+			}
+			return client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_STONES_DRAW_AREA);
+		}
+		return client.getWidget(WidgetInfo.FIXED_VIEWPORT_MINIMAP_DRAW_AREA);
 	}
 }

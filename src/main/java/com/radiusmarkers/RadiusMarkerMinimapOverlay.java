@@ -4,20 +4,17 @@ import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
+import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
+import java.util.Collection;
 import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
-import net.runelite.api.Varbits;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -55,6 +52,9 @@ class RadiusMarkerMinimapOverlay extends Overlay
 
 	private void drawMinimap(Graphics2D graphics)
 	{
+		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		graphics.setClip(plugin.getMinimapClipArea());
+
 		final List<ColourRadiusMarker> markers = plugin.getMarkers();
 		final List<NPC> npcs = client.getNpcs();
 
@@ -65,34 +65,38 @@ class RadiusMarkerMinimapOverlay extends Overlay
 				continue;
 			}
 
-			final WorldPoint worldPoint = marker.getWorldPoint();
 			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType());
 
-			if (config.includeRetreatInteractionRange() && marker.isRetreatInteractionVisible())
-			{
-				drawSquare(graphics, worldPoint, marker.getRetreatInteractionColour(),
-					marker.getRetreatInteractionRadius(), 1, false);
-			}
+			final Collection<WorldPoint> worldPoints = plugin.getInstanceWorldPoints(marker.getWorldPoint());
 
-			if (config.includeAggressionRange() && marker.isAggressionVisible())
+			for (WorldPoint worldPoint : worldPoints)
 			{
-				drawSquare(graphics, worldPoint, marker.getAggressionColour(),
-					marker.getAggressionRadius(), client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
-			}
+				if (config.includeRetreatInteractionRange() && marker.isRetreatInteractionVisible())
+				{
+					drawSquare(graphics, worldPoint, marker.getRetreatInteractionColour(),
+						marker.getRetreatInteractionRadius(), 1, false);
+				}
 
-			if (config.includeMaxRange() && marker.isMaxVisible())
-			{
-				drawSquare(graphics, worldPoint, marker.getMaxColour(), marker.getMaxRadius(), 1, false);
-			}
+				if (config.includeAggressionRange() && marker.isAggressionVisible())
+				{
+					drawSquare(graphics, worldPoint, marker.getAggressionColour(),
+						marker.getAggressionRadius(), client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
+				}
 
-			if (config.includeWanderRange() && marker.isWanderVisible())
-			{
-				drawSquare(graphics, worldPoint, marker.getWanderColour(), marker.getWanderRadius(), 1, false);
-			}
+				if (config.includeMaxRange() && marker.isMaxVisible())
+				{
+					drawSquare(graphics, worldPoint, marker.getMaxColour(), marker.getMaxRadius(), 1, false);
+				}
 
-			if (marker.isSpawnVisible())
-			{
-				drawSquare(graphics, worldPoint, marker.getSpawnColour(), 0, 1, false);
+				if (config.includeWanderRange() && marker.isWanderVisible())
+				{
+					drawSquare(graphics, worldPoint, marker.getWanderColour(), marker.getWanderRadius(), 1, false);
+				}
+
+				if (marker.isSpawnVisible())
+				{
+					drawSquare(graphics, worldPoint, marker.getSpawnColour(), 0, 1, false);
+				}
 			}
 
 			for (NPC npc : npcs)
@@ -131,14 +135,7 @@ class RadiusMarkerMinimapOverlay extends Overlay
 		final WorldPoint southWest = center.dx(-radius).dy(-radius);
 		final int diameter = 2 * radius + size;
 
-		Area minimapClipArea = getMinimapClipArea();
-		if (minimapClipArea == null)
-		{
-			return;
-		}
-
 		graphics.setColor(color);
-		graphics.setClip(minimapClipArea);
 
 		GeneralPath path = new GeneralPath();
 		if (radius > 0 && excludeCorner)
@@ -218,7 +215,7 @@ class RadiusMarkerMinimapOverlay extends Overlay
 		final int sin = (int) (65536.0D * Math.sin((double) angle * Perspective.UNIT));
 		final int cos = (int) (65536.0D * Math.cos((double) angle * Perspective.UNIT));
 
-		final Widget minimapDrawWidget = getMinimapDrawWidget();
+		final Widget minimapDrawWidget = plugin.getMinimapDrawWidget();
 		if (minimapDrawWidget == null || minimapDrawWidget.isHidden())
 		{
 			return null;
@@ -232,41 +229,5 @@ class RadiusMarkerMinimapOverlay extends Overlay
 		final int minimapY = loc.getY() + yy + minimapDrawWidget.getHeight() / 2;
 
 		return new Point(minimapX, minimapY);
-	}
-
-	private Widget getMinimapDrawWidget()
-	{
-		Widget minimapDrawArea;
-		if (client.isResized())
-		{
-			if (client.getVar(Varbits.SIDE_PANELS) == 1)
-			{
-				minimapDrawArea = client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_DRAW_AREA);
-			}
-			else
-			{
-				minimapDrawArea = client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_STONES_DRAW_AREA);
-			}
-		}
-		else
-		{
-			minimapDrawArea = client.getWidget(WidgetInfo.FIXED_VIEWPORT_MINIMAP_DRAW_AREA);
-		}
-		return minimapDrawArea;
-	}
-
-	private Area getMinimapClipArea()
-	{
-		Widget minimapDrawArea = getMinimapDrawWidget();
-
-		if (minimapDrawArea == null || minimapDrawArea.isHidden())
-		{
-			return null;
-		}
-
-		Rectangle bounds = minimapDrawArea.getBounds();
-		Ellipse2D ellipse = new Ellipse2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
-
-		return new Area(ellipse);
 	}
 }

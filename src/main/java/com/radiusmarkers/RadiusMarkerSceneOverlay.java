@@ -58,39 +58,48 @@ class RadiusMarkerSceneOverlay extends Overlay
 
 		for (final ColourRadiusMarker marker : markers)
 		{
-			WorldPoint worldPoint = marker.getWorldPoint();
-			if (worldPoint.getPlane() != client.getPlane() || !marker.isVisible())
+			if (!marker.isVisible())
 			{
 				continue;
 			}
 
 			final boolean excludeCorner = AttackType.MELEE.equals(marker.getAttackType());
 
-			if (config.includeRetreatInteractionRange() && marker.isRetreatInteractionVisible())
-			{
-				drawBox(graphics, worldPoint, marker.getRetreatInteractionRadius(),
-					marker.getRetreatInteractionColour(), stroke, 1, false);
-			}
+			final Collection<WorldPoint> worldPoints = plugin.getInstanceWorldPoints(marker.getWorldPoint());
 
-			if (config.includeAggressionRange() && marker.isAggressionVisible())
+			for (WorldPoint worldPoint : worldPoints)
 			{
-				drawBox(graphics, worldPoint, marker.getAggressionRadius(), marker.getAggressionColour(),
-					stroke, client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
-			}
+				if (worldPoint.getPlane() != client.getPlane())
+				{
+					continue;
+				}
 
-			if (config.includeMaxRange() && marker.isMaxVisible())
-			{
-				drawBox(graphics, worldPoint, marker.getMaxRadius(), marker.getMaxColour(), stroke, 1, false);
-			}
+				if (config.includeRetreatInteractionRange() && marker.isRetreatInteractionVisible())
+				{
+					drawBox(graphics, worldPoint, marker.getRetreatInteractionRadius(),
+						marker.getRetreatInteractionColour(), stroke, 1, false);
+				}
 
-			if (config.includeWanderRange() && marker.isWanderVisible())
-			{
-				drawBox(graphics, worldPoint, marker.getWanderRadius(), marker.getWanderColour(), stroke, 1, false);
-			}
+				if (config.includeAggressionRange() && marker.isAggressionVisible())
+				{
+					drawBox(graphics, worldPoint, marker.getAggressionRadius(), marker.getAggressionColour(),
+						stroke, client.getNpcDefinition(marker.getNpcId()).getSize(), excludeCorner);
+				}
 
-			if (marker.isSpawnVisible())
-			{
-				drawBox(graphics, worldPoint, 0, marker.getSpawnColour(), stroke, 1, false);
+				if (config.includeMaxRange() && marker.isMaxVisible())
+				{
+					drawBox(graphics, worldPoint, marker.getMaxRadius(), marker.getMaxColour(), stroke, 1, false);
+				}
+
+				if (config.includeWanderRange() && marker.isWanderVisible())
+				{
+					drawBox(graphics, worldPoint, marker.getWanderRadius(), marker.getWanderColour(), stroke, 1, false);
+				}
+
+				if (marker.isSpawnVisible())
+				{
+					drawBox(graphics, worldPoint, 0, marker.getSpawnColour(), stroke, 1, false);
+				}
 			}
 
 			for (NPC npc : npcs)
