@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 import java.util.ArrayList;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.events.MenuOpened;
@@ -46,15 +47,29 @@ public class NoExaminePlugin extends Plugin
 		{
 			MenuAction menuAction = MenuAction.of(menuEntry.getType().getId());
 
-			if ((!MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) || !config.itemsGround()) &&
-				(!MenuAction.EXAMINE_NPC.equals(menuAction) || !config.npcs()) &&
-				(!MenuAction.EXAMINE_OBJECT.equals(menuAction) || !config.objects()) &&
-				(!MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) || !config.itemInventory() || !EXAMINE.equals(menuEntry.getOption())))
+			if (!isExamine(menuAction, menuEntry.getOption()) && !isCancel(menuAction))
 			{
 				alteredMenuEntries.add(menuEntry);
 			}
 		}
 
 		client.setMenuEntries(alteredMenuEntries.toArray(new MenuEntry[0]));
+	}
+
+	private boolean isExamine(MenuAction menuAction, String option)
+	{
+		if (client.isKeyPressed(KeyCode.KC_SHIFT) && config.examineShift())
+		{
+			return false;
+		}
+		return (MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) && config.examineItemsGround()) ||
+				(MenuAction.EXAMINE_NPC.equals(menuAction) && config.examineNpcs()) ||
+				(MenuAction.EXAMINE_OBJECT.equals(menuAction) && config.examineObjects()) ||
+				(MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) && config.examineItemInventory() && EXAMINE.equals(option));
+	}
+
+	private boolean isCancel(MenuAction menuAction)
+	{
+		return MenuAction.CANCEL.equals(menuAction) && config.cancelEverywhere();
 	}
 }
