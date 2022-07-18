@@ -93,4 +93,42 @@ public interface NoExamineConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigSection(
+		name = "Remove",
+		description = "Settings for removing player-owned house remove menu options",
+		position = 8
+	)
+	String sectionRemove = "sectionRemove";
+
+	@ConfigItem(
+		keyName = "removePoh",
+		name = "Player-owned house",
+		description = "Whether to remove the remove menu options inside the player-owned house when building mode is off",
+		position = 9,
+		section = sectionRemove
+	)
+	default boolean removePoh()
+	{
+		return false;
+	}
+
+	@ConfigSection(
+		name = "Walk here",
+		description = "Settings for removing walk here menu options",
+		position = 10
+	)
+	String sectionWalkHere = "sectionWalkHere";
+
+	@ConfigItem(
+		keyName = "walkHereEverywhere",
+		name = "Everywhere",
+		description = "Whether to remove walk here menu options everywhere",
+		position = 11,
+		section = sectionWalkHere
+	)
+	default boolean walkHereEverywhere()
+	{
+		return false;
+	}
 }
