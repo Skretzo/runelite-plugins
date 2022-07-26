@@ -9,21 +9,28 @@ The output video file is encoded with the [TechSmith Screen Capture Codec](https
 ![animation](https://user-images.githubusercontent.com/53493631/147863130-e7e46a3f-2c17-4b2e-8a1d-f8878aea6bcb.gif)
 
 ## Config options
-- FPS
+- Stop on logout: `false`
+  - Whether to stop the video recording when your in-game character is logged out.
+- Exclude login screen: `false`
+  - Whether to pause the video recording when the login screen is displayed.
+- Include cursor: `true`
+  - Whether to include the cursor in the video.
+    To use a custom cursor place a file 'cursor.png' in the '.runelite' folder.
+- FPS: `25`
   - The framerate (frames/second) for the video.
-- Keyframe interval
+- Keyframe interval: `80`
   - The interval (number of frames) between keyframes (versus delta/prediction frames)
     - A lower interval (e.g. 1) gives a bigger output file, but faster seeking (good for editing)
     - A moderate interval (e.g. 80) gives a good trade-off between output file size and seeking (recommended)
     - A higher interval (e.g. 50 FPS * 60 seconds = 3000) gives a smaller output file, but slower seeking (good for archiving)
-- Compression level
+- Compression level: `6`
   - The amount of compression for each video frame
     - 1: fast compression (bigger file size, faster seeking)
     - 6: default compression (recommended)
     - 9: high compression (smaller file size, slower seeking)
-- Start video hotkey
+- Start video hotkey: `Not set`
   - The hotkey that will start the video recording. Alternatively use the start button in the plugin panel.
-- Stop video hotkey
+- Stop video hotkey: `Not set`
   - The hotkey that will stop the video recording. Alternatively use the stop button in the plugin panel.
 
 ## Acknowledgements
