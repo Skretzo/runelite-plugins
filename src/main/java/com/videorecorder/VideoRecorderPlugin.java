@@ -28,6 +28,7 @@ import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneScapeProfileType;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -82,6 +83,9 @@ public class VideoRecorderPlugin extends Plugin
 	private VideoRecorderConfig config;
 
 	private boolean running;
+	private boolean includeCursor;
+	private boolean excludeLoginScreen;
+	private boolean stopOnLogout;
 	private boolean loggedOut;
 	private boolean lastLoggedOut = true;
 	private AVIWriter video;
@@ -129,6 +133,9 @@ public class VideoRecorderPlugin extends Plugin
 	{
 		VIDEO_DIR.mkdirs();
 
+		includeCursor = config.includeCursor();
+		excludeLoginScreen = config.excludeLoginScreen();
+		stopOnLogout = config.stopOnLogout();
 		if (CURSOR_CUSTOM.exists())
 		{
 			try
@@ -175,6 +182,17 @@ public class VideoRecorderPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if ("videorecorder".equals(event.getGroup()))
+		{
+			includeCursor = config.includeCursor();
+			excludeLoginScreen = config.excludeLoginScreen();
+			stopOnLogout = config.stopOnLogout();
+		}
+	}
+
+	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
 		GameState gameState = event.getGameState();
@@ -182,7 +200,7 @@ public class VideoRecorderPlugin extends Plugin
 			GameState.LOGIN_SCREEN_AUTHENTICATOR.equals(gameState) ||
 			GameState.LOGGING_IN.equals(gameState) ||
 			(GameState.LOADING.equals(gameState) && lastLoggedOut);
-		if (config.stopOnLogout() && loggedOut && !lastLoggedOut)
+		if (stopOnLogout && loggedOut && !lastLoggedOut)
 		{
 			panel.toggleVideo(false);
 		}
@@ -204,7 +222,7 @@ public class VideoRecorderPlugin extends Plugin
 				{
 					if (running)
 					{
-						if (!config.excludeLoginScreen() || !loggedOut)
+						if (!excludeLoginScreen || !loggedOut)
 						{
 							Consumer<Image> imageCallback = (img) -> imageExecutor.submit(() -> screenshot(img));
 							drawManager.requestNextFrameListener(imageCallback);
@@ -246,7 +264,7 @@ public class VideoRecorderPlugin extends Plugin
 
 		Graphics graphics = frame.createGraphics();
 		graphics.drawImage(image, 0, 0, null);
-		if (config.includeCursor())
+		if (includeCursor)
 		{
 			Point position = client.getMouseCanvasPosition();
 			int x = position.getX();
