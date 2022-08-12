@@ -7,3 +7,4 @@
 |[![icon](../../blob/radius-markers/icon.png)](../../tree/radius-markers)|[Radius Markers](../../tree/radius-markers)|
 |[![icon](../../blob/snakeman-mode/icon.png)](../../tree/snakeman-mode)|[Snakeman Mode](../../tree/snakeman-mode)|
 |[![icon](../../blob/tick-timestamp/icon.png)](../../tree/tick-timestamp)|[Tick Timestamp](../../tree/tick-timestamp)|
+|[![icon](../../blob/video-recorder/icon.png)](../../tree/video-recorder)|[Video Recorder](../../tree/video-recorder)|
