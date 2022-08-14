@@ -52,11 +52,11 @@ public class NoExaminePlugin extends Plugin
 
 		for (MenuEntry menuEntry : menuEntries)
 		{
-			MenuAction menuAction = MenuAction.of(menuEntry.getType().getId());
+			MenuAction menuAction = menuEntry.getType();
 
 			if (!isExamine(menuAction, menuEntry.getOption()) &&
 				!isCancel(menuAction) &&
-				!isRemove(menuEntry.getOption()) &&
+				!isRemove(menuAction, menuEntry.getOption()) &&
 				!isWalkHere(menuAction))
 			{
 				alteredMenuEntries.add(menuEntry);
@@ -89,9 +89,9 @@ public class NoExaminePlugin extends Plugin
 		return MenuAction.CANCEL.equals(menuAction) && config.cancelEverywhere();
 	}
 
-	private boolean isRemove(String option)
+	private boolean isRemove(MenuAction menuAction, String option)
 	{
-		return isPoh() && REMOVE.equals(option) && config.removePoh();
+		return isPoh() && MenuAction.GAME_OBJECT_FIFTH_OPTION.equals(menuAction) && REMOVE.equals(option) && config.removePoh();
 	}
 
 	private boolean isWalkHere(MenuAction menuAction)
