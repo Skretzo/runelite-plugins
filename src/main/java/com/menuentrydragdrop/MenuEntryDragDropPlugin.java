@@ -28,9 +28,6 @@ import net.runelite.client.util.HotkeyListener;
 public class MenuEntryDragDropPlugin extends Plugin
 {
 	@Getter(AccessLevel.PACKAGE)
-	private int hoverMenuEntryIdx;
-
-	@Getter(AccessLevel.PACKAGE)
 	private boolean isHotKeyPressed;
 
 	@Getter(AccessLevel.PACKAGE)
@@ -39,7 +36,9 @@ public class MenuEntryDragDropPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private boolean isSwapping;
 
-	private int lastHoverMenuEntryIdx = -1;
+	@Getter(AccessLevel.PACKAGE)
+	private int hoverMenuEntryIdx;
+	private int originalMenuEntryIdx = -1;
 
 	private HotkeyListener hotkeyListener = new HotkeyListener(() -> Keybind.ALT)
 	{
@@ -53,6 +52,8 @@ public class MenuEntryDragDropPlugin extends Plugin
 		public void hotkeyReleased()
 		{
 			isHotKeyPressed = false;
+			isSwapping = false;
+			originalMenuEntryIdx = -1;
 		}
 	};
 
@@ -64,6 +65,7 @@ public class MenuEntryDragDropPlugin extends Plugin
 			if (e.getButton() == MouseEvent.BUTTON1 && e.isAltDown())
 			{
 				isSwapping = true;
+				originalMenuEntryIdx = hoveredMenuEntryIndex(client.getMenuEntries());
 				e.consume();
 			}
 			return super.mousePressed(e);
@@ -72,9 +74,10 @@ public class MenuEntryDragDropPlugin extends Plugin
 		@Override
 		public MouseEvent mouseReleased(MouseEvent e)
 		{
-			if (e.getButton() == MouseEvent.BUTTON1 && e.isAltDown())
+			if (e.getButton() == MouseEvent.BUTTON1)
 			{
 				isSwapping = false;
+				originalMenuEntryIdx = -1;
 				e.consume();
 			}
 			return super.mouseReleased(e);
@@ -121,26 +124,37 @@ public class MenuEntryDragDropPlugin extends Plugin
 	@Subscribe
 	public void onMenuOpened(MenuOpened event)
 	{
+		MenuEntry[] entries = client.getMenuEntries();
+		for (MenuEntry entry : entries)
+		{
+			// Workaround to allow deprioritized menu entries (e.g. Examine) to be swapped anywhere in the menu
+			entry.setDeprioritized(true);
+		}
 		isMenuOpen = true;
 	}
 
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
-		MenuEntry[] entries = client.getMenuEntries();
-		hoverMenuEntryIdx = hoveredMenuEntry(entries);
+		if (!isMenuOpen)
+		{
+			return;
+		}
 
-		if (isMenuOpen && isSwapping && isHotKeyPressed && hoverMenuEntryIdx >= 0 && hoverMenuEntryIdx != lastHoverMenuEntryIdx)
+		MenuEntry[] entries = client.getMenuEntries();
+		hoverMenuEntryIdx = hoveredMenuEntryIndex(entries);
+
+		if (isSwapping && hoverMenuEntryIdx >= 0 && hoverMenuEntryIdx != originalMenuEntryIdx)
 		{
 			MenuEntry entrySwap = entries[hoverMenuEntryIdx];
-			entries[hoverMenuEntryIdx] = entries[lastHoverMenuEntryIdx];
-			entries[lastHoverMenuEntryIdx] = entrySwap;
+			entries[hoverMenuEntryIdx] = entries[originalMenuEntryIdx];
+			entries[originalMenuEntryIdx] = entrySwap;
+			originalMenuEntryIdx = hoverMenuEntryIdx;
 			client.setMenuEntries(entries);
 		}
-		lastHoverMenuEntryIdx = hoverMenuEntryIdx;
 	}
 
-	private int hoveredMenuEntry(final MenuEntry[] menuEntries)
+	private int hoveredMenuEntryIndex(final MenuEntry[] menuEntries)
 	{
 		final int menuX = client.getMenuX();
 		final int menuY = client.getMenuY();
