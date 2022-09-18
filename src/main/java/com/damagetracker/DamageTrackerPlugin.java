@@ -129,24 +129,27 @@ public class DamageTrackerPlugin extends Plugin
 	public void onHitsplatApplied(HitsplatApplied event)
 	{
 		boolean isOwnDamage = event.getHitsplat().isMine();
-		// if (!event.getHitsplat().isMine() || event.getHitsplat().getHitsplatType() != HitsplatID.DAMAGE_ME || BLOCK_ME)
 		int damage = event.getHitsplat().getAmount();
 		int targetId = event.getActor() instanceof NPC ? ((NPC) event.getActor()).getId() : -2;
 		String targetName = event.getActor().getName();
 
-		SwingUtilities.invokeLater(() ->
+		boolean update = false;
+		for (DamageTracker tracker : trackers)
 		{
-			boolean update = false;
-			for (DamageTracker tracker : trackers)
+			if (tracker.shouldUpdate(isOwnDamage, targetName, targetId, client))
 			{
-				if (tracker.shouldUpdate(isOwnDamage, targetName, targetId, client))
+				update = true;
+				SwingUtilities.invokeLater(() ->
 				{
-					update = true;
 					tracker.update(damage);
 					saveTracker(tracker);
-				}
+				});
 			}
-			if (update)
+		}
+		boolean finalUpdate = update;
+		SwingUtilities.invokeLater(() ->
+		{
+			if (finalUpdate)
 			{
 				pluginPanel.update();
 			}
@@ -405,14 +408,4 @@ public class DamageTrackerPlugin extends Plugin
 		pluginPanel.rebuild();
 		pluginPanel.update();
 	}
-
-	/*
-	private void saveTrackers()
-	{
-		for (DamageTracker tracker : trackers)
-		{
-			saveTracker(tracker);
-		}
-	}
-	*/
 }
