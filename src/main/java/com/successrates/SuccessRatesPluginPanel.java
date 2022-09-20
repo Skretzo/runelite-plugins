@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,14 +16,15 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import lombok.Getter;
 import net.runelite.api.Client;
-import net.runelite.api.Skill;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.ColorScheme;
@@ -30,7 +35,7 @@ import net.runelite.client.ui.components.ComboBoxListRenderer;
 class SuccessRatesPluginPanel extends PluginPanel
 {
 	private final JPanel successRatesPanel = new JPanel();
-	private final JComboBox<Skill> skillSelection = new JComboBox<>();
+	private final JComboBox<SuccessRatesSkill> skillSelection = new JComboBox<>();
 	private final JComboBox<SuccessRatesTracker> trackerSelection = new JComboBox<>();
 
 	private final SuccessRatesConfig config;
@@ -41,7 +46,7 @@ class SuccessRatesPluginPanel extends PluginPanel
 	private final EventBus eventBus;
 
 	@Getter
-	private Map<Skill, List<SuccessRatesTracker>> trackers = new HashMap<>();
+	private Map<SuccessRatesSkill, List<SuccessRatesTracker>> trackers = new HashMap<>();
 
 	public SuccessRatesPluginPanel(SuccessRatesConfig config, SuccessRatesPlugin plugin, Client client,
 		ConfigManager configManager, Gson gson, EventBus eventBus)
@@ -62,6 +67,49 @@ class SuccessRatesPluginPanel extends PluginPanel
 		JPanel titlePanel = new JPanel(new BorderLayout());
 		titlePanel.setBorder(new EmptyBorder(1, 3, 10, 0));
 		titlePanel.add(title, BorderLayout.WEST);
+
+		JPanel settingsPanel = new JPanel(new BorderLayout());
+		settingsPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+		JButton deleteButton = new JButton("Reset data");
+		JButton exportButton = new JButton("Export to clipboard");
+		deleteButton.setPreferredSize(new Dimension(85, 25));
+		exportButton.setPreferredSize(new Dimension(128, 25));
+		deleteButton.setForeground(Color.WHITE);
+		exportButton.setForeground(Color.WHITE);
+		deleteButton.setFont(FontManager.getRunescapeSmallFont());
+		exportButton.setFont(FontManager.getRunescapeSmallFont());
+		deleteButton.addActionListener(actionEvent ->
+		{
+			int confirm = JOptionPane.showConfirmDialog(SuccessRatesPluginPanel.this,
+				"Are you sure you want to permanently delete the data associated with this tracker?",
+				"Warning", JOptionPane.OK_CANCEL_OPTION);
+
+			if (confirm == 0)
+			{
+				if (trackerSelection.getSelectedItem() == null)
+				{
+					return;
+				}
+				SuccessRatesTracker tracker = (SuccessRatesTracker) trackerSelection.getSelectedItem();
+				tracker.reset();
+			}
+		});
+		exportButton.addActionListener(actionEvent ->
+		{
+			if (trackerSelection.getSelectedItem() == null)
+			{
+				return;
+			}
+			SuccessRatesTracker tracker = (SuccessRatesTracker) trackerSelection.getSelectedItem();
+			StringBuilder text = new StringBuilder(tracker.toString() + ":\nLevel\tSuccesses\tFailures:\n");
+			for (SuccessRatesBar bar : tracker.getTrackerBars().values())
+			{
+				text.append(bar.toString()).append("\n");
+			}
+			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text.toString()), null);
+		});
+		settingsPanel.add(deleteButton, BorderLayout.WEST);
+		settingsPanel.add(exportButton, BorderLayout.EAST);
 
 		JPanel headerPanel = new JPanel(new BorderLayout());
 		headerPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
@@ -102,7 +150,7 @@ class SuccessRatesPluginPanel extends PluginPanel
 		{
 			if (skillSelection.getSelectedItem() != null)
 			{
-				final Skill skill = (Skill) skillSelection.getSelectedItem();
+				final SuccessRatesSkill skill = (SuccessRatesSkill) skillSelection.getSelectedItem();
 				trackerSelection.removeAllItems();
 				for (SuccessRatesTracker tracker : trackers.get(skill))
 				{
@@ -123,6 +171,7 @@ class SuccessRatesPluginPanel extends PluginPanel
 		optionPanel.add(trackerSelection);
 		// optionPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 		// optionPanel.add(exportButton); // "Export to clipboard"
+		optionPanel.add(settingsPanel);
 		optionPanel.add(headerPanel);
 
 		add(optionPanel, BorderLayout.NORTH);
@@ -142,15 +191,11 @@ class SuccessRatesPluginPanel extends PluginPanel
 			tracker.loadTrackerData();
 
 			final Map<Integer, SuccessRatesBar> trackerBars = new HashMap<>();
-			for (int i = 0; i < 100; i++)
+			for (Map.Entry<Integer, Integer[]> levelRate : tracker.getLevelRates().entrySet())
 			{
-				final SuccessRatesBar bar = new SuccessRatesBar(i, tracker.getSkill());
-				if (tracker.getLevelRates().containsKey(i))
-				{
-					Integer[] data = tracker.getLevelRates().get(i);
-					bar.update(data[0], data[1]);
-				}
-				trackerBars.put(i, bar);
+				final SuccessRatesBar bar = new SuccessRatesBar(levelRate.getKey(), tracker.getColor());
+				bar.update(levelRate.getValue()[0], levelRate.getValue()[1]);
+				trackerBars.put(levelRate.getKey(), bar);
 			}
 			tracker.setTrackerBars(trackerBars);
 
@@ -166,16 +211,16 @@ class SuccessRatesPluginPanel extends PluginPanel
 		}
 
 		// Populate skill selection
-		List<Skill> skills = new ArrayList<>(trackers.keySet());
-		skills.sort(Comparator.comparing(Skill::getName));
+		List<SuccessRatesSkill> skills = new ArrayList<>(trackers.keySet());
+		skills.sort(Comparator.comparing(SuccessRatesSkill::ordinal));
 		skillSelection.removeAllItems();
-		for (Skill skill : skills)
+		for (SuccessRatesSkill skill : skills)
 		{
 			skillSelection.addItem(skill);
 		}
 	}
 
-	private void displaySelectedTracker()
+	public void displaySelectedTracker()
 	{
 		config.indexSkill(skillSelection.getSelectedIndex());
 		config.indexTracker(trackerSelection.getSelectedIndex());

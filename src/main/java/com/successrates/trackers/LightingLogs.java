@@ -1,10 +1,10 @@
 package com.successrates.trackers;
 
+import com.successrates.SuccessRatesSkill;
 import com.successrates.SuccessRatesTracker;
 import net.runelite.api.Actor;
 import net.runelite.api.AnimationID;
 import net.runelite.api.ChatMessageType;
-import net.runelite.api.Skill;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.client.eventbus.Subscribe;
@@ -29,9 +29,9 @@ public class LightingLogs extends SuccessRatesTracker
 	private int lastFailures;
 
 	@Override
-	public Skill getSkill()
+	public SuccessRatesSkill getSkill()
 	{
-		return Skill.FIREMAKING;
+		return SuccessRatesSkill.FIREMAKING;
 	}
 
 	@Subscribe
@@ -51,7 +51,7 @@ public class LightingLogs extends SuccessRatesTracker
 
 		final int id = actor.getAnimation();
 		final int tick = client.getTickCount();
-		final int lvl = Math.min(99, client.getBoostedSkillLevel(Skill.FIREMAKING));
+		final int lvl = Math.min(99, client.getBoostedSkillLevel(getSkill().getSkill()));
 
 		final int deltaTick = tick - lastTick;
 

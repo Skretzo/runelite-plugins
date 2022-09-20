@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import net.runelite.api.Skill;
-import net.runelite.client.ui.SkillColor;
 import net.runelite.client.ui.components.ProgressBar;
 
 class SuccessRatesBar extends JPanel
@@ -17,7 +15,7 @@ class SuccessRatesBar extends JPanel
 
 	private final ProgressBar progressBar = new ProgressBar();
 
-	SuccessRatesBar(int level, Skill skill)
+	SuccessRatesBar(int level, Color color)
 	{
 		this.level = level;
 
@@ -25,7 +23,7 @@ class SuccessRatesBar extends JPanel
 		setBorder(new EmptyBorder(0, 0, 2, 0));
 
 		progressBar.setBackground(new Color(61, 56, 49));
-		progressBar.setForeground(skill.equals(Skill.OVERALL) ? Color.RED : SkillColor.find(skill).getColor());
+		progressBar.setForeground(color);
 
 		progressBar.setCenterLabel("" + level);
 
@@ -75,5 +73,11 @@ class SuccessRatesBar extends JPanel
 		failures += deltaFailures;
 
 		updateInfo();
+	}
+
+	@Override
+	public String toString()
+	{
+		return level + "\t" + successes + "\t" + failures;
 	}
 }

@@ -3,14 +3,17 @@ package com.successrates;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
 import net.runelite.api.Skill;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.ui.SkillColor;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class SuccessRatesTracker implements Comparable<SuccessRatesTracker>
@@ -32,7 +35,12 @@ public abstract class SuccessRatesTracker implements Comparable<SuccessRatesTrac
 	@Setter
 	public Map<Integer, SuccessRatesBar> trackerBars = new HashMap<>();
 
-	public abstract Skill getSkill();
+	public abstract SuccessRatesSkill getSkill();
+
+	public Color getColor()
+	{
+		return getSkill().getSkill().equals(Skill.OVERALL) ? Color.RED : SkillColor.find(getSkill().getSkill()).getColor();
+	}
 
 	public void register(EventBus eventBus, Client client, SuccessRatesPlugin plugin,
 		ConfigManager configManager, Gson gson)
@@ -54,17 +62,29 @@ public abstract class SuccessRatesTracker implements Comparable<SuccessRatesTrac
 	public void update(int lvl, int successes, int fails)
 	{
 		SuccessRatesBar bar = trackerBars.get(lvl);
-		if (bar != null)
+		if (bar == null)
+		{
+			SwingUtilities.invokeLater(() ->
+			{
+				SuccessRatesBar newBar = new SuccessRatesBar(lvl, getColor());
+				trackerBars.put(lvl, newBar);
+				newBar.update(successes, fails);
+				if (plugin != null)
+				{
+					plugin.rebuildPanel();
+				}
+			});
+		}
+		else
 		{
 			bar.update(successes, fails);
+			if (plugin != null)
+			{
+				plugin.updatePanel();
+			}
 		}
 
 		updateTrackerData(lvl, successes, fails);
-
-		if (plugin != null)
-		{
-			plugin.updatePanel();
-		}
 
 		saveTrackerData();
 	}
@@ -105,12 +125,24 @@ public abstract class SuccessRatesTracker implements Comparable<SuccessRatesTrac
 		if (levelRates == null || levelRates.isEmpty())
 		{
 			configManager.unsetConfiguration(CONFIG_GROUP, key);
+			return;
 		}
 
 		configManager.setConfiguration(CONFIG_GROUP, key, gson.toJson(levelRates));
 	}
 
-	private String getTrackerName()
+	public void reset()
+	{
+		levelRates.clear();
+		trackerBars.clear();
+		saveTrackerData();
+		if (plugin != null)
+		{
+			plugin.rebuildPanel();
+		}
+	}
+
+	public String getTrackerName()
 	{
 		return getClass().getSimpleName();
 	}

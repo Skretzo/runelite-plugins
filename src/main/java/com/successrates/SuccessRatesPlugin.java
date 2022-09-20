@@ -71,7 +71,7 @@ public class SuccessRatesPlugin extends Plugin
 		// Do we really have to save the tracker data every time we perform an action in-game?
 		// Maybe only save here on shutDown? What about X-ing the client?
 
-		for (Skill skill : pluginPanel.getTrackers().keySet())
+		for (SuccessRatesSkill skill : pluginPanel.getTrackers().keySet())
 		{
 			for (SuccessRatesTracker tracker : pluginPanel.getTrackers().get(skill))
 			{
@@ -89,5 +89,10 @@ public class SuccessRatesPlugin extends Plugin
 	{
 		pluginPanel.repaint();
 		pluginPanel.revalidate();
+	}
+
+	public void rebuildPanel()
+	{
+		pluginPanel.displaySelectedTracker();
 	}
 }

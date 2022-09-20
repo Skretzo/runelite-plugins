@@ -1,13 +1,13 @@
 package com.successrates.trackers;
 
+import com.successrates.SuccessRatesSkill;
 import com.successrates.SuccessRatesTracker;
-import net.runelite.api.Skill;
 
 public class OtherThing extends SuccessRatesTracker
 {
 	@Override
-	public Skill getSkill()
+	public SuccessRatesSkill getSkill()
 	{
-		return Skill.OVERALL;
+		return SuccessRatesSkill.CUSTOM;
 	}
 }

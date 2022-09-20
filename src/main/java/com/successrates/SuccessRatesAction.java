@@ -1,9 +1,7 @@
 package com.successrates;
 
 import com.successrates.trackers.BendingNails;
-import com.successrates.trackers.FiringBowl;
-import com.successrates.trackers.FiringPieDish;
-import com.successrates.trackers.FiringPot;
+import com.successrates.trackers.FiringPottery;
 import com.successrates.trackers.LightingLogs;
 import com.successrates.trackers.OtherThing;
 import lombok.Getter;
@@ -14,9 +12,9 @@ public enum SuccessRatesAction
 	BENDING_NAILS(new BendingNails()),
 
 	// Crafting
-	FIRING_BOWL(new FiringBowl()),
-	FIRING_PIE_DISH(new FiringPieDish()),
-	FIRING_POT(new FiringPot()),
+	FIRING_BOWL(new FiringPottery("bowl")),
+	FIRING_PIE_DISH(new FiringPottery("pie dish")),
+	FIRING_POT(new FiringPottery("pot")),
 
 	// Firemaking
 	LIGHTING_LOGS(new LightingLogs()),
