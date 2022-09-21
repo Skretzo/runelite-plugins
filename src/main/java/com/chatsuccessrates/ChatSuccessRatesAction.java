@@ -6,8 +6,10 @@ import com.chatsuccessrates.trackers.FiringPottery;
 import com.chatsuccessrates.trackers.LightingLogs;
 import com.chatsuccessrates.trackers.Pickpocketing;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.ItemID;
 
+@RequiredArgsConstructor
 public enum ChatSuccessRatesAction
 {
 	// Construction
@@ -45,9 +47,4 @@ public enum ChatSuccessRatesAction
 
 	@Getter
 	private final ChatSuccessRatesTracker tracker;
-
-	ChatSuccessRatesAction(ChatSuccessRatesTracker tracker)
-	{
-		this.tracker = tracker;
-	}
 }

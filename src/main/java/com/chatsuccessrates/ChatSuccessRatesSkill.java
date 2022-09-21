@@ -1,8 +1,10 @@
 package com.chatsuccessrates;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.Skill;
 
+@RequiredArgsConstructor
 public enum ChatSuccessRatesSkill
 {
 	CUSTOM(Skill.OVERALL),
@@ -32,21 +34,4 @@ public enum ChatSuccessRatesSkill
 
 	@Getter
 	private final Skill skill;
-
-	ChatSuccessRatesSkill(Skill skill)
-	{
-		this.skill = skill;
-	}
-
-	public static ChatSuccessRatesSkill from(Skill skill)
-	{
-		for (ChatSuccessRatesSkill chatSuccessRatesSkill : ChatSuccessRatesSkill.values())
-		{
-			if (chatSuccessRatesSkill.skill.equals(skill))
-			{
-				return chatSuccessRatesSkill;
-			}
-		}
-		return CUSTOM;
-	}
 }
