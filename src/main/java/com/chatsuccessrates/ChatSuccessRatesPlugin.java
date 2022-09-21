@@ -1,16 +1,16 @@
 package com.chatsuccessrates;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import net.runelite.api.ChatMessageType;
-import static net.runelite.api.ChatMessageType.GAMEMESSAGE;
-import static net.runelite.api.ChatMessageType.SPAM;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.api.Skill;
@@ -20,27 +20,34 @@ import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.util.ImageUtil;
+import static net.runelite.api.ChatMessageType.GAMEMESSAGE;
+import static net.runelite.api.ChatMessageType.SPAM;
 
 @PluginDescriptor(
 	name = "Chat Success Rates",
-	description = "Track skilling success rates with game chat messages",
-	tags = {"chat", "message", "success", "failure", "skill", "levels", "counter"}
+	description = "Track and display skilling success rates",
+	tags = {"skilling", "level", "success", "failure", "rate", "tracking", "counter", "distribution"}
 )
 public class ChatSuccessRatesPlugin extends Plugin
 {
+	public static final Set<ChatMessageType> COLLAPSIBLE_MESSAGETYPES = ImmutableSet.of(
+		GAMEMESSAGE,
+		SPAM
+	);
+	public static final String CONFIG_GROUP = "chatsuccessrates";
 	private static final String DUPLICATE_PREFIX = " (";
 	private static final String DUPLICATE_SUFFIX = ")";
 	private static final String LEVEL_DELIMITER = ": ";
 	private static final String COPY_TO_CLIPBOARD_OPTION = "Copy";
 	private static final String COPY_TO_CLIPBOARD_TARGET = "Chat success rates";
-	private static final Set<ChatMessageType> COLLAPSIBLE_MESSAGETYPES = ImmutableSet.of(
-		GAMEMESSAGE,
-		SPAM
-	);
 
 	private static class Duplicate
 	{
@@ -59,14 +66,29 @@ public class ChatSuccessRatesPlugin extends Plugin
 		}
 	};
 
+	private NavigationButton navigationButton;
+	private ChatSuccessRatesPluginPanel pluginPanel;
+
+	@Inject
+	private Gson gson;
+
 	@Inject
 	private Client client;
+
+	@Inject
+	private EventBus eventBus;
+
+	@Inject
+	private ConfigManager configManager;
+
+	@Inject
+	private ClientToolbar clientToolbar;
 
 	@Inject
 	private ChatSuccessRatesConfig config;
 
 	@Provides
-	ChatSuccessRatesConfig provideConfig(ConfigManager configManager)
+	ChatSuccessRatesConfig providesConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(ChatSuccessRatesConfig.class);
 	}
@@ -75,11 +97,37 @@ public class ChatSuccessRatesPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		client.refreshChat();
+
+		pluginPanel = new ChatSuccessRatesPluginPanel(config, this, client, configManager, gson, eventBus);
+
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "chat_success_rates_icon.png");
+
+		navigationButton = NavigationButton.builder()
+			.tooltip("Chat Success Rates")
+			.icon(icon)
+			.priority(5)
+			.panel(pluginPanel)
+			.build();
+
+		clientToolbar.addNavigation(navigationButton);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
+		for (ChatSuccessRatesSkill skill : pluginPanel.getTrackers().keySet())
+		{
+			for (ChatSuccessRatesTracker tracker : pluginPanel.getTrackers().get(skill))
+			{
+				tracker.unregister();
+			}
+		}
+
+		clientToolbar.removeNavigation(navigationButton);
+
+		pluginPanel = null;
+		navigationButton = null;
+
 		duplicateChatCache.clear();
 		client.refreshChat();
 	}
@@ -87,7 +135,7 @@ public class ChatSuccessRatesPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		if (!"chatsuccessrates".equals(event.getGroup()))
+		if (!CONFIG_GROUP.equals(event.getGroup()))
 		{
 			return;
 		}
@@ -201,10 +249,21 @@ public class ChatSuccessRatesPlugin extends Plugin
 		if (config.addLevelPrefix())
 		{
 			final Skill skill = config.levelPrefix();
-			final int level = (!config.useBoostedLevel() || Skill.OVERALL.equals(skill)) ?
-				client.getRealSkillLevel(skill) : client.getBoostedSkillLevel(skill);
+			final int level = Skill.OVERALL.equals(skill) ? client.getTotalLevel() :
+				(config.useBoostedLevel() ? client.getBoostedSkillLevel(skill) : client.getRealSkillLevel(skill));
 			message = level + LEVEL_DELIMITER + message;
 		}
 		return message;
+	}
+
+	public void updatePanel()
+	{
+		pluginPanel.repaint();
+		pluginPanel.revalidate();
+	}
+
+	public void rebuildPanel()
+	{
+		pluginPanel.displaySelectedTracker();
 	}
 }
