@@ -51,9 +51,9 @@ public class DamageTrackerPanel extends JPanel
 	private final JPanel containerOptions = new JPanel();
 
 	private final FlatTextField inputName = new FlatTextField();
+	private final JLabel edit = new JLabel("Edit");
 	private final JLabel save = new JLabel("Save");
 	private final JLabel cancel = new JLabel("Cancel");
-	private final JLabel rename = new JLabel("Edit");
 	private final JLabel delete = new JLabel();
 
 	private final FlatTextField inputTargetName = new FlatTextField();
@@ -143,9 +143,12 @@ public class DamageTrackerPanel extends JPanel
 			}
 		});
 
-		rename.setFont(FontManager.getRunescapeSmallFont());
-		rename.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-		rename.addMouseListener(new MouseAdapter()
+		edit.setFont(FontManager.getRunescapeSmallFont());
+		edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+		edit.setToolTipText("<html>While in edit mode you can right click<br>" +
+			"<b>NPCs</b>, <b>equipment</b>, <b>skills</b>, <b>attack styles</b> or <b>prayers</b><br>" +
+			"and select \"Update tracker\" to add it as a condition</html>");
+		edit.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
@@ -157,13 +160,13 @@ public class DamageTrackerPanel extends JPanel
 			@Override
 			public void mouseEntered(MouseEvent mouseEvent)
 			{
-				rename.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker().darker());
+				edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker().darker());
 			}
 
 			@Override
 			public void mouseExited(MouseEvent mouseEvent)
 			{
-				rename.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+				edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 			}
 		});
 
@@ -332,7 +335,7 @@ public class DamageTrackerPanel extends JPanel
 			}
 		});
 
-		nameActions.add(rename);
+		nameActions.add(edit);
 		nameActions.add(cancel);
 		nameActions.add(save);
 		nameActions.add(toggle);
@@ -371,8 +374,8 @@ public class DamageTrackerPanel extends JPanel
 					StringBuilder text = new StringBuilder();
 					for (DamageTrackerBar bar : tracker.getTrackerBars().values())
 					{
+						text.append(text.length() > 0 ? "\n" : "");
 						text.append(bar);
-						text.append("\n");
 					}
 					Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text.toString()), null);
 				}
@@ -434,7 +437,7 @@ public class DamageTrackerPanel extends JPanel
 	{
 		save.setVisible(saveAndCancel);
 		cancel.setVisible(saveAndCancel);
-		rename.setVisible(!saveAndCancel);
+		edit.setVisible(!saveAndCancel);
 		collapse.setVisible(!saveAndCancel);
 		toggle.setVisible(!saveAndCancel);
 		delete.setVisible(!saveAndCancel);
@@ -455,7 +458,7 @@ public class DamageTrackerPanel extends JPanel
 	{
 		final boolean open = !tracker.isCollapsed();
 
-		rename.setVisible(open);
+		edit.setVisible(open);
 		toggle.setVisible(open);
 
 		containerOptions.setVisible(open);
