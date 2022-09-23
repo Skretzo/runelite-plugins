@@ -207,10 +207,9 @@ public class DamageTrackerPanel extends JPanel
 			}
 		});
 
-		JPanel containerOwnDamage = new JPanel(new BorderLayout());
+		JPanel containerOwnDamage = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
 		JPanel containerTargetName = new JPanel(new BorderLayout());
 
-		containerOwnDamage.setBorder(new EmptyBorder(2, 0, 2, 0));
 		containerTargetName.setBorder(new EmptyBorder(2, 0, 2, 0));
 		containerOptions.setBorder(new EmptyBorder(5, 5, 2, 5));
 		containerBars.setBorder(new EmptyBorder(5, 10, 5, 10));
@@ -221,10 +220,7 @@ public class DamageTrackerPanel extends JPanel
 		containerOptions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		containerBars.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		JPanel leftActionsOwnDamage = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		JPanel leftActionsTargetName = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-
-		leftActionsOwnDamage.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		leftActionsTargetName.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		JCheckBox ownDamage = new JCheckBox();
@@ -263,12 +259,12 @@ public class DamageTrackerPanel extends JPanel
 		labelOwnDamage.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 		labelTargetName.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 		labelOwnDamage.setPreferredSize(new Dimension(162, 21));
-		labelTargetName.setPreferredSize(new Dimension(70, 21));
+		labelTargetName.setPreferredSize(new Dimension(60, 21));
+		labelOwnDamage.setBorder(new EmptyBorder(0, 5, 0, 0));
 		labelOwnDamage.setToolTipText("Whether to only track damage dealt by your own character");
 		labelTargetName.setToolTipText("<html>The name of the NPC or Player to track<br>" +
 			"(blank to track all opponents, append #number to specify NPC id)</html>");
 
-		leftActionsOwnDamage.add(ownDamage);
 		leftActionsTargetName.add(labelTargetName);
 
 		JPanel rightActionsOwnDamage = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -277,7 +273,6 @@ public class DamageTrackerPanel extends JPanel
 		rightActionsOwnDamage.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		rightActionsTargetName.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		rightActionsOwnDamage.add(labelOwnDamage);
 		rightActionsTargetName.add(inputTargetName);
 
 		collapse = new JButton(tracker.isCollapsed() ? COLLAPSE_ICON : EXPAND_ICON);
@@ -345,9 +340,8 @@ public class DamageTrackerPanel extends JPanel
 		nameWrapper.add(inputName, BorderLayout.CENTER);
 		nameWrapper.add(nameActions, BorderLayout.EAST);
 
-		containerOwnDamage.add(leftActionsOwnDamage, BorderLayout.WEST);
-		containerOwnDamage.add(rightActionsOwnDamage, BorderLayout.EAST);
-
+		containerOwnDamage.add(ownDamage);
+		containerOwnDamage.add(labelOwnDamage);
 		containerTargetName.add(leftActionsTargetName, BorderLayout.WEST);
 		containerTargetName.add(rightActionsTargetName, BorderLayout.EAST);
 
