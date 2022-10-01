@@ -42,14 +42,14 @@ A radius marker is a way to display the spawn point, attack range, hunt range, m
   - Hunt radius: `1`
   - Interaction radius: `1`
 - Default colours
-  - Spawn point: ![#FF00FFFF](https://via.placeholder.com/15/00FFFF/000000?text=+) `#FF00FFFF`
-  - Wander range: ![#FFFFFF00](https://via.placeholder.com/15/FFFF00/000000?text=+) `#FFFFFF00`
-  - Max range: ![#FFFF00FF](https://via.placeholder.com/15/FF00FF/000000?text=+) `#FFFF00FF`
-  - Aggression range: ![#FFFF0000](https://via.placeholder.com/15/FF0000/000000?text=+) `#FFFF0000`
-  - Retreat interaction range: ![#FF0000FF](https://via.placeholder.com/15/0000FF/000000?text=+) `#FF0000FF`
-  - Attack range: ![#FF7F0000](https://via.placeholder.com/15/7F0000/000000?text=+) `#FF7F0000`
-  - Hunt range: ![#FFFF7F00](https://via.placeholder.com/15/FF7F00/000000?text=+) `#FFFF7F00`
-  - Interaction range: ![#FF00C800](https://via.placeholder.com/15/00C800/000000?text=+) `#FF00C800`
+  - Spawn point: `#FF00FFFF`
+  - Wander range: `#FFFFFF00`
+  - Max range: `#FFFF00FF`
+  - Aggression range: `#FFFF0000`
+  - Retreat interaction range: `#FF0000FF`
+  - Attack range: `#FF7F0000`
+  - Hunt range: `#FFFF7F00`
+  - Interaction range: `#FF00C800`
 - Border width: `3`
 - Show on minimap: ✅ `true`
 - Show on world map: ✅ `true`

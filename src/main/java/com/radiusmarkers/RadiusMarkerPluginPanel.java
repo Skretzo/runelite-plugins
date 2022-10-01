@@ -4,12 +4,18 @@ import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -27,6 +33,10 @@ import net.runelite.client.util.ImageUtil;
 
 class RadiusMarkerPluginPanel extends PluginPanel
 {
+	private static final ImageIcon COPY_ICON;
+	private static final ImageIcon COPY_HOVER_ICON;
+	private static final ImageIcon PASTE_ICON;
+	private static final ImageIcon PASTE_HOVER_ICON;
 	private static final ImageIcon ADD_ICON;
 	private static final ImageIcon ADD_HOVER_ICON;
 
@@ -34,6 +44,8 @@ class RadiusMarkerPluginPanel extends PluginPanel
 	private static final String[] FILTER_TEXT = {"ALL", "R", "", ""};
 	private static final String[] FILTER_DESCRIPTIONS;
 
+	private final JLabel copyMarkers = new JLabel(COPY_ICON);
+	private final JLabel pasteMarkers = new JLabel(PASTE_ICON);
 	private final JLabel markerAdd = new JLabel(ADD_ICON);
 	private final JLabel title = new JLabel();
 	private final JLabel filter = new JLabel(FILTER_ICONS[0]);
@@ -50,6 +62,14 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 	static
 	{
+		final BufferedImage copyIcon = ImageUtil.loadImageResource(RadiusMarkerPlugin.class, "copy_icon.png");
+		COPY_ICON = new ImageIcon(copyIcon);
+		COPY_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(copyIcon, 0.53f));
+
+		final BufferedImage pasteIcon = ImageUtil.loadImageResource(RadiusMarkerPlugin.class, "paste_icon.png");
+		PASTE_ICON = new ImageIcon(pasteIcon);
+		PASTE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(pasteIcon, 0.53f));
+
 		final BufferedImage addIcon = ImageUtil.loadImageResource(RadiusMarkerPlugin.class, "add_icon.png");
 		ADD_ICON = new ImageIcon(addIcon);
 		ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
@@ -89,6 +109,8 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		JPanel titlePanel = new JPanel(new BorderLayout());
 		titlePanel.setBorder(new EmptyBorder(1, 3, 10, 7));
+
+		JPanel markerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 7, 3));
 
 		searchPanel.setBorder(new EmptyBorder(1, 0, 0, 0));
 
@@ -147,7 +169,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 		title.setForeground(Color.WHITE);
 
 		titlePanel.add(title, BorderLayout.WEST);
-		titlePanel.add(markerAdd, BorderLayout.EAST);
+		titlePanel.add(markerButtons, BorderLayout.EAST);
 
 		searchPanel.add(searchBar, BorderLayout.WEST);
 		searchPanel.add(filter, BorderLayout.EAST);
@@ -164,6 +186,50 @@ class RadiusMarkerPluginPanel extends PluginPanel
 		noMarkersPanel.setVisible(false);
 
 		markerView.add(noMarkersPanel);
+
+		copyMarkers.setToolTipText("Export all visible markers to your clipboard");
+		copyMarkers.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				copyMarkers();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				copyMarkers.setIcon(COPY_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				copyMarkers.setIcon(COPY_ICON);
+			}
+		});
+
+		pasteMarkers.setToolTipText("Import markers from your clipboard");
+		pasteMarkers.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				pasteMarkers();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				pasteMarkers.setIcon(PASTE_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				pasteMarkers.setIcon(PASTE_ICON);
+			}
+		});
 
 		markerAdd.setToolTipText("Add new radius marker");
 		markerAdd.addMouseListener(new MouseAdapter()
@@ -186,6 +252,10 @@ class RadiusMarkerPluginPanel extends PluginPanel
 				markerAdd.setIcon(ADD_ICON);
 			}
 		});
+
+		markerButtons.add(pasteMarkers);
+		markerButtons.add(copyMarkers);
+		markerButtons.add(markerAdd);
 
 		centerPanel.add(markerView, BorderLayout.NORTH);
 
@@ -245,5 +315,33 @@ class RadiusMarkerPluginPanel extends PluginPanel
 				scrollRectToVisible(markerPosition);
 			}
 		});
+	}
+
+	private void copyMarkers()
+	{
+		if (plugin.copyMarkers() != null)
+		{
+			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(plugin.copyMarkers()), null);
+		}
+	}
+
+	private void pasteMarkers()
+	{
+		final String clipboardText;
+		try
+		{
+			clipboardText = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor).toString();
+		}
+		catch (IOException | UnsupportedFlavorException ignore)
+		{
+			return;
+		}
+
+		if (plugin.pasteMarkers(clipboardText))
+		{
+			noMarkersPanel.setVisible(false);
+			searchPanel.setVisible(true);
+			rebuild();
+		}
 	}
 }

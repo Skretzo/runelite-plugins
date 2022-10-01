@@ -2,6 +2,7 @@ package com.radiusmarkers;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -231,6 +232,74 @@ public class RadiusMarkerPlugin extends Plugin
 
 		String json = gson.toJson(markers);
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
+	}
+
+	public String copyMarkers()
+	{
+		List<RadiusMarker> markersCopy = new ArrayList<>();
+
+		for (ColourRadiusMarker marker : markers)
+		{
+			if (marker.isVisible())
+			{
+				markersCopy.add(translateToRadiusMarker(marker));
+			}
+		}
+
+		if (markersCopy.isEmpty())
+		{
+			return null;
+		}
+
+		return gson.toJson(markersCopy);
+	}
+
+	public boolean pasteMarkers(String json)
+	{
+		if (Strings.isNullOrEmpty(json))
+		{
+			return false;
+		}
+
+		List<RadiusMarker> radiusMarkers;
+		try
+		{
+			radiusMarkers = gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
+		}
+		catch (IllegalStateException | JsonSyntaxException ignore)
+		{
+			return false;
+		}
+		List<ColourRadiusMarker> outputMarkers = new ArrayList<>();
+		List<ColourRadiusMarker> colourRadiusMarkers = translateToColourRadiusMarker(radiusMarkers);
+
+		for (ColourRadiusMarker radiusMarker : colourRadiusMarkers)
+		{
+			boolean unique = true;
+			for (ColourRadiusMarker marker : markers)
+			{
+				if (marker.getId() == radiusMarker.getId())
+				{
+					unique = false;
+					break;
+				}
+			}
+			if (unique)
+			{
+				outputMarkers.add(radiusMarker);
+			}
+		}
+
+		if (outputMarkers.isEmpty())
+		{
+			return false;
+		}
+
+		markers.addAll(outputMarkers);
+		Collections.sort(markers);
+		saveMarkers();
+
+		return true;
 	}
 
 	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers)
