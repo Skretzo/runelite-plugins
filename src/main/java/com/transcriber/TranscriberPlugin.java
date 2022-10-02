@@ -2,6 +2,7 @@ package com.transcriber;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
@@ -9,6 +10,7 @@ import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -34,6 +36,12 @@ public class TranscriberPlugin extends Plugin
 	@Inject
 	private ClientToolbar clientToolbar;
 
+	@Inject
+	private ConfigManager configManager;
+
+	@Inject
+	private TranscriberConfig config;
+
 	private boolean readingBook;
 	private int openedBook = -BOOK_OPENING_MAX_OFFSET;
 	private int scheduledTranscribe;
@@ -41,11 +49,16 @@ public class TranscriberPlugin extends Plugin
 	private TranscriberPanel pluginPanel;
 	private NavigationButton navigationButton;
 
+	@Provides
+	TranscriberConfig providesConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(TranscriberConfig.class);
+	}
+
 	@Override
 	protected void startUp()
 	{
-		pluginPanel = injector.getInstance(TranscriberPanel.class);
-		pluginPanel.init();
+		pluginPanel = new TranscriberPanel(config);
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/panel_icon.png");
 
@@ -74,11 +87,27 @@ public class TranscriberPlugin extends Plugin
 			return;
 		}
 
-		String text = widget.getText();
-		if (!widget.isHidden() && !Strings.isNullOrEmpty(text))
+		if (!widget.isHidden())
 		{
-			pluginPanel.appendText(text);
+			String text = widget.getText();
+			if (!Strings.isNullOrEmpty(text))
+			{
+				pluginPanel.appendText(text);
+			}
+
+			int itemId = widget.getItemId();
+			if (itemId > -1)
+			{
+				pluginPanel.appendText("<itemID=" + itemId + ">");
+			}
+
+			int spriteId = widget.getSpriteId();
+			if (spriteId > -1)
+			{
+				pluginPanel.appendText("<spriteID=" + spriteId + ">");
+			}
 		}
+
 
 		try
 		{
@@ -118,6 +147,10 @@ public class TranscriberPlugin extends Plugin
 		{
 			readingBook = true;
 			widgetBook = client.getWidget(groupId, 0);
+			if (widgetBook != null)
+			{
+				widgetBook = widgetBook.getParent();
+			}
 			scheduledTranscribe = tickCount + TRANSCRIBE_OFFSET;
 		}
 	}

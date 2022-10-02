@@ -11,8 +11,15 @@ import net.runelite.client.ui.PluginPanel;
 public class TranscriberPanel extends PluginPanel
 {
 	private final JTextArea transcriberEditor = new JTextArea();
+	private final TranscriberConfig config;
 
-	void init()
+	TranscriberPanel(TranscriberConfig config)
+	{
+		this.config = config;
+		init();
+	}
+
+	private void init()
 	{
 		getParent().setLayout(new BorderLayout());
 		getParent().add(this, BorderLayout.CENTER);
@@ -39,7 +46,12 @@ public class TranscriberPanel extends PluginPanel
 
 	void appendText(String data)
 	{
-		transcriberEditor.append(data.replaceAll("<br>", "\n").replaceAll("<col=000000>", "") + "\n");
+		data = data.replaceAll("<br>", "\n");
+		if (config.removeUnnecessaryTags())
+		{
+			data = data.replaceAll("<col=000000>", "");
+		}
+		transcriberEditor.append(data + "\n");
 		transcriberEditor.setCaretPosition(transcriberEditor.getDocument().getLength());
 	}
 }
