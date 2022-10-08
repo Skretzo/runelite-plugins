@@ -4,14 +4,15 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuOptionClicked;
-import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -25,10 +26,7 @@ import net.runelite.client.util.ImageUtil;
 )
 public class TranscriberPlugin extends Plugin
 {
-	private static final int BOOK_OPENING_MAX_OFFSET = 5;
 	private static final int TRANSCRIBE_OFFSET = 1;
-	private static final String BOOK_OPTION_NEXT_PAGE = "Continue";
-	private static final String BOOK_OPTION_READ = "Read";
 
 	@Inject
 	private Client client;
@@ -42,12 +40,11 @@ public class TranscriberPlugin extends Plugin
 	@Inject
 	private TranscriberConfig config;
 
-	private boolean readingBook;
-	private int openedBook = -BOOK_OPENING_MAX_OFFSET;
 	private int scheduledTranscribe;
 	private Widget widgetBook;
 	private TranscriberPanel pluginPanel;
 	private NavigationButton navigationButton;
+	private List<Integer> blacklist = new ArrayList<>();
 
 	@Provides
 	TranscriberConfig providesConfig(ConfigManager configManager)
@@ -70,6 +67,8 @@ public class TranscriberPlugin extends Plugin
 			.build();
 
 		clientToolbar.addNavigation(navigationButton);
+
+		populateBlacklist();
 	}
 
 	@Override
@@ -78,6 +77,7 @@ public class TranscriberPlugin extends Plugin
 		clientToolbar.removeNavigation(navigationButton);
 		pluginPanel = null;
 		navigationButton = null;
+		blacklist.clear();
 	}
 
 	private void transcribeWidget(Widget widget)
@@ -96,18 +96,17 @@ public class TranscriberPlugin extends Plugin
 			}
 
 			int itemId = widget.getItemId();
-			if (itemId > -1)
+			if (itemId > -1 && config.itemIds())
 			{
 				pluginPanel.appendText("<itemID=" + itemId + ">");
 			}
 
 			int spriteId = widget.getSpriteId();
-			if (spriteId > -1)
+			if (spriteId > -1 && config.spriteIds())
 			{
 				pluginPanel.appendText("<spriteID=" + spriteId + ">");
 			}
 		}
-
 
 		try
 		{
@@ -141,34 +140,45 @@ public class TranscriberPlugin extends Plugin
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
 		final int groupId = event.getGroupId();
-		final int tickCount = client.getTickCount();
 
-		if (readingBook || (tickCount - openedBook) < BOOK_OPENING_MAX_OFFSET)
+		if (blacklist.contains(groupId))
 		{
-			readingBook = true;
-			widgetBook = client.getWidget(groupId, 0);
-			if (widgetBook != null)
-			{
-				widgetBook = widgetBook.getParent();
-			}
-			scheduledTranscribe = tickCount + TRANSCRIBE_OFFSET;
+			return;
+		}
+
+		widgetBook = client.getWidget(groupId, 0);
+		if (widgetBook != null)
+		{
+			widgetBook = widgetBook.getParent();
+		}
+
+		scheduledTranscribe = client.getTickCount() + TRANSCRIBE_OFFSET;
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if ("transcriber".equals(event.getGroup()))
+		{
+			populateBlacklist();
 		}
 	}
 
-	@Subscribe
-	public void onWidgetClosed(WidgetClosed event)
+	private void populateBlacklist()
 	{
-		readingBook = false;
-	}
+		String[] parts = config.widgetBlacklist().replace(' ', ',').replace(';', ',').replace('\n', ',').split(",");
 
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		final String option = event.getMenuOption();
-		if (option.startsWith(BOOK_OPTION_READ) ||
-			(option.equals(BOOK_OPTION_NEXT_PAGE) && readingBook))
+		blacklist.clear();
+		for (String s : parts)
 		{
-			openedBook = client.getTickCount();
+			try
+			{
+				int id = Integer.parseInt(s);
+				blacklist.add(id);
+			}
+			catch (NumberFormatException ignore)
+			{
+			}
 		}
 	}
 }
