@@ -89,10 +89,16 @@ public class TranscriberPlugin extends Plugin
 
 		if (!widget.isHidden())
 		{
-			String text = widget.getText();
-			if (!Strings.isNullOrEmpty(text))
+			int animationId = widget.getAnimationId();
+			if (animationId > -1 && config.animationIds())
 			{
-				pluginPanel.appendText(text);
+				pluginPanel.appendText("<animationID=" + animationId + ">");
+			}
+
+			int fontId = widget.getFontId();
+			if (fontId > -1 && config.fontIds())
+			{
+				pluginPanel.appendText("<fontID=" + fontId + ">");
 			}
 
 			int itemId = widget.getItemId();
@@ -101,10 +107,22 @@ public class TranscriberPlugin extends Plugin
 				pluginPanel.appendText("<itemID=" + itemId + ">");
 			}
 
+			int modelId = widget.getModelId();
+			if (modelId > -1 && config.modelIds())
+			{
+				pluginPanel.appendText("<modelID=" + modelId + ">");
+			}
+
 			int spriteId = widget.getSpriteId();
 			if (spriteId > -1 && config.spriteIds())
 			{
 				pluginPanel.appendText("<spriteID=" + spriteId + ">");
+			}
+
+			String text = widget.getText();
+			if (!Strings.isNullOrEmpty(text))
+			{
+				pluginPanel.appendText(text);
 			}
 		}
 

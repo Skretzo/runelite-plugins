@@ -8,11 +8,41 @@ import net.runelite.client.config.ConfigItem;
 public interface TranscriberConfig extends Config
 {
 	@ConfigItem(
+		keyName = "animationIds",
+		name = "Include animation IDs",
+		description = "Whether to include animation IDs in the transcript, e.g. <animationID=100>"
+	)
+	default boolean animationIds()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "fontIds",
+		name = "Include font IDs",
+		description = "Whether to include font IDs in the transcript, e.g. <fontID=497>"
+	)
+	default boolean fontIds()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "itemIds",
 		name = "Include item IDs",
 		description = "Whether to include item IDs in the transcript, e.g. <itemID=4151>"
 	)
 	default boolean itemIds()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "modelIds",
+		name = "Include model IDs",
+		description = "Whether to include model IDs in the transcript, e.g. <modelID=11365>"
+	)
+	default boolean modelIds()
 	{
 		return false;
 	}
@@ -45,7 +75,8 @@ public interface TranscriberConfig extends Config
 	)
 	default String widgetBlacklist()
 	{
-		return "4,7,65,69,76,77,84,94,122,134,137,156,160,162,182,193,201,217,219,229,231,239,245,259,278,310," +
-			"320,370,372,399,464,527,541,553,593,595,600,621,626,629,701,702,707,712,713,714,715,716,717";
+		return "4,7,65,69,76,77,84,94,109,116,122,134,137,156,160,162,182,193,201,216,217," +
+			"218,219,229,231,238,239,245,259,278,310,320,370,372,378,387,399,429,432,464," +
+			"527,541,553,593,595,600,621,626,629,701,702,707,712,713,714,715,716,717";
 	}
 }
