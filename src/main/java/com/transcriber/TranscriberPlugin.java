@@ -95,12 +95,6 @@ public class TranscriberPlugin extends Plugin
 				pluginPanel.appendText("<animationID=" + animationId + ">");
 			}
 
-			int fontId = widget.getFontId();
-			if (fontId > -1 && config.fontIds())
-			{
-				pluginPanel.appendText("<fontID=" + fontId + ">");
-			}
-
 			int itemId = widget.getItemId();
 			if (itemId > -1 && config.itemIds())
 			{
@@ -122,6 +116,12 @@ public class TranscriberPlugin extends Plugin
 			String text = widget.getText();
 			if (!Strings.isNullOrEmpty(text))
 			{
+				int fontId = widget.getFontId();
+				if (fontId > -1 && config.fontIds())
+				{
+					pluginPanel.appendText("<fontID=" + fontId + ">");
+				}
+
 				pluginPanel.appendText(text);
 			}
 		}
