@@ -6,10 +6,13 @@ import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -17,6 +20,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
@@ -38,10 +42,18 @@ public class TranscriberPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private OverlayManager overlayManager;
+
+	@Inject
 	private TranscriberConfig config;
+
+	@Inject
+	private TranscriberOverlay overlay;
 
 	private int scheduledTranscribe;
 	private Widget widgetBook;
+	@Getter
+	private Widget widgetLoaded;
 	private TranscriberPanel pluginPanel;
 	private NavigationButton navigationButton;
 	private List<Integer> blacklist = new ArrayList<>();
@@ -69,11 +81,14 @@ public class TranscriberPlugin extends Plugin
 		clientToolbar.addNavigation(navigationButton);
 
 		populateBlacklist();
+
+		overlayManager.add(overlay);
 	}
 
 	@Override
 	protected void shutDown()
 	{
+		overlayManager.remove(overlay);
 		clientToolbar.removeNavigation(navigationButton);
 		pluginPanel = null;
 		navigationButton = null;
@@ -164,13 +179,24 @@ public class TranscriberPlugin extends Plugin
 			return;
 		}
 
-		widgetBook = client.getWidget(groupId, 0);
-		if (widgetBook != null)
+		widgetLoaded = client.getWidget(groupId, 0);
+		if (widgetLoaded != null)
 		{
-			widgetBook = widgetBook.getParent();
+			widgetBook = widgetLoaded.getParent();
 		}
 
 		scheduledTranscribe = client.getTickCount() + TRANSCRIBE_OFFSET;
+	}
+
+	@Subscribe
+	public void onWidgetClosed(WidgetClosed event)
+	{
+		final int groupId = event.getGroupId();
+
+		if (widgetLoaded != null && groupId == WidgetInfo.TO_GROUP(widgetLoaded.getId()))
+		{
+			widgetLoaded = null;
+		}
 	}
 
 	@Subscribe
@@ -180,6 +206,11 @@ public class TranscriberPlugin extends Plugin
 		{
 			populateBlacklist();
 		}
+	}
+
+	public String[] getSelected()
+	{
+		return pluginPanel.getSelected();
 	}
 
 	private void populateBlacklist()

@@ -54,4 +54,16 @@ public class TranscriberPanel extends PluginPanel
 		transcriberEditor.append(data + "\n");
 		transcriberEditor.setCaretPosition(transcriberEditor.getDocument().getLength());
 	}
+
+	String[] getSelected()
+	{
+		String text = transcriberEditor.getSelectedText();
+
+		if (text == null)
+		{
+			return new String[0];
+		}
+
+		return text.split("\n");
+	}
 }

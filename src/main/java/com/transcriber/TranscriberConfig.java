@@ -68,6 +68,16 @@ public interface TranscriberConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showTranscriptionOutline",
+		name = "Show transcription outline",
+		description = "Whether to outline the selected portion of the transcription"
+	)
+	default boolean showTranscriptionOutline()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "widgetBlacklist",
 		name = "Blacklist",
 		description = "A list of widget group IDs to exclude",
@@ -75,7 +85,7 @@ public interface TranscriberConfig extends Config
 	)
 	default String widgetBlacklist()
 	{
-		return "4,7,65,69,76,77,84,94,109,116,122,134,137,156,160,162,182,193,201,216,217," +
+		return "4,7,65,69,76,77,84,94,109,116,122,134,137,149,156,160,162,182,193,201,216,217," +
 			"218,219,229,231,238,239,245,259,278,310,320,370,372,378,387,399,429,432,464," +
 			"527,541,553,593,595,600,621,626,629,701,702,707,712,713,714,715,716,717";
 	}
