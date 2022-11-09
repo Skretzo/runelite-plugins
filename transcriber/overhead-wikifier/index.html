@@ -1,0 +1,128 @@
+<html>
+
+  <head>
+
+    <title>
+      Transcriber overhead text wikifier
+    </title>
+
+    <link rel = "icon" href = "https://raw.githubusercontent.com/Skretzo/runelite-plugins/transcriber/icon.png">
+
+    <style>
+
+      body
+      {
+        font-family: arial, sans-serif;
+      }
+
+      table
+      {
+        border-collapse: collapse;
+        text-align: center;
+      }
+
+      td, th
+      {
+        border: 1px solid rgba(0, 0, 0, 0);
+        padding: 8px;
+      }
+
+      th
+      {
+        font-size: 22px;
+      }
+
+      textarea
+      {
+        height: 170px;
+        min-width: 700px;
+        max-width: 1200px;
+        min-height: 20px;
+        max-height: 500px;
+      }
+
+    </style>
+
+    <script>
+
+      function convert()
+      {
+        var input = document.getElementById("input").value;
+
+        document.getElementById("input").value = "";
+
+        var lines = input.replaceAll("\n\n\n", "\n").replaceAll("\n\n", "\n").split("\n");
+
+        var outputs = [];
+
+        for (var i = 0; i < lines.length; i++)
+        {
+          outputs.push(wikify(lines[i]));
+        }
+
+        var output = outputs.join("\n");
+
+        document.getElementById("output").value = output;
+      }
+
+      function wikify(input)
+      {
+        var FORMAT_BOLD = "'''";
+        var FORMAT_NAME_SUFFIX = ":";
+        var FORMAT_OVERHEAD_PREFIX = "{{overhead|";
+        var FORMAT_OVERHEAD_SUFFIX = "}}";
+        var SEPARATOR = " ";
+        var DELIM = FORMAT_NAME_SUFFIX + SEPARATOR;
+
+        var parts = input.split(DELIM);
+        parts = parts.slice(0, 1).concat(parts.slice(1).join(DELIM));
+
+        var name = FORMAT_BOLD + parts[0] + FORMAT_NAME_SUFFIX + FORMAT_BOLD;
+        var text = FORMAT_OVERHEAD_PREFIX + parts[1] + FORMAT_OVERHEAD_SUFFIX;
+
+        var output = name + SEPARATOR + text;
+
+        return output;
+      }
+
+    </script>
+
+  </head>
+
+  <body>
+
+  <center>
+
+    <table>
+
+      <tr>
+        <th colspan = 3>Transcriber NPC overhead text wikifier</th>
+      </tr>
+
+      <tr>
+        <td>
+          <button onclick = "convert()">
+            WIKIFY
+          </button>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <textarea id = "input" name = "input" placeholder = 'Input'></textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <textarea id = "output" name = "output" placeholder = 'Output' readOnly = "true"></textarea>
+        </td>
+      </tr>
+
+    </table>
+
+  </center>
+
+  </body>
+
+</html>
