@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import net.runelite.api.Client;
+import net.runelite.api.NPC;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.OverheadTextChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
@@ -25,12 +27,13 @@ import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
 	name = "Transcriber",
-	description = "Automatically copy text in books, scrolls, parchments, flyers, etc to a panel when you read it",
+	description = "Automatically copy text in books, scrolls, parchments, flyers, etc and NPC overhead text to a panel when you see it",
 	tags = {"transcribe", "copy", "text"}
 )
 public class TranscriberPlugin extends Plugin
 {
 	private static final int TRANSCRIBE_OFFSET = 1;
+	private static final String OVERHEAD_TEXT_DELIM = ": ";
 
 	@Inject
 	private Client client;
@@ -206,6 +209,17 @@ public class TranscriberPlugin extends Plugin
 		{
 			populateBlacklist();
 		}
+	}
+
+	@Subscribe
+	public void onOverheadTextChanged(OverheadTextChanged event)
+	{
+		if (!config.transcribeNpcOverheadText() || !(event.getActor() instanceof NPC))
+		{
+			return;
+		}
+
+		pluginPanel.appendText(event.getActor().getName() + OVERHEAD_TEXT_DELIM + event.getOverheadText());
 	}
 
 	public String[] getSelected()

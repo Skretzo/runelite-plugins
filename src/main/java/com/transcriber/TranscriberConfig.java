@@ -78,6 +78,16 @@ public interface TranscriberConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "transcribeNpcOverheadText",
+		name = "Transcribe NPC overhead text",
+		description = "Whether to transcribe overhead text for NPCs"
+	)
+	default boolean transcribeNpcOverheadText()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "widgetBlacklist",
 		name = "Blacklist",
 		description = "A list of widget group IDs to exclude",
