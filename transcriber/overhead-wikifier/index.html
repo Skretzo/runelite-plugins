@@ -57,7 +57,11 @@
 
         for (var i = 0; i < lines.length; i++)
         {
-          outputs.push(wikify(lines[i]));
+          var line = lines[i];
+          if (line.length > 0)
+          {
+            outputs.push(wikify(line));
+          }
         }
 
         var output = outputs.join("\n");
