@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -204,10 +205,13 @@ public class RadiusMarkerPlugin extends Plugin
 		markers.clear();
 
 		final Collection<RadiusMarker> radiusMarkers = getRadiusMarkers();
-		final List<ColourRadiusMarker> colourRadiusMarkers = translateToColourRadiusMarker(radiusMarkers);
-		markers.addAll(colourRadiusMarkers);
 
-		Collections.sort(markers);
+		if (radiusMarkers != null)
+		{
+			final List<ColourRadiusMarker> colourRadiusMarkers = translateToColourRadiusMarker(radiusMarkers);
+			markers.addAll(colourRadiusMarkers);
+			Collections.sort(markers);
+		}
 	}
 
 	private Collection<RadiusMarker> getRadiusMarkers()
@@ -219,7 +223,17 @@ public class RadiusMarkerPlugin extends Plugin
 			return Collections.emptyList();
 		}
 
-		return gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
+		try
+		{
+			return gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
+		}
+		catch (IllegalStateException | JsonSyntaxException ignore)
+		{
+			JOptionPane.showConfirmDialog(pluginPanel,
+				"The radius markers you are trying to load from your config are malformed",
+				"Warning", JOptionPane.OK_CANCEL_OPTION);
+			return null;
+		}
 	}
 
 	private void saveMarkers(Collection<RadiusMarker> markers)
@@ -268,6 +282,9 @@ public class RadiusMarkerPlugin extends Plugin
 		}
 		catch (IllegalStateException | JsonSyntaxException ignore)
 		{
+			JOptionPane.showConfirmDialog(pluginPanel,
+				"The radius markers you are trying to import are malformed",
+				"Warning", JOptionPane.OK_CANCEL_OPTION);
 			return false;
 		}
 		List<ColourRadiusMarker> outputMarkers = new ArrayList<>();

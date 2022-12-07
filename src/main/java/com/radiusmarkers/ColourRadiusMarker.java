@@ -65,7 +65,7 @@ class ColourRadiusMarker implements Comparable<ColourRadiusMarker>
 	{
 		this.id = radiusMarker.getId();
 
-		this.name = radiusMarker.getName();
+		this.name = radiusMarker.getName() == null ? "Marker" : radiusMarker.getName();
 		this.visible = radiusMarker.isVisible();
 		this.collapsed = radiusMarker.isCollapsed();
 
