@@ -184,6 +184,7 @@ public class CombatRollPlugin extends Plugin
 		}
 
 		int roll = effectiveLevel * (equipmentBonus + 64);
+		roll = Math.max(applySlayerBoost(roll, rollType), applySalveBoost(roll, rollType));
 
 		return roll;
 	}
@@ -328,6 +329,84 @@ public class CombatRollPlugin extends Plugin
 		}
 
 		return (level * boost) / SCALE;
+	}
+
+	private int applySlayerBoost(int roll, CombatRoll rollType)
+	{
+		final int SCALE = 60;
+		int boost = SCALE;
+
+		boolean helm = hasEquipment(ItemID.SLAYER_HELMET, ItemID.BLACK_SLAYER_HELMET,
+			ItemID.GREEN_SLAYER_HELMET, ItemID.HYDRA_SLAYER_HELMET, ItemID.PURPLE_SLAYER_HELMET,
+			ItemID.RED_SLAYER_HELMET, ItemID.TURQUOISE_SLAYER_HELMET, ItemID.TWISTED_SLAYER_HELMET,
+			ItemID.TZKAL_SLAYER_HELMET, ItemID.TZTOK_SLAYER_HELMET, ItemID.VAMPYRIC_SLAYER_HELMET);
+		boolean helmImbued = hasEquipment(ItemID.SLAYER_HELMET_I, ItemID.SLAYER_HELMET_I_25177, ItemID.SLAYER_HELMET_I_26674,
+			ItemID.BLACK_SLAYER_HELMET_I, ItemID.BLACK_SLAYER_HELMET_I_25179, ItemID.BLACK_SLAYER_HELMET_I_26675,
+			ItemID.GREEN_SLAYER_HELMET_I, ItemID.GREEN_SLAYER_HELMET_I_25181, ItemID.GREEN_SLAYER_HELMET_I_26676,
+			ItemID.HYDRA_SLAYER_HELMET_I, ItemID.HYDRA_SLAYER_HELMET_I_25189, ItemID.HYDRA_SLAYER_HELMET_I_26680,
+			ItemID.PURPLE_SLAYER_HELMET_I, ItemID.PURPLE_SLAYER_HELMET_I_25185, ItemID.PURPLE_SLAYER_HELMET_I_26678,
+			ItemID.RED_SLAYER_HELMET_I, ItemID.RED_SLAYER_HELMET_I_25183, ItemID.RED_SLAYER_HELMET_I_26677,
+			ItemID.TURQUOISE_SLAYER_HELMET_I, ItemID.TURQUOISE_SLAYER_HELMET_I_25187, ItemID.TURQUOISE_SLAYER_HELMET_I_26679,
+			ItemID.TWISTED_SLAYER_HELMET_I, ItemID.TWISTED_SLAYER_HELMET_I_25191, ItemID.TWISTED_SLAYER_HELMET_I_26681,
+			ItemID.TZKAL_SLAYER_HELMET_I, ItemID.TZKAL_SLAYER_HELMET_I_25914, ItemID.TZKAL_SLAYER_HELMET_I_26684,
+			ItemID.TZTOK_SLAYER_HELMET_I, ItemID.TZTOK_SLAYER_HELMET_I_25902, ItemID.TZTOK_SLAYER_HELMET_I_26682,
+			ItemID.VAMPYRIC_SLAYER_HELMET_I, ItemID.VAMPYRIC_SLAYER_HELMET_I_25908, ItemID.VAMPYRIC_SLAYER_HELMET_I_26683);
+		boolean mask = hasEquipment(ItemID.BLACK_MASK, ItemID.BLACK_MASK_1, ItemID.BLACK_MASK_2,
+			ItemID.BLACK_MASK_3, ItemID.BLACK_MASK_4, ItemID.BLACK_MASK_5, ItemID.BLACK_MASK_6,
+			ItemID.BLACK_MASK_7, ItemID.BLACK_MASK_8, ItemID.BLACK_MASK_9, ItemID.BLACK_MASK_10);
+		boolean maskImbued = hasEquipment(ItemID.BLACK_MASK_I, ItemID.BLACK_MASK_I_25276, ItemID.BLACK_MASK_I_26781,
+			ItemID.BLACK_MASK_1_I, ItemID.BLACK_MASK_1_I_25275, ItemID.BLACK_MASK_1_I_26780,
+			ItemID.BLACK_MASK_2_I, ItemID.BLACK_MASK_2_I_25274, ItemID.BLACK_MASK_2_I_26779,
+			ItemID.BLACK_MASK_3_I, ItemID.BLACK_MASK_3_I_25273, ItemID.BLACK_MASK_3_I_26778,
+			ItemID.BLACK_MASK_4_I, ItemID.BLACK_MASK_4_I_25272, ItemID.BLACK_MASK_4_I_26777,
+			ItemID.BLACK_MASK_5_I, ItemID.BLACK_MASK_5_I_25271, ItemID.BLACK_MASK_5_I_26776,
+			ItemID.BLACK_MASK_6_I, ItemID.BLACK_MASK_6_I_25270, ItemID.BLACK_MASK_6_I_26775,
+			ItemID.BLACK_MASK_7_I, ItemID.BLACK_MASK_7_I_25269, ItemID.BLACK_MASK_7_I_26774,
+			ItemID.BLACK_MASK_8_I, ItemID.BLACK_MASK_8_I_25268, ItemID.BLACK_MASK_8_I_26773,
+			ItemID.BLACK_MASK_9_I, ItemID.BLACK_MASK_9_I_25267, ItemID.BLACK_MASK_9_I_26772,
+			ItemID.BLACK_MASK_10_I, ItemID.BLACK_MASK_10_I_25266, ItemID.BLACK_MASK_10_I_26771);
+
+		switch (rollType)
+		{
+			case OFFENSIVE_MELEE:
+				boost = (helm || helmImbued || mask || maskImbued) ? 70 : boost; // +16.667 %
+				break;
+			case OFFENSIVE_RANGED:
+			case OFFENSIVE_MAGIC:
+				boost = (helmImbued || maskImbued) ? 69 : boost; // +15 %
+				break;
+		}
+
+		return (roll * boost) / SCALE;
+	}
+
+	private int applySalveBoost(int roll, CombatRoll rollType)
+	{
+		final int SCALE = 60;
+		int boost = SCALE;
+
+		boolean salve = hasEquipment(ItemID.SALVE_AMULET);
+		boolean salveI = hasEquipment(ItemID.SALVE_AMULETI, ItemID.SALVE_AMULETI_25250, ItemID.SALVE_AMULETI_26763);
+		boolean salveE = hasEquipment(ItemID.SALVE_AMULET_E);
+		boolean salveEI = hasEquipment(ItemID.SALVE_AMULETEI, ItemID.SALVE_AMULETEI_25278, ItemID.SALVE_AMULETEI_26782);
+
+		switch (rollType)
+		{
+			case OFFENSIVE_MELEE:
+				boost = (salve || salveI) ? 70 : boost; // +16.667 %
+				boost = (salveE || salveEI) ? 72 : boost; // +20 %
+				break;
+			case OFFENSIVE_RANGED:
+				boost = salveI ? 70 : boost; // +16.667 %
+				boost = salveEI ? 72 : boost; // +20 %
+				break;
+			case OFFENSIVE_MAGIC:
+				boost = salveI ? 69 : boost; // +15 %
+				boost = salveEI ? 72 : boost; // +20 %
+				break;
+		}
+
+		return (roll * boost) / SCALE;
 	}
 
 	private void updateEquipmentStats(Widget widget, boolean reset)
