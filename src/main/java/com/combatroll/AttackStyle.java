@@ -1,0 +1,18 @@
+package com.combatroll;
+
+public enum AttackStyle
+{
+	ACCURATE,
+	AUTOCAST,
+	AGGRESSIVE,
+	AIM_AND_FIRE,
+	BLOCK,
+	CONTROLLED,
+	DEFENSIVE,
+	DEFENSIVE_AUTOCAST,
+	LONGRANGE,
+	LONG_FUSE,
+	MEDIUM_FUSE,
+	RAPID,
+	SHORT_FUSE
+}

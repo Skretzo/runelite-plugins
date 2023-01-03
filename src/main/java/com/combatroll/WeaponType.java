@@ -1,0 +1,61 @@
+package com.combatroll;
+
+import static com.combatroll.AttackStyle.ACCURATE;
+import static com.combatroll.AttackStyle.AGGRESSIVE;
+import static com.combatroll.AttackStyle.AIM_AND_FIRE;
+import static com.combatroll.AttackStyle.AUTOCAST;
+import static com.combatroll.AttackStyle.BLOCK;
+import static com.combatroll.AttackStyle.CONTROLLED;
+import static com.combatroll.AttackStyle.DEFENSIVE;
+import static com.combatroll.AttackStyle.DEFENSIVE_AUTOCAST;
+import static com.combatroll.AttackStyle.LONGRANGE;
+import static com.combatroll.AttackStyle.LONG_FUSE;
+import static com.combatroll.AttackStyle.MEDIUM_FUSE;
+import static com.combatroll.AttackStyle.RAPID;
+import static com.combatroll.AttackStyle.SHORT_FUSE;
+
+public enum WeaponType
+{
+	UNARMED(ACCURATE, AGGRESSIVE, null, DEFENSIVE),
+	AXE(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
+	BLUNT(ACCURATE, AGGRESSIVE, null, DEFENSIVE),
+	BOW(ACCURATE, RAPID, null, LONGRANGE),
+	CLAWS(ACCURATE, AGGRESSIVE, CONTROLLED, DEFENSIVE),
+	CROSSBOW(ACCURATE, RAPID, null, LONGRANGE),
+	SALAMANDER(AGGRESSIVE, ACCURATE, DEFENSIVE),
+	CHINCHOMPA(SHORT_FUSE, MEDIUM_FUSE, null, LONG_FUSE),
+	GUN(AIM_AND_FIRE, AGGRESSIVE),
+	SWORD_SLASH(ACCURATE, AGGRESSIVE, CONTROLLED, DEFENSIVE),
+	SWORD_2H(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
+	PICKAXE(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
+	HALBERD(CONTROLLED, AGGRESSIVE, null, DEFENSIVE),
+	POLESTAFF(ACCURATE, AGGRESSIVE, null, DEFENSIVE),
+	SCYTHE(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
+	SPEAR(CONTROLLED, CONTROLLED, CONTROLLED, DEFENSIVE),
+	SPIKED(ACCURATE, AGGRESSIVE, CONTROLLED, DEFENSIVE),
+	SWORD_STAB(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
+	STAFF(ACCURATE, AGGRESSIVE, null, DEFENSIVE, AUTOCAST, DEFENSIVE_AUTOCAST),
+	THROWN(ACCURATE, RAPID, null, LONGRANGE),
+	WHIP(ACCURATE, CONTROLLED, null, DEFENSIVE),
+	STAFF_BLADED(ACCURATE, AGGRESSIVE, null, DEFENSIVE, AUTOCAST, DEFENSIVE_AUTOCAST),
+	GODSWORD(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE),
+	STAFF_POWERED(ACCURATE, ACCURATE, null, LONGRANGE),
+	BANNER(ACCURATE, AGGRESSIVE, CONTROLLED, DEFENSIVE),
+	POLEARM(CONTROLLED, AGGRESSIVE, null, DEFENSIVE),
+	BLUDGEON(AGGRESSIVE, AGGRESSIVE, null, AGGRESSIVE),
+	BULWARK(ACCURATE, null, null, BLOCK),
+	STAFF_SHADOW(ACCURATE, ACCURATE, null, LONGRANGE),
+	PARTISAN(ACCURATE, AGGRESSIVE, AGGRESSIVE, DEFENSIVE);
+
+	private final AttackStyle[] attackStyles;
+
+	WeaponType(AttackStyle... attackStyles)
+	{
+		this.attackStyles = attackStyles;
+	}
+
+	public static AttackStyle getAttackStyle(int weaponTypeIndex, int attackStyleIndex)
+	{
+		return values()[weaponTypeIndex].attackStyles[attackStyleIndex];
+	}
+}
