@@ -91,6 +91,24 @@ public class CombatRollPlugin extends Plugin
 		}
 	}
 
+	private boolean hasEquipment(int... ids)
+	{
+		ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
+
+		if (equipment != null)
+		{
+			for (int id : ids)
+			{
+				if (equipment.contains(id))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	private void updateInfo()
 	{
 		Widget equipmentScreen = client.getWidget(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0);
@@ -152,6 +170,7 @@ public class CombatRollPlugin extends Plugin
 		effectiveLevel = applyPrayerBoost(effectiveLevel, rollType);
 		effectiveLevel = applyStanceBonus(effectiveLevel, rollType, attackStyle);
 		effectiveLevel = applyAdjustmentConstant(effectiveLevel);
+		effectiveLevel = applyVoidBoost(effectiveLevel, rollType);
 
 		if (isMagicDefenceRoll)
 		{
@@ -268,6 +287,47 @@ public class CombatRollPlugin extends Plugin
 	{
 		final int ADJUSTMENT_CONSTANT = 8;
 		return level + ADJUSTMENT_CONSTANT;
+	}
+
+	private int applyVoidBoost(int level, CombatRoll rollType)
+	{
+		final int SCALE = 100;
+		int boost = SCALE;
+
+		boolean gloves = hasEquipment(ItemID.VOID_KNIGHT_GLOVES, ItemID.VOID_KNIGHT_GLOVES_L,
+			ItemID.VOID_KNIGHT_GLOVES_LOR, ItemID.VOID_KNIGHT_GLOVES_OR);
+		boolean legs = hasEquipment(ItemID.VOID_KNIGHT_ROBE, ItemID.VOID_KNIGHT_ROBE_L,
+			ItemID.VOID_KNIGHT_ROBE_LOR, ItemID.VOID_KNIGHT_ROBE_OR);
+		boolean eliteLegs = hasEquipment(ItemID.ELITE_VOID_ROBE, ItemID.ELITE_VOID_ROBE_L,
+			ItemID.ELITE_VOID_ROBE_LOR, ItemID.ELITE_VOID_ROBE_OR);
+		boolean body = hasEquipment(ItemID.VOID_KNIGHT_TOP, ItemID.VOID_KNIGHT_TOP_L,
+			ItemID.VOID_KNIGHT_TOP_LOR, ItemID.VOID_KNIGHT_TOP_OR);
+		boolean eliteBody = hasEquipment(ItemID.ELITE_VOID_TOP, ItemID.ELITE_VOID_TOP_L,
+			ItemID.ELITE_VOID_TOP_LOR, ItemID.ELITE_VOID_TOP_OR);
+		boolean helmMelee = hasEquipment(ItemID.VOID_MELEE_HELM, ItemID.VOID_MELEE_HELM_L,
+			ItemID.VOID_MELEE_HELM_LOR, ItemID.VOID_MELEE_HELM_OR);
+		boolean helmRanged = hasEquipment(ItemID.VOID_RANGER_HELM, ItemID.VOID_RANGER_HELM_L,
+			ItemID.VOID_RANGER_HELM_LOR, ItemID.VOID_RANGER_HELM_OR);
+		boolean helmMagic = hasEquipment(ItemID.VOID_MAGE_HELM, ItemID.VOID_MAGE_HELM_L,
+			ItemID.VOID_MAGE_HELM_LOR, ItemID.VOID_MAGE_HELM_OR);
+
+		boolean set = gloves && (legs || eliteLegs) && (body || eliteBody) && (helmMelee || helmRanged || helmMagic);
+
+		if (set)
+		{
+			switch (rollType)
+			{
+				case OFFENSIVE_MELEE:
+				case OFFENSIVE_RANGED:
+					boost = (helmMelee || helmRanged) ? 110 : boost;
+					break;
+				case OFFENSIVE_MAGIC:
+					boost = helmMagic ? 145 : boost;
+					break;
+			}
+		}
+
+		return (level * boost) / SCALE;
 	}
 
 	private void updateEquipmentStats(Widget widget, boolean reset)
