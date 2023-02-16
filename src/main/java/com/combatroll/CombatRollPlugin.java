@@ -13,8 +13,7 @@ import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
-import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
@@ -28,8 +27,9 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class CombatRollPlugin extends Plugin
 {
+	private static final int EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID = 12;
+	private static final int EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET = 66;
 	private static final int EQUIPMENT_STATS_WIDGET_GROUP_ID = 84;
-	private static final int EQUIPMENT_INVENTORY_CONTAINER_ID = 94;
 
 	/**
 	 * Equipment attack bonus widget child IDs
@@ -66,28 +66,33 @@ public class CombatRollPlugin extends Plugin
 	private ClientThread clientThread;
 
 	@Override
+	protected void startUp()
+	{
+		clientThread.invokeLater(() ->
+		{
+			updateInfo(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0);
+			updateInfo(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET);
+		});
+	}
+
+	@Override
 	protected void shutDown()
 	{
-		updateEquipmentStats(client.getWidget(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0), true);
-		setInfo(ATTACK_HEADER, " ", "bonus");
-		setInfo(DEFENCE_HEADER, " ", "bonus");
+		updateEquipmentStats(client.getWidget(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0), 0, true);
+		updateEquipmentStats(client.getWidget(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, 0), EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET, true);
+		setInfo(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0, ATTACK_HEADER, " ", "bonus");
+		setInfo(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0, DEFENCE_HEADER, " ", "bonus");
+		setInfo(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET, ATTACK_HEADER, " ", "bonus");
+		setInfo(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET, DEFENCE_HEADER, " ", "bonus");
 	}
 
 	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
+	public void onScriptPostFired(ScriptPostFired event)
 	{
-		if (event.getGroupId() == EQUIPMENT_STATS_WIDGET_GROUP_ID)
+		if (event.getScriptId() == 547) // [clientscript,runweight_visible]
 		{
-			clientThread.invokeLater(this::updateInfo);
-		}
-	}
-
-	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged event)
-	{
-		if (event.getContainerId() == EQUIPMENT_INVENTORY_CONTAINER_ID)
-		{
-			updateInfo();
+			updateInfo(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0);
+			updateInfo(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET);
 		}
 	}
 
@@ -109,37 +114,35 @@ public class CombatRollPlugin extends Plugin
 		return false;
 	}
 
-	private void updateInfo()
+	private void updateInfo(int widgetId, int offset)
 	{
-		Widget equipmentScreen = client.getWidget(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0);
-		Widget equipmentInventory = client.getWidget(WidgetInfo.EQUIPMENT_INVENTORY_ITEMS_CONTAINER);
+		Widget equipmentScreen = client.getWidget(widgetId, 0);
 
-		if (equipmentScreen == null || equipmentScreen.isHidden() ||
-			equipmentInventory == null || equipmentInventory.isHidden())
+		if (equipmentScreen == null || equipmentScreen.isHidden())
 		{
 			return;
 		}
 
-		updateEquipmentStats(client.getWidget(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0), false);
+		updateEquipmentStats(equipmentScreen, offset, false);
 
-		setInfo(ATTACK_HEADER, " ", "roll");
-		showRoll(ATTACK_STAB, calculateRoll(combatBonuses.get(ATTACK_STAB), CombatRoll.OFFENSIVE_MELEE));
-		showRoll(ATTACK_SLASH, calculateRoll(combatBonuses.get(ATTACK_SLASH), CombatRoll.OFFENSIVE_MELEE));
-		showRoll(ATTACK_CRUSH, calculateRoll(combatBonuses.get(ATTACK_CRUSH), CombatRoll.OFFENSIVE_MELEE));
-		showRoll(ATTACK_MAGIC, calculateRoll(combatBonuses.get(ATTACK_MAGIC), CombatRoll.OFFENSIVE_MAGIC));
-		showRoll(ATTACK_RANGED, calculateRoll(combatBonuses.get(ATTACK_RANGED), CombatRoll.OFFENSIVE_RANGED));
+		setInfo(widgetId, offset, ATTACK_HEADER, " ", "roll");
+		showRoll(widgetId, offset, ATTACK_STAB, calculateRoll(combatBonuses.getOrDefault(ATTACK_STAB, 0), CombatRoll.OFFENSIVE_MELEE));
+		showRoll(widgetId, offset, ATTACK_SLASH, calculateRoll(combatBonuses.getOrDefault(ATTACK_SLASH, 0), CombatRoll.OFFENSIVE_MELEE));
+		showRoll(widgetId, offset, ATTACK_CRUSH, calculateRoll(combatBonuses.getOrDefault(ATTACK_CRUSH, 0), CombatRoll.OFFENSIVE_MELEE));
+		showRoll(widgetId, offset, ATTACK_MAGIC, calculateRoll(combatBonuses.getOrDefault(ATTACK_MAGIC, 0), CombatRoll.OFFENSIVE_MAGIC));
+		showRoll(widgetId, offset, ATTACK_RANGED, calculateRoll(combatBonuses.getOrDefault(ATTACK_RANGED, 0), CombatRoll.OFFENSIVE_RANGED));
 
-		setInfo(DEFENCE_HEADER, " ", "roll");
-		showRoll(DEFENCE_STAB, calculateRoll(combatBonuses.get(DEFENCE_STAB), CombatRoll.DEFENSIVE_MELEE));
-		showRoll(DEFENCE_SLASH, calculateRoll(combatBonuses.get(DEFENCE_SLASH), CombatRoll.DEFENSIVE_MELEE));
-		showRoll(DEFENCE_CRUSH, calculateRoll(combatBonuses.get(DEFENCE_CRUSH), CombatRoll.DEFENSIVE_MELEE));
-		showRoll(DEFENCE_MAGIC, calculateRoll(combatBonuses.get(DEFENCE_MAGIC), CombatRoll.DEFENSIVE_MAGIC));
-		showRoll(DEFENCE_RANGED, calculateRoll(combatBonuses.get(DEFENCE_RANGED), CombatRoll.DEFENSIVE_RANGED));
+		setInfo(widgetId, offset, DEFENCE_HEADER, " ", "roll");
+		showRoll(widgetId, offset, DEFENCE_STAB, calculateRoll(combatBonuses.getOrDefault(DEFENCE_STAB, 0), CombatRoll.DEFENSIVE_MELEE));
+		showRoll(widgetId, offset, DEFENCE_SLASH, calculateRoll(combatBonuses.getOrDefault(DEFENCE_SLASH, 0), CombatRoll.DEFENSIVE_MELEE));
+		showRoll(widgetId, offset, DEFENCE_CRUSH, calculateRoll(combatBonuses.getOrDefault(DEFENCE_CRUSH, 0), CombatRoll.DEFENSIVE_MELEE));
+		showRoll(widgetId, offset, DEFENCE_MAGIC, calculateRoll(combatBonuses.getOrDefault(DEFENCE_MAGIC, 0), CombatRoll.DEFENSIVE_MAGIC));
+		showRoll(widgetId, offset, DEFENCE_RANGED, calculateRoll(combatBonuses.getOrDefault(DEFENCE_RANGED, 0), CombatRoll.DEFENSIVE_RANGED));
 	}
 
-	private void setInfo(int displayIndex, String delim, String roll)
+	private void setInfo(int widgetId, int offset, int displayIndex, String delim, String roll)
 	{
-		Widget widget = client.getWidget(EQUIPMENT_STATS_WIDGET_GROUP_ID, displayIndex);
+		Widget widget = client.getWidget(widgetId, offset + displayIndex);
 
 		if (widget != null)
 		{
@@ -147,9 +150,9 @@ public class CombatRollPlugin extends Plugin
 		}
 	}
 
-	private void showRoll(int displayIndex, int roll)
+	private void showRoll(int widgetId, int offset, int displayIndex, int roll)
 	{
-		setInfo(displayIndex, ": ", Integer.toString(roll));
+		setInfo(widgetId, offset, displayIndex, ": ", Integer.toString(roll));
 	}
 
 	private int calculateRoll(int equipmentBonus, CombatRoll rollType)
@@ -409,14 +412,14 @@ public class CombatRollPlugin extends Plugin
 		return (roll * boost) / SCALE;
 	}
 
-	private void updateEquipmentStats(Widget widget, boolean reset)
+	private void updateEquipmentStats(Widget widget, int offset, boolean reset)
 	{
 		if (widget == null)
 		{
 			return;
 		}
 
-		int id = WidgetInfo.TO_CHILD(widget.getId());
+		int id = WidgetInfo.TO_CHILD(widget.getId()) - offset;
 		String text = widget.getText();
 		if (reset && original.containsKey(id))
 		{
@@ -433,7 +436,7 @@ public class CombatRollPlugin extends Plugin
 		{
 			for (Widget child : children)
 			{
-				updateEquipmentStats(child, reset);
+				updateEquipmentStats(child, offset, reset);
 			}
 		}
 	}
@@ -445,13 +448,13 @@ public class CombatRollPlugin extends Plugin
 			return;
 		}
 
-		int start = text.indexOf(": ") + 2;
+		int start = text.indexOf(": ");
 
 		if (start >= 0)
 		{
 			try
 			{
-				combatBonuses.put(id, Integer.parseInt(text.substring(start)));
+				combatBonuses.put(id, Integer.parseInt(text.substring(start + 2)));
 			}
 			catch (NumberFormatException ignored)
 			{
