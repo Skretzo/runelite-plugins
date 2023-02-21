@@ -238,21 +238,24 @@ public class CombatRollPlugin extends Plugin
 				boost = client.isPrayerActive(Prayer.RIGOUR) ? 120 : boost;
 				break;
 			case OFFENSIVE_MAGIC:
-			case DEFENSIVE_MAGIC:
 				boost = client.isPrayerActive(Prayer.MYSTIC_WILL) ? 105 : boost;
 				boost = client.isPrayerActive(Prayer.MYSTIC_LORE) ? 110 : boost;
 				boost = client.isPrayerActive(Prayer.MYSTIC_MIGHT) ? 115 : boost;
 				boost = client.isPrayerActive(Prayer.AUGURY) ? 125 : boost;
 				break;
 			case DEFENSIVE_MELEE:
+			case DEFENSIVE_RANGED:
+			case DEFENSIVE_MAGIC:
+				boost = client.isPrayerActive(Prayer.MYSTIC_WILL) ? 105 : boost;
+				boost = client.isPrayerActive(Prayer.MYSTIC_LORE) ? 110 : boost;
+				boost = client.isPrayerActive(Prayer.MYSTIC_MIGHT) ? 115 : boost;
 				boost = client.isPrayerActive(Prayer.THICK_SKIN) ? 105 : boost;
 				boost = client.isPrayerActive(Prayer.ROCK_SKIN) ? 110 : boost;
 				boost = client.isPrayerActive(Prayer.STEEL_SKIN) ? 115 : boost;
 				boost = client.isPrayerActive(Prayer.CHIVALRY) ? 120 : boost;
 				boost = client.isPrayerActive(Prayer.PIETY) ? 125 : boost;
-				break;
-			case DEFENSIVE_RANGED:
 				boost = client.isPrayerActive(Prayer.RIGOUR) ? 125 : boost;
+				boost = client.isPrayerActive(Prayer.AUGURY) ? 125 : boost;
 				break;
 		}
 
