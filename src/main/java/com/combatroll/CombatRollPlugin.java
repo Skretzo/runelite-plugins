@@ -182,6 +182,9 @@ public class CombatRollPlugin extends Plugin
 			int effectiveLevelMagic;
 			effectiveLevelMagic = getSkillLevel(rollType);
 			effectiveLevelMagic = applyPrayerBoost(effectiveLevelMagic, rollType);
+			effectiveLevelMagic = applyStanceBonus(effectiveLevelMagic, rollType, attackStyle);
+			effectiveLevelMagic = applyAdjustmentConstant(effectiveLevelMagic);
+			effectiveLevelMagic = applyVoidBoost(effectiveLevelMagic, rollType);
 			effectiveLevelMagic = (effectiveLevelMagic * 70) / 100;
 			effectiveLevel = effectiveLevelDefence + effectiveLevelMagic;
 		}
