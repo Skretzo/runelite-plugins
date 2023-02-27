@@ -172,7 +172,7 @@ public class CombatRollPlugin extends Plugin
 		int effectiveLevel = getSkillLevel(rollType);
 		effectiveLevel = applyPrayerBoost(effectiveLevel, rollType);
 		effectiveLevel = applyStanceBonus(effectiveLevel, rollType, attackStyle);
-		effectiveLevel = applyAdjustmentConstant(effectiveLevel);
+		effectiveLevel = applyAdjustmentConstant(effectiveLevel, isMagicDefenceRoll);
 		effectiveLevel = applyVoidBoost(effectiveLevel, rollType);
 
 		if (isMagicDefenceRoll)
@@ -183,7 +183,7 @@ public class CombatRollPlugin extends Plugin
 			effectiveLevelMagic = getSkillLevel(rollType);
 			effectiveLevelMagic = applyPrayerBoost(effectiveLevelMagic, rollType);
 			effectiveLevelMagic = applyStanceBonus(effectiveLevelMagic, rollType, attackStyle);
-			effectiveLevelMagic = applyAdjustmentConstant(effectiveLevelMagic);
+			effectiveLevelMagic = applyAdjustmentConstant(effectiveLevelMagic, isMagicDefenceRoll);
 			effectiveLevelMagic = applyVoidBoost(effectiveLevelMagic, rollType);
 			effectiveLevelMagic = (effectiveLevelMagic * 70) / 100;
 			effectiveLevel = effectiveLevelDefence + effectiveLevelMagic;
@@ -293,9 +293,13 @@ public class CombatRollPlugin extends Plugin
 		return level + bonus;
 	}
 
-	private int applyAdjustmentConstant(int level)
+	private int applyAdjustmentConstant(int level, boolean isMagicDefenceRoll)
 	{
-		final int ADJUSTMENT_CONSTANT = 8;
+		int ADJUSTMENT_CONSTANT = 8;
+		if (isMagicDefenceRoll)
+		{
+			ADJUSTMENT_CONSTANT = 0;
+		}
 		return level + ADJUSTMENT_CONSTANT;
 	}
 
