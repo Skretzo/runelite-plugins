@@ -1,5 +1,6 @@
 package com.combatroll;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
-import net.runelite.api.events.ScriptPostFired;
+import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
@@ -87,12 +88,24 @@ public class CombatRollPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onScriptPostFired(ScriptPostFired event)
+	public void onScriptPreFired(ScriptPreFired event)
 	{
-		if (event.getScriptId() == 547) // [clientscript,runweight_visible]
+		if (event.getScriptId() == 545 && event.getScriptEvent() != null) // [clientscript,wear_updateslot]
 		{
-			updateInfo(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0);
-			updateInfo(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET);
+			Widget widget = event.getScriptEvent().getSource();
+
+			int groupId = WidgetInfo.TO_GROUP(widget.getId());
+			int childId = WidgetInfo.TO_CHILD(widget.getId());
+			int indexSlotHelm = 10;
+
+			if (groupId == EQUIPMENT_STATS_WIDGET_GROUP_ID && childId == indexSlotHelm)
+			{
+				updateInfo(EQUIPMENT_STATS_WIDGET_GROUP_ID, 0);
+			}
+			else if (groupId == EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID && childId == indexSlotHelm + EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET)
+			{
+				updateInfo(EQUIPMENT_STATS_BANK_WIDGET_GROUP_ID, EQUIPMENT_STATS_BANK_WIDGET_CHILD_OFFSET);
+			}
 		}
 	}
 
@@ -435,7 +448,7 @@ public class CombatRollPlugin extends Plugin
 		{
 			widget.setText(original.remove(id));
 		}
-		else if (EQUIPMENT_STATS_WIDGET_CHILD_IDS.contains(id) && text != null)
+		else if (EQUIPMENT_STATS_WIDGET_CHILD_IDS.contains(id) && !Strings.isNullOrEmpty(text))
 		{
 			parseEquipmentStat(id, text);
 			original.put(id, text);
@@ -453,7 +466,7 @@ public class CombatRollPlugin extends Plugin
 
 	private void parseEquipmentStat(int id, String text)
 	{
-		if (text == null)
+		if (Strings.isNullOrEmpty(text))
 		{
 			return;
 		}
