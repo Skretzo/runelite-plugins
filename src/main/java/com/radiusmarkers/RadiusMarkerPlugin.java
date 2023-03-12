@@ -252,9 +252,17 @@ public class RadiusMarkerPlugin extends Plugin
 	{
 		List<RadiusMarker> markersCopy = new ArrayList<>();
 
+		int regionId = client.getLocalPlayer() == null ? -1 : client.getLocalPlayer().getWorldLocation().getRegionID();
+		String searchTerm = pluginPanel.getSearchText().toLowerCase();
+		PanelFilter filter = pluginPanel.getPanelFilter();
+
 		for (ColourRadiusMarker marker : markers)
 		{
-			if (marker.isVisible())
+			if (marker.getName().toLowerCase().contains(searchTerm) &&
+				(PanelFilter.ALL.equals(filter) ||
+				(PanelFilter.REGION.equals(filter) && marker.getWorldPoint().getRegionID() == regionId) ||
+				(PanelFilter.VISIBLE.equals(filter) && marker.isVisible()) ||
+				(PanelFilter.INVISIBLE.equals(filter) && !marker.isVisible())))
 			{
 				markersCopy.add(translateToRadiusMarker(marker));
 			}

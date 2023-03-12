@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -58,6 +59,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 	private final RadiusMarkerPlugin plugin;
 	private final RadiusMarkerConfig config;
 
+	@Getter
 	private PanelFilter panelFilter = PanelFilter.ALL;
 
 	static
@@ -187,7 +189,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		markerView.add(noMarkersPanel);
 
-		copyMarkers.setToolTipText("Export all visible markers to your clipboard");
+		copyMarkers.setToolTipText("Export all searched or filtered markers to your clipboard");
 		copyMarkers.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -271,7 +273,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		for (final ColourRadiusMarker marker : plugin.getMarkers())
 		{
-			if (marker.getName().toLowerCase().contains(searchBar.getText().toLowerCase()) &&
+			if (marker.getName().toLowerCase().contains(getSearchText().toLowerCase()) &&
 				(PanelFilter.ALL.equals(panelFilter) ||
 				(PanelFilter.REGION.equals(panelFilter) && marker.getWorldPoint().getRegionID() == regionId) ||
 				(PanelFilter.VISIBLE.equals(panelFilter) && marker.isVisible()) ||
@@ -298,6 +300,11 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		repaint();
 		revalidate();
+	}
+
+	public String getSearchText()
+	{
+		return searchBar.getText();
 	}
 
 	private void addMarker()
