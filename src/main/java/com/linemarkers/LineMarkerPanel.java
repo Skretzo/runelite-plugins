@@ -403,7 +403,7 @@ class LineMarkerPanel extends JPanel
 
 			JLabel groupButton = new JLabel();
 			JLabel deleteLine = new JLabel();
-			JLabel groupText = new JLabel("Line group:");
+			JLabel groupText = new JLabel("Group:");
 			JComboBox<String> groupSelection = new JComboBox<>(names);
 
 			groupText.setFont(FontManager.getRunescapeSmallFont());
@@ -414,7 +414,7 @@ class LineMarkerPanel extends JPanel
 			groupCancel.setVisible(false);
 			groupCancel.setFont(FontManager.getRunescapeSmallFont());
 			groupCancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
-			groupCancel.setBorder(new EmptyBorder(3, 0, 0, 3));
+			groupCancel.setBorder(new EmptyBorder(6, 0, 0, 1));
 			groupCancel.addMouseListener(new MouseAdapter()
 			{
 				@Override
@@ -446,7 +446,7 @@ class LineMarkerPanel extends JPanel
 
 			groupSelection.setVisible(false);
 			groupSelection.setRenderer(new ComboBoxListRenderer<>());
-			groupSelection.setPreferredSize(new Dimension(100, 24));
+			groupSelection.setPreferredSize(new Dimension(115, 24));
 			groupSelection.setSelectedIndex(groups.indexOf(marker));
 			groupSelection.setToolTipText("Marker group");
 			groupSelection.addActionListener(e ->
@@ -474,6 +474,7 @@ class LineMarkerPanel extends JPanel
 
 			groupButton.setIcon(SETTINGS_ICON);
 			groupButton.setToolTipText("Edit group");
+			groupButton.setBorder(new EmptyBorder(1, 0, 0, 0));
 			groupButton.addMouseListener(new MouseAdapter()
 			{
 				@Override
@@ -515,6 +516,7 @@ class LineMarkerPanel extends JPanel
 
 			deleteLine.setIcon(DELETE_ICON);
 			deleteLine.setToolTipText("Delete line segment");
+			deleteLine.setBorder(new EmptyBorder(1, 0, 0, 0));
 			deleteLine.addMouseListener(new MouseAdapter()
 			{
 				@Override
