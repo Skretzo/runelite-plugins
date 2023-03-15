@@ -20,7 +20,6 @@ import javax.swing.SwingUtilities;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.runelite.api.Client;
-import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.SpriteID;
@@ -30,14 +29,19 @@ import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.Keybind;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
+import net.runelite.client.input.KeyManager;
+import net.runelite.client.input.MouseManager;
+import net.runelite.client.input.MouseWheelListener;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
@@ -89,6 +93,12 @@ public class LineMarkerPlugin extends Plugin
 	@Inject
 	private SpriteManager spriteManager;
 
+	@Inject
+	private KeyManager keyManager;
+
+	@Inject
+	private MouseManager mouseManager;
+
 	@Getter
 	@Inject
 	private ColorPickerManager colourPickerManager;
@@ -100,6 +110,46 @@ public class LineMarkerPlugin extends Plugin
 	private Shape minimapClipFixed;
 	private Shape minimapClipResizeable;
 	private Rectangle minimapRectangle = new Rectangle();
+	private LineGroup lastGroup = null;
+	private Line lastLine = null;
+	private boolean isHotkeyPressed = false;
+
+	private HotkeyListener hotkeyListener = new HotkeyListener(() -> Keybind.SHIFT)
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			isHotkeyPressed = true;
+		}
+
+		@Override
+		public void hotkeyReleased()
+		{
+			lastLine = null;
+			lastGroup = null;
+			isHotkeyPressed = false;
+		}
+	};
+
+	private MouseWheelListener mouseWheelListener = event ->
+	{
+		if (isHotkeyPressed && lastLine != null)
+		{
+			if (event.getWheelRotation() > 0)
+			{
+				lastLine.setEdge(lastLine.getEdge().next());
+			}
+			else
+			{
+				lastLine.setEdge(lastLine.getEdge().next().next().next());
+			}
+
+			event.consume();
+			saveMarkers();
+			revalidate();
+		}
+		return event;
+	};
 
 	@Provides
 	LineMarkerConfig providesConfig(ConfigManager configManager)
@@ -110,6 +160,9 @@ public class LineMarkerPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		keyManager.registerKeyListener(hotkeyListener);
+		mouseManager.registerMouseWheelListener(mouseWheelListener);
+
 		overlayManager.add(mapOverlay);
 		overlayManager.add(sceneOverlay);
 		overlayManager.add(minimapOverlay);
@@ -134,6 +187,9 @@ public class LineMarkerPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
+		keyManager.unregisterKeyListener(hotkeyListener);
+		mouseManager.unregisterMouseWheelListener(mouseWheelListener);
+
 		overlayManager.remove(mapOverlay);
 		overlayManager.remove(sceneOverlay);
 		overlayManager.remove(minimapOverlay);
@@ -149,7 +205,7 @@ public class LineMarkerPlugin extends Plugin
 	@Subscribe
 	public void onMenuEntryAdded(final MenuEntryAdded event)
 	{
-		if (client.isKeyPressed(KeyCode.KC_SHIFT) && event.getOption().equals(WALK_HERE) && event.getTarget().isEmpty())
+		if (isHotkeyPressed && event.getOption().equals(WALK_HERE) && event.getTarget().isEmpty())
 		{
 			client.createMenuEntry(1)
 				.setOption(ADD_LINE)
@@ -183,7 +239,17 @@ public class LineMarkerPlugin extends Plugin
 			return;
 		}
 
-		groups.add(new LineGroup(DEFAULT_MARKER_NAME + " " + (groups.size() + 1), new Line(config, tile.getWorldLocation())));
+		lastLine = new Line(config, tile.getWorldLocation());
+
+		if (lastGroup == null)
+		{
+			lastGroup = new LineGroup(DEFAULT_MARKER_NAME + " " + (groups.size() + 1), lastLine);
+			groups.add(lastGroup);
+		}
+		else
+		{
+			lastGroup.getLines().add(lastLine);
+		}
 
 		saveMarkers();
 		rebuild();
@@ -409,6 +475,11 @@ public class LineMarkerPlugin extends Plugin
 	public void rebuild()
 	{
 		SwingUtilities.invokeLater(() -> pluginPanel.rebuild());
+	}
+
+	public void revalidate()
+	{
+		SwingUtilities.invokeLater(() -> pluginPanel.revalidate());
 	}
 
 	public Shape getMinimapClipArea()
