@@ -63,7 +63,7 @@ class LineMarkerMapOverlay extends Overlay
 
 		graphics.setClip(getWorldMapClipArea(bounds));
 
-		for (final LineGroup group : plugin.getGroups())
+		for (final LineGroup group : plugin.getMarkers())
 		{
 			if (!group.isVisible())
 			{

@@ -50,7 +50,7 @@ class LineMarkerMinimapOverlay extends Overlay
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		graphics.setClip(plugin.getMinimapClipArea());
 
-		for (final LineGroup group : plugin.getGroups())
+		for (final LineGroup group : plugin.getMarkers())
 		{
 			if (!group.isVisible())
 			{

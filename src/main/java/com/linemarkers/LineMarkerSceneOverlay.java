@@ -36,7 +36,7 @@ class LineMarkerSceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		for (final LineGroup group : plugin.getGroups())
+		for (final LineGroup group : plugin.getMarkers())
 		{
 			if (!group.isVisible())
 			{
@@ -79,7 +79,7 @@ class LineMarkerSceneOverlay extends Overlay
 
 	private Point worldToScene(WorldPoint location)
 	{
-		LocalPoint localPoint = LocalPoint.fromWorld(client, location.getX(), location.getY());
+		LocalPoint localPoint = LocalPoint.fromWorld(client, location);
 
 		if (localPoint == null)
 		{

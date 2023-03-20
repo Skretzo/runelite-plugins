@@ -20,11 +20,14 @@ import javax.swing.SwingUtilities;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Tile;
 import net.runelite.api.Varbits;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -62,6 +65,12 @@ public class LineMarkerPlugin extends Plugin
 
 	@Getter(AccessLevel.PACKAGE)
 	private List<LineGroup> groups = new ArrayList<>();
+
+	/**
+	 * 'markers' is a mirror of 'groups' with additional copies of LineGroups for all instances
+	 */
+	@Getter(AccessLevel.PACKAGE)
+	private List<LineGroup> markers = new ArrayList<>();
 
 	@Inject
 	private Client client;
@@ -195,11 +204,23 @@ public class LineMarkerPlugin extends Plugin
 		overlayManager.remove(minimapOverlay);
 
 		groups.clear();
+		markers.clear();
 
 		clientToolbar.removeNavigation(navigationButton);
 
 		pluginPanel = null;
 		navigationButton = null;
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged event)
+	{
+		if (!GameState.LOGGED_IN.equals(event.getGameState()) || !client.isInInstancedRegion())
+		{
+			return;
+		}
+
+		mirrorMarkers();
 	}
 
 	@Subscribe
@@ -239,7 +260,7 @@ public class LineMarkerPlugin extends Plugin
 			return;
 		}
 
-		lastLine = new Line(config, tile.getWorldLocation());
+		lastLine = new Line(config, WorldPoint.fromLocalInstance(client, tile.getLocalLocation()));
 
 		if (lastGroup == null)
 		{
@@ -258,6 +279,7 @@ public class LineMarkerPlugin extends Plugin
 	private void loadMarkers()
 	{
 		groups.clear();
+		markers.clear();
 
 		String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
 
@@ -269,6 +291,7 @@ public class LineMarkerPlugin extends Plugin
 		try
 		{
 			groups = gson.fromJson(json, new TypeToken<ArrayList<LineGroup>>(){}.getType());
+			mirrorMarkers();
 		}
 		catch (IllegalStateException | JsonSyntaxException ignore)
 		{
@@ -288,6 +311,12 @@ public class LineMarkerPlugin extends Plugin
 
 		String json = gson.toJson(groups);
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
+		mirrorMarkers();
+	}
+
+	private void mirrorMarkers()
+	{
+		markers = LineGroup.instances(client, groups);
 	}
 
 	public String copyMarkers()
