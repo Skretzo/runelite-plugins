@@ -6,7 +6,6 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -416,8 +415,8 @@ public class LineMarkerPlugin extends Plugin
 
 	private Polygon bufferedImageToPolygon(BufferedImage image)
 	{
-		Color outsideColour = null;
-		Color previousColour;
+		int outsideColour = -1;
+		int previousColour;
 		final int width = image.getWidth();
 		final int height = image.getHeight();
 		List<Point> points = new ArrayList<>();
@@ -426,22 +425,17 @@ public class LineMarkerPlugin extends Plugin
 			previousColour = outsideColour;
 			for (int x = 0; x < width; x++)
 			{
-				int rgb = image.getRGB(x, y);
-				int a = (rgb & 0xff000000) >>> 24;
-				int r = (rgb & 0x00ff0000) >> 16;
-				int g = (rgb & 0x0000ff00) >> 8;
-				int b = (rgb & 0x000000ff) >> 0;
-				Color colour = new Color(r, g, b, a);
+				int colour = image.getRGB(x, y);
 				if (x == 0 && y == 0)
 				{
 					outsideColour = colour;
 					previousColour = colour;
 				}
-				if (!colour.equals(outsideColour) && previousColour.equals(outsideColour))
+				if (colour != outsideColour && previousColour == outsideColour)
 				{
 					points.add(new Point(x, y));
 				}
-				if ((colour.equals(outsideColour) || x == (width - 1)) && !previousColour.equals(outsideColour))
+				if ((colour == outsideColour || x == (width - 1)) && previousColour != outsideColour)
 				{
 					points.add(0, new Point(x, y));
 				}
@@ -515,7 +509,7 @@ public class LineMarkerPlugin extends Plugin
 	{
 		Widget minimapWidget = getMinimapDrawWidget();
 
-		if (minimapWidget == null || minimapWidget.isHidden() || minimapRectangle != (minimapRectangle = minimapWidget.getBounds()))
+		if (minimapWidget == null || minimapWidget.isHidden() || !minimapRectangle.equals(minimapRectangle = minimapWidget.getBounds()))
 		{
 			minimapClipFixed = null;
 			minimapClipResizeable = null;
