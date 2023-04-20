@@ -35,22 +35,22 @@ public class CombatRollPlugin extends Plugin
 	/**
 	 * Equipment attack bonus widget child IDs
 	 */
-	private static final int ATTACK_HEADER = 23;
-	private static final int ATTACK_STAB = 24;
-	private static final int ATTACK_SLASH = 25;
-	private static final int ATTACK_CRUSH = 26;
-	private static final int ATTACK_MAGIC = 27;
-	private static final int ATTACK_RANGED = 28;
+	private static final int ATTACK_HEADER = 22;
+	private static final int ATTACK_STAB = 23;
+	private static final int ATTACK_SLASH = 24;
+	private static final int ATTACK_CRUSH = 25;
+	private static final int ATTACK_MAGIC = 26;
+	private static final int ATTACK_RANGED = 27;
 
 	/**
 	 * Equipment defence bonus widget child IDs
 	 */
-	private static final int DEFENCE_HEADER = 29;
-	private static final int DEFENCE_STAB = 30;
-	private static final int DEFENCE_SLASH = 31;
-	private static final int DEFENCE_CRUSH = 32;
-	private static final int DEFENCE_MAGIC = 33;
-	private static final int DEFENCE_RANGED = 34;
+	private static final int DEFENCE_HEADER = 28;
+	private static final int DEFENCE_STAB = 29;
+	private static final int DEFENCE_SLASH = 30;
+	private static final int DEFENCE_CRUSH = 31;
+	private static final int DEFENCE_MAGIC = 32;
+	private static final int DEFENCE_RANGED = 33;
 
 	private static final List<Integer> EQUIPMENT_STATS_WIDGET_CHILD_IDS = Arrays.asList(
 		ATTACK_STAB, ATTACK_SLASH, ATTACK_CRUSH, ATTACK_MAGIC, ATTACK_RANGED,
