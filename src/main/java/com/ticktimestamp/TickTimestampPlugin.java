@@ -25,6 +25,7 @@ public class TickTimestampPlugin extends Plugin
 	private TickTimestampConfig config;
 
 	private int lastTickCount;
+	private int loginTickCount;
 
 	@Provides
 	TickTimestampConfig provideConfig(ConfigManager configManager)
@@ -36,12 +37,18 @@ public class TickTimestampPlugin extends Plugin
 	public void onChatMessage(ChatMessage event)
 	{
 		ChatMessageType type = event.getType();
+
+		if (ChatMessageType.WELCOME.equals(type))
+		{
+			loginTickCount = client.getTickCount();
+		}
+
 		if (!ChatMessageType.GAMEMESSAGE.equals(type) && !ChatMessageType.SPAM.equals(type))
 		{
 			return;
 		}
 
-		int tickCount = client.getTickCount();
+		int tickCount = client.getTickCount() - loginTickCount;
 		int timestamp = config.deltaTick() ? (tickCount - lastTickCount) : tickCount;
 		lastTickCount = tickCount;
 
