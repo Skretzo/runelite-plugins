@@ -218,7 +218,6 @@ public class CombatRollPlugin extends Plugin
 				skill = Skill.ATTACK;
 				break;
 			case OFFENSIVE_RANGED:
-			case DEFENSIVE_RANGED:
 				skill = Skill.RANGED;
 				break;
 			case OFFENSIVE_MAGIC:
@@ -226,6 +225,7 @@ public class CombatRollPlugin extends Plugin
 				skill = Skill.MAGIC;
 				break;
 			case DEFENSIVE_MELEE:
+			case DEFENSIVE_RANGED:
 				skill = Skill.DEFENCE;
 				break;
 		}
