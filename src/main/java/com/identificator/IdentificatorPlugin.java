@@ -1,13 +1,15 @@
 package com.identificator;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.Color;
+import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.KeyCode;
+import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
-import net.runelite.api.ObjectComposition;
 import net.runelite.api.Player;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.client.config.ConfigManager;
@@ -27,6 +29,22 @@ public class IdentificatorPlugin extends Plugin
 {
 	static final String CONFIG_GROUP = "identificator";
 	static final int TILE_RADIUS = 20;
+	static final List<MenuAction> OBJECT_MENU_TYPES = ImmutableList.of(
+		MenuAction.EXAMINE_OBJECT,
+		MenuAction.GAME_OBJECT_FIRST_OPTION,
+		MenuAction.GAME_OBJECT_SECOND_OPTION,
+		MenuAction.GAME_OBJECT_THIRD_OPTION,
+		MenuAction.GAME_OBJECT_FOURTH_OPTION,
+		MenuAction.GAME_OBJECT_FIFTH_OPTION
+	);
+	static final List<MenuAction> GROUND_ITEM_MENU_TYPES = ImmutableList.of(
+		MenuAction.EXAMINE_ITEM_GROUND,
+		MenuAction.GROUND_ITEM_FIRST_OPTION,
+		MenuAction.GROUND_ITEM_SECOND_OPTION,
+		MenuAction.GROUND_ITEM_THIRD_OPTION,
+		MenuAction.GROUND_ITEM_FOURTH_OPTION,
+		MenuAction.GROUND_ITEM_FIFTH_OPTION
+	);
 
 	String hoverText = null;
 	boolean showHoverInfo;
@@ -40,7 +58,11 @@ public class IdentificatorPlugin extends Plugin
 	boolean showPlayerAnimationId;
 	boolean showPlayerPoseAnimationId;
 	boolean showPlayerGraphicId;
-	boolean showObjectId;
+	boolean showGameObjectId;
+	boolean showGroundObjectId;
+	boolean showDecorativeObjectId;
+	boolean showWallObjectId;
+	boolean showGroundItemId;
 	Color colourHover;
 	Color colourOverhead;
 	Color colourMenu;
@@ -100,7 +122,11 @@ public class IdentificatorPlugin extends Plugin
 		showPlayerAnimationId = config.showPlayerAnimationId();
 		showPlayerPoseAnimationId = config.showPlayerPoseAnimationId();
 		showPlayerGraphicId = config.showPlayerGraphicId();
-		showObjectId = config.showObjectId();
+		showGameObjectId = config.showGameObjectId();
+		showGroundObjectId = config.showGroundObjectId();
+		showDecorativeObjectId = config.showDecorativeObjectId();
+		showWallObjectId = config.showWallObjectId();
+		showGroundItemId = config.showGroundItemId();
 		colourHover = config.colourHover();
 		colourOverhead = config.colourOverhead();
 		colourMenu = config.colourMenu();
@@ -117,9 +143,9 @@ public class IdentificatorPlugin extends Plugin
 		}
 
 		MenuEntry entry = event.getMenuEntry();
+		final MenuAction menuAction = entry.getType();
 		final NPC npc = entry.getNpc();
 		final Player player = entry.getPlayer();
-		final ObjectComposition objectComposition = entry.getIdentifier() > 0 ? client.getObjectDefinition(entry.getIdentifier()) : null;
 
 		if (npc != null)
 		{
@@ -210,11 +236,22 @@ public class IdentificatorPlugin extends Plugin
 				}
 			}
 		}
-		else if (objectComposition != null)
+		else if (OBJECT_MENU_TYPES.contains(menuAction))
 		{
-			if (showObjectId)
+			if (showGameObjectId)
 			{
-				hoverText = "(ID: " + objectComposition.getId() + ")";
+				hoverText = "(ID: " + entry.getIdentifier() + ")";
+				if (showMenuInfo)
+				{
+					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
+				}
+			}
+		}
+		else if (GROUND_ITEM_MENU_TYPES.contains(menuAction))
+		{
+			if (showGroundItemId)
+			{
+				hoverText = "(ID: " + entry.getIdentifier() + ")";
 				if (showMenuInfo)
 				{
 					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));

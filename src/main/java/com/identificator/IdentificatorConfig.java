@@ -18,7 +18,7 @@ public interface IdentificatorConfig extends Config
 	)
 	default boolean showHoverInfo()
 	{
-		return false;
+		return true;
 	}
 
 	@ConfigItem(
@@ -146,13 +146,61 @@ public interface IdentificatorConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "showObjectId",
-		name = "Show object id",
-		description = "Whether to display the id of an object",
+		keyName = "showGameObjectId",
+		name = "Show game object id",
+		description = "Whether to display the id of a game object",
 		position = 12,
 		section = optionsSection
 	)
-	default boolean showObjectId()
+	default boolean showGameObjectId()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "showGroundObjectId",
+		name = "Show ground object id",
+		description = "Whether to display the id of a ground object",
+		position = 13,
+		section = optionsSection
+	)
+	default boolean showGroundObjectId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showDecorativeObjectId",
+		name = "Show decorative object id",
+		description = "Whether to display the id of a decorative object",
+		position = 14,
+		section = optionsSection
+	)
+	default boolean showDecorativeObjectId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showWallObjectId",
+		name = "Show wall object id",
+		description = "Whether to display the id of a wall object",
+		position = 15,
+		section = optionsSection
+	)
+	default boolean showWallObjectId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showGroundItemId",
+		name = "Show ground item id",
+		description = "Whether to display the id of a ground item",
+		position = 16,
+		section = optionsSection
+	)
+	default boolean showGroundItemId()
 	{
 		return true;
 	}
@@ -160,7 +208,7 @@ public interface IdentificatorConfig extends Config
 	@ConfigSection(
 		name = "Colours",
 		description = "Options for the text colours",
-		position = 13
+		position = 17
 	)
 	String coloursSection = "coloursSection";
 
@@ -169,7 +217,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourHover",
 		name = "Hover text",
 		description = "The colour of the hover info text",
-		position = 14
+		position = 18
 	)
 	default Color colourHover()
 	{
@@ -181,7 +229,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourOverhead",
 		name = "Overhead text",
 		description = "The colour of the overhead info text",
-		position = 15
+		position = 19
 	)
 	default Color colourOverhead()
 	{
@@ -193,7 +241,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourMenu",
 		name = "Menu text",
 		description = "The colour of the menu info text",
-		position = 16
+		position = 20
 	)
 	default Color colourMenu()
 	{
