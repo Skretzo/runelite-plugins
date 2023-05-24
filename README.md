@@ -3,6 +3,7 @@
 |:---|:----------|
 |[![icon](../../blob/chat-success-rates/icon.png)](../../tree/chat-success-rates)|[Chat Success Rates](../../tree/chat-success-rates)|
 |[![icon](../../blob/combat-roll/icon.png)](../../tree/combat-roll)|[Combat Roll](../../tree/combat-roll)|
+|[![icon](../../blob/identificator/icon.png)](../../tree/identificator)|[Identificator](../../tree/identificator)|
 |[![icon](../../blob/invalid-movement/icon.png)](../../tree/invalid-movement)|[Invalid Movement](../../tree/invalid-movement)|
 |[![icon](../../blob/line-markers/icon.png)](../../tree/line-markers)|[Line Markers](../../tree/line-markers)|
 |[![icon](../../blob/no-examine/icon.png)](../../tree/no-examine)|[No Examine](../../tree/no-examine)|
