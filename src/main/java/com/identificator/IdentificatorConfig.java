@@ -217,7 +217,8 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourHover",
 		name = "Hover text",
 		description = "The colour of the hover info text",
-		position = 18
+		position = 18,
+		section = coloursSection
 	)
 	default Color colourHover()
 	{
@@ -229,7 +230,8 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourOverhead",
 		name = "Overhead text",
 		description = "The colour of the overhead info text",
-		position = 19
+		position = 19,
+		section = coloursSection
 	)
 	default Color colourOverhead()
 	{
@@ -241,7 +243,8 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourMenu",
 		name = "Menu text",
 		description = "The colour of the menu info text",
-		position = 20
+		position = 20,
+		section = coloursSection
 	)
 	default Color colourMenu()
 	{
