@@ -9,6 +9,8 @@ import net.runelite.api.DecorativeObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.GroundObject;
 import net.runelite.api.KeyCode;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
@@ -63,10 +65,12 @@ public class IdentificatorOverlay extends Overlay
 			}
 
 			Tile[][] tiles = client.getScene().getTiles()[client.getPlane()];
-			final int radius = IdentificatorPlugin.TILE_RADIUS;
+
 			final WorldPoint location = client.getLocalPlayer().getWorldLocation();
+			final int radius = IdentificatorPlugin.TILE_RADIUS;
 			final int width = tiles.length;
 			final int height = tiles[0].length;
+
 			for (int i = 0; i < width; i++)
 			{
 				for (int j = 0; j < height; j++)
@@ -108,15 +112,15 @@ public class IdentificatorOverlay extends Overlay
 
 					final Point textLocation = Perspective.getCanvasTextLocation(client, graphics, tile.getLocalLocation(), text.toString(), 40);
 
-					if (textLocation != null)
+					if (text.length() > 0 && textLocation != null)
 					{
-						OverlayUtil.renderTextLocation(graphics, textLocation, text.toString(), plugin.colourOverhead);
+						OverlayUtil.renderTextLocation(graphics, textLocation, "(ID: " + text.toString() + ")", plugin.colourOverhead);
 					}
 				}
 			}
 		}
 
-		if (plugin.showHoverInfo)
+		if (plugin.showHoverInfo && isHoveringGameScene())
 		{
 			if (plugin.hoverText != null)
 			{
@@ -177,6 +181,19 @@ public class IdentificatorOverlay extends Overlay
 		}
 
 		return null;
+	}
+
+	private boolean isHoveringGameScene()
+	{
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		for (int i = menuEntries.length - 1; i >= 0; i--)
+		{
+			if (MenuAction.WALK.equals(menuEntries[i].getType()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void renderNpc(Graphics2D graphics, NPC npc)

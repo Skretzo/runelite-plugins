@@ -238,7 +238,7 @@ public class IdentificatorPlugin extends Plugin
 		}
 		else if (OBJECT_MENU_TYPES.contains(menuAction))
 		{
-			if (showGameObjectId)
+			if (showGameObjectId || showGroundObjectId || showDecorativeObjectId || showWallObjectId)
 			{
 				hoverText = "(ID: " + entry.getIdentifier() + ")";
 				if (showMenuInfo)
