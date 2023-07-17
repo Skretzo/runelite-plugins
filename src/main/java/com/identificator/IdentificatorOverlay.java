@@ -15,6 +15,7 @@ import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
+import net.runelite.api.TileObject;
 import net.runelite.api.WallObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
@@ -81,22 +82,35 @@ public class IdentificatorOverlay extends Overlay
 						continue;
 					}
 
-					GameObject[] gameObjects = tile.getGameObjects();
-					if (gameObjects != null && gameObjects.length > 0)
+					StringBuilder text = new StringBuilder();
+
+					if (plugin.showGameObjectId)
 					{
-						renderGameObject(graphics, gameObjects[0]);
+						text.append(gameObjectsToText(tile.getGameObjects()));
+					}
+					if (plugin.showGroundObjectId)
+					{
+						text.append(objectToText(text, tile.getGroundObject()));
+					}
+					if (plugin.showDecorativeObjectId)
+					{
+						text.append(objectToText(text, tile.getDecorativeObject()));
+					}
+					if (plugin.showWallObjectId)
+					{
+						text.append(objectToText(text, tile.getWallObject()));
+					}
+					if (plugin.showGroundItemId)
+					{
+						String textGroundItems = groundItemsToText(tile.getGroundItems());
+						text.append((text.length() > 0 && textGroundItems.length() > 0) ? ", " : "").append(textGroundItems);
 					}
 
-					renderGroundObject(graphics, tile.getGroundObject());
+					final Point textLocation = Perspective.getCanvasTextLocation(client, graphics, tile.getLocalLocation(), text.toString(), 40);
 
-					renderDecorativeObject(graphics, tile.getDecorativeObject());
-
-					renderWallObject(graphics, tile.getWallObject());
-
-					List<TileItem> tileItems = tile.getGroundItems();
-					if (tileItems != null && !tileItems.isEmpty())
+					if (textLocation != null)
 					{
-						renderGroundItem(graphics, tileItems.get(0), tile);
+						OverlayUtil.renderTextLocation(graphics, textLocation, text.toString(), plugin.colourOverhead);
 					}
 				}
 			}
@@ -113,7 +127,7 @@ public class IdentificatorOverlay extends Overlay
 				Tile selectedTile = client.getSelectedSceneTile();
 				if (selectedTile != null)
 				{
-					String text = "";
+					StringBuilder text = new StringBuilder();
 
 					GameObject[] gameObjects = selectedTile.getGameObjects();
 					GroundObject groundObject = selectedTile.getGroundObject();
@@ -121,30 +135,42 @@ public class IdentificatorOverlay extends Overlay
 					WallObject wallObject = selectedTile.getWallObject();
 					List<TileItem> tileItems = selectedTile.getGroundItems();
 
-					if (gameObjects != null && gameObjects.length > 0 && gameObjects[0] != null)
+					if (gameObjects != null && plugin.showGameObjectId)
 					{
-						text = "(ID: " + gameObjects[0].getId() + ")";
+						for (GameObject gameObject : gameObjects)
+						{
+							if (gameObject != null)
+							{
+								text.append(text.length() > 0 ? ", " : "").append(gameObject.getId());
+							}
+						}
 					}
-					else if (groundObject != null)
+					if (groundObject != null && plugin.showGroundObjectId)
 					{
-						text = "(ID: " + groundObject.getId() + ")";
+						text.append(text.length() > 0 ? ", " : "").append(groundObject.getId());
 					}
-					else if (decorativeObject != null)
+					if (decorativeObject != null && plugin.showDecorativeObjectId)
 					{
-						text = "(ID: " + decorativeObject.getId() + ")";
+						text.append(text.length() > 0 ? ", " : "").append(decorativeObject.getId());
 					}
-					else if (wallObject != null)
+					if (wallObject != null && plugin.showWallObjectId)
 					{
-						text = "(ID: " + wallObject.getId() + ")";
+						text.append(text.length() > 0 ? ", " : "").append(wallObject.getId());
 					}
-					else if (tileItems != null && !tileItems.isEmpty() && tileItems.get(0) != null)
+					if (tileItems != null && plugin.showGroundItemId)
 					{
-						text = "(ID: " + tileItems.get(0).getId() + ")";
+						for (TileItem tileItem : tileItems)
+						{
+							if (tileItem != null)
+							{
+								text.append(text.length() > 0 ? ", " : "").append(tileItem.getId());
+							}
+						}
 					}
 
 					if (text.length() > 0)
 					{
-						tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag(text, plugin.colourHover)));
+						tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag("(ID: " + text + ")", plugin.colourHover)));
 					}
 				}
 			}
@@ -232,138 +258,52 @@ public class IdentificatorOverlay extends Overlay
 		}
 	}
 
-	private void renderGameObject(Graphics2D graphics, GameObject object)
+	private String objectToText(StringBuilder text, TileObject tileObject)
 	{
-		if (object == null)
+		if (tileObject == null)
 		{
-			return;
+			return "";
 		}
-
-		String text = "";
-
-		if (plugin.showGameObjectId)
-		{
-			text += "(ID: " + object.getId() + ")";
-		}
-
-		if (text.length() <= 0)
-		{
-			return;
-		}
-
-		final Point textLocation = object.getCanvasTextLocation(graphics, text, 40);
-
-		if (textLocation != null)
-		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
-		}
+		return (text.length() > 0 ? ", " : "") + tileObject.getId();
 	}
 
-	private void renderGroundObject(Graphics2D graphics, GroundObject object)
+	private String gameObjectsToText(GameObject[] gameObjects)
 	{
-		if (object == null)
+		StringBuilder text = new StringBuilder();
+
+		if (!plugin.showGameObjectId || gameObjects == null)
 		{
-			return;
+			return text.toString();
 		}
 
-		String text = "";
-
-		if (plugin.showGroundObjectId)
+		for (GameObject gameObject : gameObjects)
 		{
-			text += "(ID: " + object.getId() + ")";
+			if (gameObject != null)
+			{
+				text.append(text.length() > 0 ? ", " : "").append(gameObject.getId());
+			}
 		}
 
-		if (text.length() <= 0)
-		{
-			return;
-		}
-
-		final Point textLocation = object.getCanvasTextLocation(graphics, text, 40);
-
-		if (textLocation != null)
-		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
-		}
+		return text.toString();
 	}
 
-	private void renderDecorativeObject(Graphics2D graphics, DecorativeObject object)
+	private String groundItemsToText(List<TileItem> tileItems)
 	{
-		if (object == null)
+		StringBuilder text = new StringBuilder();
+
+		if (!plugin.showGroundItemId || tileItems == null)
 		{
-			return;
+			return text.toString();
 		}
 
-		String text = "";
-
-		if (plugin.showDecorativeObjectId)
+		for (TileItem tileItem : tileItems)
 		{
-			text += "(ID: " + object.getId() + ")";
+			if (tileItem != null)
+			{
+				text.append(text.length() > 0 ? ", " : "").append(tileItem.getId());
+			}
 		}
 
-		if (text.length() <= 0)
-		{
-			return;
-		}
-
-		final Point textLocation = object.getCanvasTextLocation(graphics, text, 40);
-
-		if (textLocation != null)
-		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
-		}
-	}
-
-	private void renderWallObject(Graphics2D graphics, WallObject object)
-	{
-		if (object == null)
-		{
-			return;
-		}
-
-		String text = "";
-
-		if (plugin.showWallObjectId)
-		{
-			text += "(ID: " + object.getId() + ")";
-		}
-
-		if (text.length() <= 0)
-		{
-			return;
-		}
-
-		final Point textLocation = object.getCanvasTextLocation(graphics, text, 40);
-
-		if (textLocation != null)
-		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
-		}
-	}
-
-	private void renderGroundItem(Graphics2D graphics, TileItem item, Tile tile)
-	{
-		if (item == null)
-		{
-			return;
-		}
-
-		String text = "";
-
-		if (plugin.showGroundItemId)
-		{
-			text += "(ID: " + item.getId() + ")";
-		}
-
-		if (text.length() <= 0)
-		{
-			return;
-		}
-
-		final Point textLocation = Perspective.getCanvasTextLocation(client, graphics, tile.getLocalLocation(), text, 40);
-
-		if (textLocation != null)
-		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
-		}
+		return text.toString();
 	}
 }
