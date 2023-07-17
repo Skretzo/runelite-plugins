@@ -71,6 +71,11 @@ public class IdentificatorOverlay extends Overlay
 				for (int j = 0; j < height; j++)
 				{
 					Tile tile = tiles[i][j];
+					if (tile == null)
+					{
+						continue;
+					}
+
 					if (location.distanceTo(tile.getWorldLocation()) > radius)
 					{
 						continue;
