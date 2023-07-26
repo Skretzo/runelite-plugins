@@ -4,21 +4,28 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.List;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
+import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ColorUtil;
+import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
 	name = "Identificator",
@@ -27,6 +34,8 @@ import net.runelite.client.util.ColorUtil;
 )
 public class IdentificatorPlugin extends Plugin
 {
+	private static final String PANEL_DELIMITER = "\t";
+
 	static final String CONFIG_GROUP = "identificator";
 	static final int TILE_RADIUS = 20;
 	static final List<MenuAction> OBJECT_MENU_TYPES = ImmutableList.of(
@@ -67,8 +76,19 @@ public class IdentificatorPlugin extends Plugin
 	Color colourOverhead;
 	Color colourMenu;
 
+	private IdentificatorPanel panel;
+	private NavigationButton navigationButton;
+	private int lastTickCount;
+	private int loginTickCount;
+	private int lastPlayerAnimationId;
+	private int lastPlayerPoseAnimationId;
+	private int lastPlayerGraphicId;
+
 	@Inject
 	private Client client;
+
+	@Inject
+	private ClientToolbar clientToolbar;
 
 	@Inject
 	private IdentificatorConfig config;
@@ -90,12 +110,31 @@ public class IdentificatorPlugin extends Plugin
 	{
 		loadOptions();
 		overlayManager.add(identificatorOverlay);
+
+		panel = new IdentificatorPanel();
+
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/panel_icon.png");
+
+		navigationButton = NavigationButton.builder()
+			.tooltip("Identificator")
+			.icon(icon)
+			.priority(100)
+			.panel(panel)
+			.build();
+
+		if (config.logging())
+		{
+			clientToolbar.addNavigation(navigationButton);
+		}
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		overlayManager.remove(identificatorOverlay);
+		clientToolbar.removeNavigation(navigationButton);
+		panel = null;
+		navigationButton = null;
 	}
 
 	@Subscribe
@@ -107,6 +146,18 @@ public class IdentificatorPlugin extends Plugin
 		}
 
 		loadOptions();
+
+		if ("logging".equals(event.getKey()))
+		{
+			if (config.logging())
+			{
+				clientToolbar.addNavigation(navigationButton);
+			}
+			else
+			{
+				clientToolbar.removeNavigation(navigationButton);
+			}
+		}
 	}
 
 	private void loadOptions()
@@ -257,6 +308,62 @@ public class IdentificatorPlugin extends Plugin
 					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
 				}
 			}
+		}
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		Player player = client.getLocalPlayer();
+		if (player == null)
+		{
+			return;
+		}
+
+		int tickCount = client.getTickCount() - loginTickCount;
+		int timestamp = config.logRelativeTickTimestamp() ? (tickCount - lastTickCount) : tickCount;
+
+		int playerAnimationId = player.getAnimation();
+		int playerPoseAnimationId = player.getPoseAnimation();
+		int playerGraphicId = player.getGraphic();
+
+		if (playerAnimationId != lastPlayerAnimationId)
+		{
+			if (config.logPlayerAnimationId())
+			{
+				panel.appendText(timestamp + PANEL_DELIMITER + playerAnimationId);
+			}
+			lastTickCount = tickCount;
+			lastPlayerAnimationId = playerAnimationId;
+		}
+
+		if (playerPoseAnimationId != lastPlayerPoseAnimationId)
+		{
+			if (config.logPlayerPoseAnimationId())
+			{
+				panel.appendText(timestamp + PANEL_DELIMITER + playerPoseAnimationId);
+			}
+			lastTickCount = tickCount;
+			lastPlayerPoseAnimationId = playerPoseAnimationId;
+		}
+
+		if (playerGraphicId != lastPlayerGraphicId)
+		{
+			if (config.logPlayerGraphicId())
+			{
+				panel.appendText(timestamp + PANEL_DELIMITER + playerGraphicId);
+			}
+			lastTickCount = tickCount;
+			lastPlayerGraphicId = playerGraphicId;
+		}
+	}
+
+	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if (ChatMessageType.WELCOME.equals(event.getType()))
+		{
+			loginTickCount = client.getTickCount();
 		}
 	}
 }

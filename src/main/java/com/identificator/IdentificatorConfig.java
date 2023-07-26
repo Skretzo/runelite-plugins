@@ -206,9 +206,76 @@ public interface IdentificatorConfig extends Config
 	}
 
 	@ConfigSection(
+		name = "Logging",
+		description = "Options for logging tick timestamp and player related IDs in a side panel",
+		position = 17
+	)
+	String loggingSection = "optionsLogging";
+
+	@ConfigItem(
+		keyName = "logging",
+		name = "Enable logging",
+		description = "Whether to enable logging of tick timestamp and player related IDs in a side panel",
+		position = 18,
+		section = loggingSection
+	)
+	default boolean logging()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "logRelativeTickTimestamp",
+		name = "Relative tick timestamp",
+		description = "Whether to make the tick timestamp relative to the last logged entry or make it static",
+		position = 19,
+		section = loggingSection
+	)
+	default boolean logRelativeTickTimestamp()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "logPlayerAnimationId",
+		name = "Log animation IDs",
+		description = "Whether to log player animation IDs in a side panel",
+		position = 20,
+		section = loggingSection
+	)
+	default boolean logPlayerAnimationId()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "logPlayerPoseAnimationId",
+		name = "Log pose animation IDs",
+		description = "Whether to log player pose animation IDs in a side panel",
+		position = 21,
+		section = loggingSection
+	)
+	default boolean logPlayerPoseAnimationId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "logPlayerGraphicId",
+		name = "Log graphic IDs",
+		description = "Whether to log player graphic IDs in a side panel",
+		position = 22,
+		section = loggingSection
+	)
+	default boolean logPlayerGraphicId()
+	{
+		return false;
+	}
+
+	@ConfigSection(
 		name = "Colours",
 		description = "Options for the text colours",
-		position = 17
+		position = 23
 	)
 	String coloursSection = "coloursSection";
 
@@ -217,7 +284,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourHover",
 		name = "Hover text",
 		description = "The colour of the hover info text",
-		position = 18,
+		position = 24,
 		section = coloursSection
 	)
 	default Color colourHover()
@@ -230,7 +297,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourOverhead",
 		name = "Overhead text",
 		description = "The colour of the overhead info text",
-		position = 19,
+		position = 25,
 		section = coloursSection
 	)
 	default Color colourOverhead()
@@ -243,7 +310,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourMenu",
 		name = "Menu text",
 		description = "The colour of the menu info text",
-		position = 20,
+		position = 26,
 		section = coloursSection
 	)
 	default Color colourMenu()
