@@ -101,7 +101,7 @@ class RadiusMarkerMinimapOverlay extends Overlay
 
 			for (NPC npc : npcs)
 			{
-				if (npc.getId() != marker.getNpcId())
+				if (npc.getId() != marker.getNpcId() || RadiusMarkerPlugin.exclude(npc))
 				{
 					continue;
 				}

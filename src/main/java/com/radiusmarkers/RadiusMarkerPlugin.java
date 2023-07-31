@@ -326,6 +326,11 @@ public class RadiusMarkerPlugin extends Plugin
 		return true;
 	}
 
+	public static boolean exclude(NPC npc)
+	{
+		return npc == null || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName());
+	}
+
 	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers)
 	{
 		if (markers.isEmpty())
