@@ -26,6 +26,7 @@ import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.Model;
 import net.runelite.api.NPC;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
@@ -328,7 +329,20 @@ public class RadiusMarkerPlugin extends Plugin
 
 	public static boolean exclude(NPC npc)
 	{
-		return npc == null || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName());
+		return npc == null || npc.getName() == null || ("null".equals(npc.getName()) && isInvisible(npc.getModel()));
+	}
+
+	private static boolean isInvisible(Model model)
+	{
+		// If all the values in model.getFaceColors3() are -1 then the model is invisible
+		for (int value : model.getFaceColors3())
+		{
+			if (value != -1)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers)
