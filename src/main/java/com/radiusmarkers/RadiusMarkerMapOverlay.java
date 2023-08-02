@@ -111,7 +111,7 @@ class RadiusMarkerMapOverlay extends Overlay
 
 			for (NPC npc : npcs)
 			{
-				if (npc.getId() != marker.getNpcId() || RadiusMarkerPlugin.exclude(npc))
+				if (npc.getId() != marker.getNpcId() || plugin.exclude(npc))
 				{
 					continue;
 				}
