@@ -60,7 +60,7 @@ public class NpcIdOverlay extends Overlay
 
 		for (NPC npc : client.getCachedNPCs())
 		{
-			if (npc == null || (config.hideInvisible() && npc.getId() == -1))
+			if (npc == null || npc.getId() < 0 || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName()))
 			{
 				continue;
 			}
