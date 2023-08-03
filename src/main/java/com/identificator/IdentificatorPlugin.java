@@ -183,6 +183,11 @@ public class IdentificatorPlugin extends Plugin
 		colourMenu = config.colourMenu();
 	}
 
+	public boolean exclude(NPC npc)
+	{
+		return npc == null || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName());
+	}
+
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
@@ -198,7 +203,7 @@ public class IdentificatorPlugin extends Plugin
 		final NPC npc = entry.getNpc();
 		final Player player = entry.getPlayer();
 
-		if (npc != null)
+		if (!exclude(npc))
 		{
 			if (showNpcId)
 			{

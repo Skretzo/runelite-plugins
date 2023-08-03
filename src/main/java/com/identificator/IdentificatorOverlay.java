@@ -198,7 +198,7 @@ public class IdentificatorOverlay extends Overlay
 
 	private void renderNpc(Graphics2D graphics, NPC npc)
 	{
-		if (npc == null)
+		if (plugin.exclude(npc))
 		{
 			return;
 		}
