@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.ActorSpotAnim;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.MenuAction;
@@ -372,7 +373,7 @@ public class RadiusMarkerPlugin extends Plugin
 		Model model = npc.getModel();
 		if (model == null)
 		{
-			invisibleNullNpcs.add(id);
+			updateNullNpcCache(invisibleNullNpcs, npc);
 			return true;
 		}
 
@@ -381,13 +382,32 @@ public class RadiusMarkerPlugin extends Plugin
 		{
 			if (value != -1)
 			{
-				visibleNullNpcs.add(id);
+				updateNullNpcCache(visibleNullNpcs, npc);
 				return false;
 			}
 		}
 
-		invisibleNullNpcs.add(id);
+		updateNullNpcCache(invisibleNullNpcs, npc);
 		return true;
+	}
+
+	private void updateNullNpcCache(Set<Integer> cache, NPC npc)
+	{
+		if (npc.getAnimation() != -1)
+		{
+			return;
+		}
+
+		for (ActorSpotAnim spotAnim : npc.getSpotAnims())
+		{
+			if (spotAnim.getId() != -1)
+			{
+				return;
+			}
+		}
+
+		// Only update the null npc cache if both the animation and spot animation is -1
+		cache.add(npc.getId());
 	}
 
 	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers)
