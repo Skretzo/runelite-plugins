@@ -23,6 +23,9 @@ A radius marker is a way to display the spawn point, attack range, hunt range, m
 - Interaction range (*talking range*)
   - The area in which the player can interact with (e.g. talk-to) the NPC.
 
+## Additional info
+It is not possible to add radius markers for invisible NPCs or NPCs with no name. Try alternative plugins like e.g. [Better NPC Highlight](https://github.com/MoreBuchus/buchus-plugins/tree/better-npc-highlight).
+
 ## Panel
 ![Example of radius marker in the plugin panel](https://user-images.githubusercontent.com/53493631/150693312-4709f979-845c-4492-bf3f-d9f4a62c3fc1.png)
 
