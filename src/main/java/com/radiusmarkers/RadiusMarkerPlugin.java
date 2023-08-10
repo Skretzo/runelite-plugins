@@ -16,26 +16,20 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.api.ActorSpotAnim;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.MenuAction;
 import static net.runelite.api.MenuAction.MENU_ACTION_DEPRIORITIZE_OFFSET;
 import net.runelite.api.MenuEntry;
-import net.runelite.api.Model;
 import net.runelite.api.NPC;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -111,8 +105,6 @@ public class RadiusMarkerPlugin extends Plugin
 	private Shape minimapClipFixed;
 	private Shape minimapClipResizeable;
 	private Rectangle minimapRectangle = new Rectangle();
-	private Set<Integer> visibleNullNpcs = new HashSet<>();
-	private Set<Integer> invisibleNullNpcs = new HashSet<>();
 
 	@Provides
 	RadiusMarkerConfig providesConfig(ConfigManager configManager)
@@ -152,7 +144,6 @@ public class RadiusMarkerPlugin extends Plugin
 		overlayManager.remove(minimapOverlay);
 
 		markers.clear();
-		clearNullNpcCache();
 
 		clientToolbar.removeNavigation(navigationButton);
 
@@ -192,22 +183,6 @@ public class RadiusMarkerPlugin extends Plugin
 				.setType(MenuAction.RUNELITE)
 				.onClick(this::updateMarkerInfo);
 		}
-	}
-
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged event)
-	{
-		if (GameState.LOADING.equals(event.getGameState()))
-		{
-			clearNullNpcCache();
-		}
-
-	}
-
-	private void clearNullNpcCache()
-	{
-		visibleNullNpcs.clear();
-		invisibleNullNpcs.clear();
 	}
 
 	private void updateMarkerInfo(MenuEntry entry)
@@ -353,61 +328,7 @@ public class RadiusMarkerPlugin extends Plugin
 
 	public boolean exclude(NPC npc)
 	{
-		return npc == null || npc.getName() == null || ("null".equals(npc.getName()) && isInvisible(npc));
-	}
-
-	private boolean isInvisible(NPC npc)
-	{
-		final int id = npc.getId();
-
-		if (visibleNullNpcs.contains(id))
-		{
-			return false;
-		}
-
-		if (invisibleNullNpcs.contains(id))
-		{
-			return true;
-		}
-
-		Model model = npc.getModel();
-		if (model == null)
-		{
-			updateNullNpcCache(invisibleNullNpcs, npc);
-			return true;
-		}
-
-		// If all the values in model.getFaceColors3() are -1 then the model is invisible
-		for (int value : model.getFaceColors3())
-		{
-			if (value != -1)
-			{
-				updateNullNpcCache(visibleNullNpcs, npc);
-				return false;
-			}
-		}
-
-		updateNullNpcCache(invisibleNullNpcs, npc);
-		return true;
-	}
-
-	private void updateNullNpcCache(Set<Integer> cache, NPC npc)
-	{
-		if (npc.getAnimation() != -1)
-		{
-			return;
-		}
-
-		for (ActorSpotAnim spotAnim : npc.getSpotAnims())
-		{
-			if (spotAnim.getId() != -1)
-			{
-				return;
-			}
-		}
-
-		// Only update the null npc cache if both the animation and spot animation is -1
-		cache.add(npc.getId());
+		return npc == null || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName());
 	}
 
 	private List<ColourRadiusMarker> translateToColourRadiusMarker(Collection<RadiusMarker> markers)
