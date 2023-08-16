@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.List;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
@@ -12,6 +13,7 @@ import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
+import net.runelite.api.NpcOverrides;
 import net.runelite.api.Player;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
@@ -72,6 +74,9 @@ public class IdentificatorPlugin extends Plugin
 	boolean showDecorativeObjectId;
 	boolean showWallObjectId;
 	boolean showGroundItemId;
+	boolean showNpcOverrideModelIds;
+	boolean showNpcOverrideColours;
+	boolean showNpcOverrideTextures;
 	Color colourHover;
 	Color colourOverhead;
 	Color colourMenu;
@@ -178,6 +183,9 @@ public class IdentificatorPlugin extends Plugin
 		showDecorativeObjectId = config.showDecorativeObjectId();
 		showWallObjectId = config.showWallObjectId();
 		showGroundItemId = config.showGroundItemId();
+		showNpcOverrideModelIds = config.showNpcOverrideModelIds();
+		showNpcOverrideColours = config.showNpcOverrideColours();
+		showNpcOverrideTextures = config.showNpcOverrideTextures();
 		colourHover = config.colourHover();
 		colourOverhead = config.colourOverhead();
 		colourMenu = config.colourMenu();
@@ -251,6 +259,49 @@ public class IdentificatorPlugin extends Plugin
 				if (showMenuInfo)
 				{
 					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
+				}
+			}
+			if ((showNpcOverrideModelIds || showNpcOverrideColours || showNpcOverrideTextures) && npc.getModelOverrides() != null)
+			{
+				NpcOverrides modelOverrides = npc.getModelOverrides();
+				if (showNpcOverrideModelIds && modelOverrides.getModelIds() != null)
+				{
+					String text = "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
+					if (hoverText == null)
+					{
+						hoverText = "";
+					}
+					hoverText += (hoverText.length() > 0 ? " " : "") + text;
+					if (showMenuInfo)
+					{
+						entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
+					}
+				}
+				if (showNpcOverrideColours && modelOverrides.getColorToReplaceWith() != null)
+				{
+					String text = "(C: " + Arrays.toString(modelOverrides.getColorToReplaceWith()) + ")";
+					if (hoverText == null)
+					{
+						hoverText = "";
+					}
+					hoverText += (hoverText.length() > 0 ? " " : "") + text;
+					if (showMenuInfo)
+					{
+						entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
+					}
+				}
+				if (showNpcOverrideTextures && modelOverrides.getTextureToReplaceWith() != null)
+				{
+					String text = "(T: " + Arrays.toString(modelOverrides.getTextureToReplaceWith()) + ")";
+					if (hoverText == null)
+					{
+						hoverText = "";
+					}
+					hoverText += (hoverText.length() > 0 ? " " : "") + text;
+					if (showMenuInfo)
+					{
+						entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
+					}
 				}
 			}
 		}

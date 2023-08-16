@@ -205,6 +205,42 @@ public interface IdentificatorConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "showNpcOverrideModelIds",
+		name = "Show NPC override model ids",
+		description = "Whether to display NPC override model ids",
+		position = 17,
+		section = optionsSection
+	)
+	default boolean showNpcOverrideModelIds()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showNpcOverrideColours",
+		name = "Show NPC override model colours",
+		description = "Whether to display NPC override model colours",
+		position = 18,
+		section = optionsSection
+	)
+	default boolean showNpcOverrideColours()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showNpcOverrideTextures",
+		name = "Show NPC override model textures",
+		description = "Whether to display NPC override model textures",
+		position = 19,
+		section = optionsSection
+	)
+	default boolean showNpcOverrideTextures()
+	{
+		return false;
+	}
+
 	@ConfigSection(
 		name = "Logging",
 		description = "Options for logging tick timestamp and player related IDs in a side panel",

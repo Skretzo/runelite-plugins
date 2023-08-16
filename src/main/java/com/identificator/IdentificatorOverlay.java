@@ -3,6 +3,7 @@ package com.identificator;
 import com.google.inject.Inject;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.util.Arrays;
 import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.DecorativeObject;
@@ -12,6 +13,7 @@ import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
+import net.runelite.api.NpcOverrides;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
 import net.runelite.api.Point;
@@ -223,6 +225,25 @@ public class IdentificatorOverlay extends Overlay
 		if (plugin.showNpcGraphicId)
 		{
 			text += (text.length() == 0 ? "" : " ") + "(G: " + npc.getGraphic() + ")";
+		}
+
+		if ((plugin.showNpcOverrideModelIds || plugin.showNpcOverrideColours || plugin.showNpcOverrideTextures) && npc.getModelOverrides() != null)
+		{
+			NpcOverrides modelOverrides = npc.getModelOverrides();
+			if (plugin.showNpcOverrideModelIds && modelOverrides.getModelIds() != null)
+			{
+				text += (text.length() == 0 ? "" : " ") + "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
+			}
+
+			if (plugin.showNpcOverrideColours && modelOverrides.getColorToReplaceWith() != null)
+			{
+				text += (text.length() == 0 ? "" : " ") + "(C: " + Arrays.toString(modelOverrides.getColorToReplaceWith()) + ")";
+			}
+
+			if (plugin.showNpcOverrideTextures && modelOverrides.getTextureToReplaceWith() != null)
+			{
+				text += (text.length() == 0 ? "" : " ") + "(T: " + Arrays.toString(modelOverrides.getTextureToReplaceWith()) + ")";
+			}
 		}
 
 		if (text.length() <= 0)
