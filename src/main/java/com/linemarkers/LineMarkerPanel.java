@@ -568,8 +568,48 @@ class LineMarkerPanel extends JPanel
 
 	private void save()
 	{
-		marker.setName(nameInput.getText());
-		plugin.saveMarkers();
+		String newName = nameInput.getText();
+
+		if (newName.equals(marker.getName()))
+		{
+			cancel();
+			return;
+		}
+
+		LineGroup newGroup = null;
+		for (LineGroup group : plugin.getGroups())
+		{
+			if (newName.equals(group.getName()) && !group.equals(marker))
+			{
+				newGroup = group;
+				break;
+			}
+		}
+
+		if (newGroup != null)
+		{
+			int confirm = JOptionPane.showConfirmDialog(LineMarkerPanel.this,
+				"Are you sure you want to combine this line marker with the other line marker with the same name?",
+				"Warning", JOptionPane.OK_CANCEL_OPTION);
+
+			if (confirm == 0)
+			{
+				for (Line line : marker.getLines())
+				{
+					newGroup.getLines().add(line);
+				}
+				plugin.removeMarker(marker);
+			}
+			else
+			{
+				return;
+			}
+		}
+		else
+		{
+			marker.setName(newName);
+			plugin.saveMarkers();
+		}
 
 		nameInput.setEditable(false);
 		updateNameActions(false);
