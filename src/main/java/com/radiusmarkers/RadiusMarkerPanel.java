@@ -1182,7 +1182,7 @@ class RadiusMarkerPanel extends JPanel
 			colour,
 			marker.getName() + text,
 			false);
-		colourPicker.setLocation(getLocationOnScreen());
+		colourPicker.setLocationRelativeTo(this);
 		colourPicker.setOnClose(c -> plugin.saveMarkers());
 		return colourPicker;
 	}
