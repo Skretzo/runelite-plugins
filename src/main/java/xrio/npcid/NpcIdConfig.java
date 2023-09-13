@@ -55,9 +55,31 @@ public interface NpcIdConfig extends Config
 		return false;
 	}
 
-	@Alpha
 	@ConfigItem(
 		position = 2,
+		keyName = "showName",
+		name = "Show name",
+		description = "Show the NPC name without combat level above the NPC."
+	)
+	default boolean showName()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		position = 3,
+		keyName = "hoverOnly",
+		name = "Show on hover only",
+		description = "Show the NPC identification text only when hovering the NPC."
+	)
+	default boolean hoverOnly()
+	{
+		return false;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 4,
 		keyName = "textColour",
 		name = "Text colour",
 		description = "The colour of the NPC identification text."

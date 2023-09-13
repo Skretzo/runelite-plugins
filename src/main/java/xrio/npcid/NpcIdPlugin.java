@@ -26,7 +26,13 @@ package xrio.npcid;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import net.runelite.api.MenuAction;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -34,10 +40,19 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @PluginDescriptor(
 	name = "NPC ID",
 	description = "Display identification information as text above NPCs.",
-	tags = {"NPC", "ID", "index"}
+	tags = {"NPC", "ID", "index", "name"}
 )
 public class NpcIdPlugin extends Plugin
 {
+	private static final Set<Integer> NPC_MENU_ACTIONS = new HashSet<>(Arrays.asList(
+		MenuAction.NPC_FIRST_OPTION.getId(),
+		MenuAction.NPC_SECOND_OPTION.getId(),
+		MenuAction.NPC_THIRD_OPTION.getId(),
+		MenuAction.NPC_FOURTH_OPTION.getId(),
+		MenuAction.NPC_FIFTH_OPTION.getId(),
+		MenuAction.EXAMINE_NPC.getId()));
+	public int hoverNpcIndex = -1;
+
 	@Inject
 	private NpcIdConfig config;
 
@@ -63,5 +78,18 @@ public class NpcIdPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		overlayManager.remove(npcOverlay);
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event)
+	{
+		if (NPC_MENU_ACTIONS.contains(event.getType()))
+		{
+			hoverNpcIndex = event.getIdentifier();
+		}
+		else
+		{
+			hoverNpcIndex = -1;
+		}
 	}
 }

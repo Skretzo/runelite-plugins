@@ -4,6 +4,8 @@ Display identification information as text above NPCs.
   - NPC specific [identifier](https://chisel.weirdgloop.org/moid/npc_id.html).
 * NPC index
   - Unique identifier to distinguish between NPCs with the same ID.
+* NPC name
+  - The name of the NPC without combat level.
 
 Useful for editing the [OSRS wiki](https://oldschool.runescape.wiki/).
 
