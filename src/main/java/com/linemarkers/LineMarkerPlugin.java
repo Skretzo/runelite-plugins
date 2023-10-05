@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -31,9 +32,9 @@ import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.config.Keybind;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SpriteManager;
+import net.runelite.client.input.KeyListener;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.input.MouseWheelListener;
@@ -43,7 +44,6 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
 @PluginDescriptor(
@@ -60,7 +60,6 @@ public class LineMarkerPlugin extends Plugin
 	private static final String DEFAULT_MARKER_NAME = "Marker";
 	private static final String ADD_LINE = "Add line";
 	private static final String REMOVE_LINE = "Remove line";
-	private static final String WALK_HERE = "Walk here";
 
 	@Getter(AccessLevel.PACKAGE)
 	private List<LineGroup> groups = new ArrayList<>();
@@ -122,20 +121,31 @@ public class LineMarkerPlugin extends Plugin
 	private Line lastLine = null;
 	private boolean isHotkeyPressed = false;
 
-	private HotkeyListener hotkeyListener = new HotkeyListener(() -> Keybind.SHIFT)
+	private KeyListener keyListener = new KeyListener()
 	{
 		@Override
-		public void hotkeyPressed()
+		public void keyTyped(KeyEvent e)
 		{
-			isHotkeyPressed = true;
 		}
 
 		@Override
-		public void hotkeyReleased()
+		public void keyPressed(KeyEvent e)
 		{
-			lastLine = null;
-			lastGroup = null;
-			isHotkeyPressed = false;
+			if (e.getKeyCode() == KeyEvent.VK_SHIFT)
+			{
+				isHotkeyPressed = true;
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e)
+		{
+			if (e.getKeyCode() == KeyEvent.VK_SHIFT)
+			{
+				lastLine = null;
+				lastGroup = null;
+				isHotkeyPressed = false;
+			}
 		}
 	};
 
@@ -168,7 +178,7 @@ public class LineMarkerPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		keyManager.registerKeyListener(hotkeyListener);
+		keyManager.registerKeyListener(keyListener);
 		mouseManager.registerMouseWheelListener(mouseWheelListener);
 
 		overlayManager.add(mapOverlay);
@@ -195,7 +205,7 @@ public class LineMarkerPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		keyManager.unregisterKeyListener(hotkeyListener);
+		keyManager.unregisterKeyListener(keyListener);
 		mouseManager.unregisterMouseWheelListener(mouseWheelListener);
 
 		overlayManager.remove(mapOverlay);
@@ -225,7 +235,7 @@ public class LineMarkerPlugin extends Plugin
 	@Subscribe
 	public void onMenuEntryAdded(final MenuEntryAdded event)
 	{
-		if (isHotkeyPressed && event.getOption().equals(WALK_HERE) && event.getTarget().isEmpty())
+		if (isHotkeyPressed && MenuAction.WALK.getId() == event.getType())
 		{
 			client.createMenuEntry(1)
 				.setOption(ADD_LINE)
