@@ -15,12 +15,12 @@ This plugin also comes with a few integrated presets to track a selection of ski
 ## Config options
 ![config](https://user-images.githubusercontent.com/53493631/156419218-3ffd6c9e-0e51-4fd3-a523-adffa7e6975c.png)
 - Add level prefix: ✅ `true`
-  - Whether to add a skill level prefix/identifier to the tracked chat messages
+  - Whether to add a skill level prefix/identifier to the tracked custom chat messages
 - Use boosted level: ✅ `true`
   - Whether to use the boosted skill level (numerator) or the static base skill level (denominator)
-- Level prefix: `Overall`
-  - The skill level prefix/identifier on the tracked chat messages
+- Level prefix: `Custom`
+  - The skill level prefix/identifier on the tracked custom chat messages. Custom uses total level.
 - Success message: `        `
-  - The chat message used to track a skilling action success
+  - The chat message used to track the success of a custom skilling action
 - Failure message: `        `
-  - The chat message used to track a skilling action failure
+  - The chat message used to track the failure of a custom skilling action

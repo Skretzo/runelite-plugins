@@ -7,7 +7,7 @@ import net.runelite.api.Skill;
 @RequiredArgsConstructor
 public enum ChatSuccessRatesSkill
 {
-	CUSTOM(Skill.OVERALL),
+	CUSTOM(null),
 	AGILITY(Skill.AGILITY),
 	ATTACK(Skill.ATTACK),
 	CONSTRUCTION(Skill.CONSTRUCTION),

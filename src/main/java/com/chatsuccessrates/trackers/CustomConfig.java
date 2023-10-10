@@ -3,7 +3,6 @@ package com.chatsuccessrates.trackers;
 import com.chatsuccessrates.ChatSuccessRatesSkill;
 import com.chatsuccessrates.ChatSuccessRatesTracker;
 import java.awt.Color;
-import net.runelite.api.Skill;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.SkillColor;
@@ -20,7 +19,11 @@ public class CustomConfig extends ChatSuccessRatesTracker
 	@Override
 	public Color getColor()
 	{
-		return config == null ? super.getColor() : SkillColor.find(config.levelPrefix()).getColor();
+		return config == null
+			? super.getColor()
+			: (ChatSuccessRatesSkill.CUSTOM.equals(config.levelPrefix())
+				? Color.RED
+				: SkillColor.find(config.levelPrefix().getSkill()).getColor());
 	}
 
 	@Override
@@ -38,9 +41,9 @@ public class CustomConfig extends ChatSuccessRatesTracker
 		}
 
 		final String message = event.getMessage();
-		final Skill skill = config.levelPrefix();
-		final int level = Skill.OVERALL.equals(skill) ? client.getTotalLevel() :
-			(config.useBoostedLevel() ? client.getBoostedSkillLevel(skill) : client.getRealSkillLevel(skill));
+		final ChatSuccessRatesSkill skill = config.levelPrefix();
+		final int level = ChatSuccessRatesSkill.CUSTOM.equals(skill) ? client.getTotalLevel() :
+			(config.useBoostedLevel() ? client.getBoostedSkillLevel(skill.getSkill()) : client.getRealSkillLevel(skill.getSkill()));
 
 		if (config.messageSuccess().equals(message))
 		{

@@ -1,6 +1,7 @@
 package com.chatsuccessrates;
 
 import com.chatsuccessrates.trackers.BendingNails;
+import com.chatsuccessrates.trackers.CatchingPetfish;
 import com.chatsuccessrates.trackers.CustomConfig;
 import com.chatsuccessrates.trackers.FiringPottery;
 import com.chatsuccessrates.trackers.LightingLogs;
@@ -28,6 +29,11 @@ public enum ChatSuccessRatesAction
 
 	// Firemaking
 	LIGHTING_LOGS(new LightingLogs()),
+
+	// Fishing
+	CATCHING_BLUEFISH(new CatchingPetfish(CatchingPetfish.TYPE_BLUE)),
+	CATCHING_GREENFISH(new CatchingPetfish(CatchingPetfish.TYPE_GREEN)),
+	CATCHING_SPINEFISH(new CatchingPetfish(CatchingPetfish.TYPE_SPINE)),
 
 	// Thieving
 	PICKPOCKETING_ELF(new Pickpocketing("elf")),

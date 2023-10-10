@@ -13,7 +13,6 @@ import java.util.Set;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
-import net.runelite.api.Skill;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.ScriptCallbackEvent;
@@ -248,9 +247,12 @@ public class ChatSuccessRatesPlugin extends Plugin
 	{
 		if (config.addLevelPrefix())
 		{
-			final Skill skill = config.levelPrefix();
-			final int level = Skill.OVERALL.equals(skill) ? client.getTotalLevel() :
-				(config.useBoostedLevel() ? client.getBoostedSkillLevel(skill) : client.getRealSkillLevel(skill));
+			final ChatSuccessRatesSkill skill = config.levelPrefix();
+			final int level = ChatSuccessRatesSkill.CUSTOM.equals(skill)
+				? client.getTotalLevel()
+				: (config.useBoostedLevel()
+					? client.getBoostedSkillLevel(skill.getSkill())
+					: client.getRealSkillLevel(skill.getSkill()));
 			message = level + LEVEL_DELIMITER + message;
 		}
 		return message;

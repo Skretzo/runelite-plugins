@@ -1,6 +1,5 @@
 package com.chatsuccessrates;
 
-import net.runelite.api.Skill;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -11,7 +10,7 @@ public interface ChatSuccessRatesConfig extends Config
 	@ConfigItem(
 		keyName = "addLevelPrefix",
 		name = "Add level prefix",
-		description = "Whether to add a skill level prefix/identifier to the tracked chat messages",
+		description = "Whether to add a skill level prefix/identifier to the tracked custom chat messages",
 		position = 0
 	)
 	default boolean addLevelPrefix()
@@ -33,18 +32,18 @@ public interface ChatSuccessRatesConfig extends Config
 	@ConfigItem(
 		keyName = "levelPrefix",
 		name = "Level prefix",
-		description = "The skill level prefix/identifier on the tracked chat messages",
+		description = "The skill level prefix/identifier on the tracked custom chat messages.<br>Custom uses total level",
 		position = 2
 	)
-	default Skill levelPrefix()
+	default ChatSuccessRatesSkill levelPrefix()
 	{
-		return Skill.OVERALL;
+		return ChatSuccessRatesSkill.CUSTOM;
 	}
 
 	@ConfigItem(
 		keyName = "messageSuccess",
-		name = "Success message",
-		description = "The chat message used to track a skilling action success",
+		name = "Custom success message",
+		description = "The chat message used to track the success of a custom skilling action",
 		position = 3
 	)
 	default String messageSuccess()
@@ -54,8 +53,8 @@ public interface ChatSuccessRatesConfig extends Config
 
 	@ConfigItem(
 		keyName = "messageFailure",
-		name = "Failure message",
-		description = "The chat message used to track a skilling action failure",
+		name = "Custom failure message",
+		description = "The chat message used to track the failure of a custom skilling action",
 		position = 4
 	)
 	default String messageFailure()

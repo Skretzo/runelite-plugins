@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -99,8 +98,8 @@ class ChatSuccessRatesPluginPanel extends PluginPanel
 				return;
 			}
 			ChatSuccessRatesTracker tracker = (ChatSuccessRatesTracker) trackerSelection.getSelectedItem();
-			StringBuilder text = new StringBuilder(tracker.toString() + ":\nLevel\tSuccesses\tFailures:\n");
-			for (ChatSuccessRatesBar bar : tracker.getTrackerBars().values())
+			StringBuilder text = new StringBuilder(tracker.toString() + ":\nLevel\tSuccesses\tFailures");
+			for (ChatSuccessRatesBar bar : tracker.getTrackerBars())
 			{
 				text.append(text.length() > 0 ? "\n" : "").append(bar.toString());
 			}
@@ -202,7 +201,7 @@ class ChatSuccessRatesPluginPanel extends PluginPanel
 				skillTrackers = trackers.get(tracker.getSkill());
 			}
 			skillTrackers.add(tracker);
-			Collections.sort(skillTrackers);
+			skillTrackers.sort(null);
 			trackers.put(tracker.getSkill(), skillTrackers);
 		}
 
@@ -229,7 +228,7 @@ class ChatSuccessRatesPluginPanel extends PluginPanel
 
 		successRatesPanel.removeAll();
 
-		for (ChatSuccessRatesBar bar : tracker.getTrackerBars().values())
+		for (ChatSuccessRatesBar bar : tracker.getTrackerBars())
 		{
 			successRatesPanel.add(bar);
 		}

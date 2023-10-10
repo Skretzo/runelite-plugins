@@ -4,13 +4,14 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.SwingUtilities;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Client;
-import net.runelite.api.Skill;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.SkillColor;
@@ -32,15 +33,21 @@ public abstract class ChatSuccessRatesTracker implements Comparable<ChatSuccessR
 	@Getter
 	private Map<Integer, Integer[]> levelRates = new HashMap<>();
 
-	@Getter
 	@Setter
-	public Map<Integer, ChatSuccessRatesBar> trackerBars = new HashMap<>();
+	private Map<Integer, ChatSuccessRatesBar> trackerBars = new HashMap<>();
+
+	public List<ChatSuccessRatesBar> getTrackerBars()
+	{
+		List<ChatSuccessRatesBar> bars = new ArrayList<>(trackerBars.values());
+		bars.sort(null);
+		return bars;
+	}
 
 	public abstract ChatSuccessRatesSkill getSkill();
 
 	public Color getColor()
 	{
-		return getSkill().getSkill().equals(Skill.OVERALL) ? Color.RED : SkillColor.find(getSkill().getSkill()).getColor();
+		return ChatSuccessRatesSkill.CUSTOM.equals(getSkill()) ? Color.RED : SkillColor.find(getSkill().getSkill()).getColor();
 	}
 
 	public void register(EventBus eventBus, Client client, ChatSuccessRatesConfig config,

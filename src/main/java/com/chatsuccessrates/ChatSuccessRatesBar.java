@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.components.ProgressBar;
 
-class ChatSuccessRatesBar extends JPanel
+class ChatSuccessRatesBar extends JPanel implements Comparable<ChatSuccessRatesBar>
 {
 	private int successes;
 	private int failures;
@@ -79,5 +79,11 @@ class ChatSuccessRatesBar extends JPanel
 	public String toString()
 	{
 		return level + "\t" + successes + "\t" + failures;
+	}
+
+	@Override
+	public int compareTo(ChatSuccessRatesBar other)
+	{
+		return Integer.compare(level, other.level);
 	}
 }
