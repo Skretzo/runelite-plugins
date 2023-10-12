@@ -224,7 +224,9 @@ public class RadiusMarkerPlugin extends Plugin
 
 		try
 		{
-			return gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
+			List<RadiusMarker> loaded = gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
+			loaded.removeIf(RadiusMarker::isInvalid);
+			return loaded;
 		}
 		catch (IllegalStateException | JsonSyntaxException ignore)
 		{
@@ -286,6 +288,7 @@ public class RadiusMarkerPlugin extends Plugin
 		try
 		{
 			radiusMarkers = gson.fromJson(json, new TypeToken<List<RadiusMarker>>(){}.getType());
+			radiusMarkers.removeIf(RadiusMarker::isInvalid);
 		}
 		catch (IllegalStateException | JsonSyntaxException ignore)
 		{
