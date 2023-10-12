@@ -299,7 +299,9 @@ public class LineMarkerPlugin extends Plugin
 
 		try
 		{
-			groups = gson.fromJson(json, new TypeToken<ArrayList<LineGroup>>(){}.getType());
+			List<LineGroup> loaded = gson.fromJson(json, new TypeToken<ArrayList<LineGroup>>(){}.getType());
+			loaded.removeIf(LineGroup::isInvalid);
+			groups.addAll(loaded);
 			mirrorMarkers();
 		}
 		catch (IllegalStateException | JsonSyntaxException ignore)
@@ -376,13 +378,8 @@ public class LineMarkerPlugin extends Plugin
 			return false;
 		}
 
-		for (LineGroup marker : markers)
-		{
-			if (!groups.contains(marker))
-			{
-				groups.add(marker);
-			}
-		}
+		markers.removeIf(group -> LineGroup.isInvalid(group) || groups.contains(group));
+		groups.addAll(markers);
 
 		saveMarkers();
 

@@ -43,6 +43,11 @@ class LineGroup
 		return markers;
 	}
 
+	public static boolean isInvalid(LineGroup group)
+	{
+		return group == null || group.id <= 0 || group.name == null || group.lines == null;
+	}
+
 	@Override
 	public String toString()
 	{
