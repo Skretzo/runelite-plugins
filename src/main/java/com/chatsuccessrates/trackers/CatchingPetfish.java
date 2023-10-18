@@ -23,7 +23,7 @@ public class CatchingPetfish extends ChatSuccessRatesTracker
 
 	private String getMessageSuccess(String type)
 	{
-		return "...and catch a Tiny " + type + "!";
+		return "...and you catch a Tiny " + type + "!";
 	}
 
 	private Set<String> getMessagesFailure()
