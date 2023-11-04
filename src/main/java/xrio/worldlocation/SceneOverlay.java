@@ -72,11 +72,6 @@ public class SceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!isHoveringScene())
-		{
-			return null;
-		}
-
 		if (config.tileLines())
 		{
 			renderLines(graphics, 1, config.tileLineWidth(), config.tileLineColour());
@@ -92,7 +87,7 @@ public class SceneOverlay extends Overlay
 			renderLines(graphics, 64, config.regionLineWidth(), config.regionLineColour());
 		}
 
-		if (config.tileLocation())
+		if (config.tileLocation() && isHoveringScene())
 		{
 			renderTile(graphics, config.tileColour());
 		}
