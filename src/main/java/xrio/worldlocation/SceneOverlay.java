@@ -35,6 +35,8 @@ import java.awt.Polygon;
 import java.awt.geom.GeneralPath;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.Scene;
@@ -70,10 +72,16 @@ public class SceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (!isHoveringScene())
+		{
+			return null;
+		}
+
 		if (config.tileLines())
 		{
 			renderLines(graphics, 1, config.tileLineWidth(), config.tileLineColour());
 		}
+
 		if (config.chunkLines())
 		{
 			renderLines(graphics, 8, config.chunkLineWidth(), config.chunkLineColour());
@@ -210,5 +218,18 @@ public class SceneOverlay extends Overlay
 				}
 			}
 		}
+	}
+
+	private boolean isHoveringScene()
+	{
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		for (int i = menuEntries.length - 1; i >= 0; i--)
+		{
+			if (MenuAction.WALK.equals(menuEntries[i].getType()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
