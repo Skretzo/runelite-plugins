@@ -241,10 +241,23 @@ public interface IdentificatorConfig extends Config
 		return false;
 	}
 
+	@ConfigItem(
+		keyName = "showGameObjectAnimationId",
+		name = "Show game object animation id",
+		description = "Whether to display the animation id of a dynamic game object.<br>" +
+			"Make sure to hover/interact with the base tile(s) of the object.",
+		position = 20,
+		section = optionsSection
+	)
+	default boolean showGameObjectAnimationId()
+	{
+		return false;
+	}
+
 	@ConfigSection(
 		name = "Logging",
 		description = "Options for logging tick timestamp and player related IDs in a side panel",
-		position = 17
+		position = 21
 	)
 	String loggingSection = "optionsLogging";
 
@@ -252,7 +265,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logging",
 		name = "Enable logging",
 		description = "Whether to enable logging of tick timestamp and player related IDs in a side panel",
-		position = 18,
+		position = 22,
 		section = loggingSection
 	)
 	default boolean logging()
@@ -264,7 +277,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logRelativeTickTimestamp",
 		name = "Relative tick timestamp",
 		description = "Whether to make the tick timestamp relative to the last logged entry or make it static",
-		position = 19,
+		position = 23,
 		section = loggingSection
 	)
 	default boolean logRelativeTickTimestamp()
@@ -276,7 +289,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerAnimationId",
 		name = "Log animation IDs",
 		description = "Whether to log player animation IDs in a side panel",
-		position = 20,
+		position = 24,
 		section = loggingSection
 	)
 	default boolean logPlayerAnimationId()
@@ -288,7 +301,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerPoseAnimationId",
 		name = "Log pose animation IDs",
 		description = "Whether to log player pose animation IDs in a side panel",
-		position = 21,
+		position = 25,
 		section = loggingSection
 	)
 	default boolean logPlayerPoseAnimationId()
@@ -300,7 +313,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerGraphicId",
 		name = "Log graphic IDs",
 		description = "Whether to log player graphic IDs in a side panel",
-		position = 22,
+		position = 26,
 		section = loggingSection
 	)
 	default boolean logPlayerGraphicId()
@@ -311,7 +324,7 @@ public interface IdentificatorConfig extends Config
 	@ConfigSection(
 		name = "Colours",
 		description = "Options for the text colours",
-		position = 23
+		position = 27
 	)
 	String coloursSection = "coloursSection";
 
@@ -320,7 +333,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourHover",
 		name = "Hover text",
 		description = "The colour of the hover info text",
-		position = 24,
+		position = 28,
 		section = coloursSection
 	)
 	default Color colourHover()
@@ -333,7 +346,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourOverhead",
 		name = "Overhead text",
 		description = "The colour of the overhead info text",
-		position = 25,
+		position = 29,
 		section = coloursSection
 	)
 	default Color colourOverhead()
@@ -346,7 +359,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourMenu",
 		name = "Menu text",
 		description = "The colour of the menu info text",
-		position = 26,
+		position = 30,
 		section = coloursSection
 	)
 	default Color colourMenu()

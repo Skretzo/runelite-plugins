@@ -5,10 +5,10 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.List;
+import net.runelite.api.Animation;
 import net.runelite.api.Client;
-import net.runelite.api.DecorativeObject;
+import net.runelite.api.DynamicObject;
 import net.runelite.api.GameObject;
-import net.runelite.api.GroundObject;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
@@ -20,7 +20,6 @@ import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
 import net.runelite.api.TileObject;
-import net.runelite.api.WallObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -122,64 +121,9 @@ public class IdentificatorOverlay extends Overlay
 			}
 		}
 
-		if (plugin.showHoverInfo && isHoveringGameScene())
+		if (plugin.showHoverInfo && !plugin.hoverText.isEmpty() && isHoveringGameScene())
 		{
-			if (plugin.hoverText != null)
-			{
-				tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag(plugin.hoverText, plugin.colourHover)));
-			}
-			else
-			{
-				Tile selectedTile = client.getSelectedSceneTile();
-				if (selectedTile != null)
-				{
-					StringBuilder text = new StringBuilder();
-
-					GameObject[] gameObjects = selectedTile.getGameObjects();
-					GroundObject groundObject = selectedTile.getGroundObject();
-					DecorativeObject decorativeObject = selectedTile.getDecorativeObject();
-					WallObject wallObject = selectedTile.getWallObject();
-					List<TileItem> tileItems = selectedTile.getGroundItems();
-
-					if (gameObjects != null && plugin.showGameObjectId)
-					{
-						for (GameObject gameObject : gameObjects)
-						{
-							if (gameObject != null)
-							{
-								text.append(text.length() > 0 ? ", " : "").append(gameObject.getId());
-							}
-						}
-					}
-					if (groundObject != null && plugin.showGroundObjectId)
-					{
-						text.append(text.length() > 0 ? ", " : "").append(groundObject.getId());
-					}
-					if (decorativeObject != null && plugin.showDecorativeObjectId)
-					{
-						text.append(text.length() > 0 ? ", " : "").append(decorativeObject.getId());
-					}
-					if (wallObject != null && plugin.showWallObjectId)
-					{
-						text.append(text.length() > 0 ? ", " : "").append(wallObject.getId());
-					}
-					if (tileItems != null && plugin.showGroundItemId)
-					{
-						for (TileItem tileItem : tileItems)
-						{
-							if (tileItem != null)
-							{
-								text.append(text.length() > 0 ? ", " : "").append(tileItem.getId());
-							}
-						}
-					}
-
-					if (text.length() > 0)
-					{
-						tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag("(ID: " + text + ")", plugin.colourHover)));
-					}
-				}
-			}
+			tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag(plugin.hoverText, plugin.colourHover)));
 		}
 
 		return null;
@@ -227,9 +171,9 @@ public class IdentificatorOverlay extends Overlay
 			text += (text.length() == 0 ? "" : " ") + "(G: " + npc.getGraphic() + ")";
 		}
 
-		if ((plugin.showNpcOverrideModelIds || plugin.showNpcOverrideColours || plugin.showNpcOverrideTextures) && npc.getModelOverrides() != null)
+		NpcOverrides modelOverrides = npc.getModelOverrides();
+		if (modelOverrides != null)
 		{
-			NpcOverrides modelOverrides = npc.getModelOverrides();
 			if (plugin.showNpcOverrideModelIds && modelOverrides.getModelIds() != null)
 			{
 				text += (text.length() == 0 ? "" : " ") + "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
@@ -316,9 +260,17 @@ public class IdentificatorOverlay extends Overlay
 
 		for (GameObject gameObject : gameObjects)
 		{
-			if (gameObject != null)
+			if (plugin.isGameObject(gameObject))
 			{
 				text.append(text.length() > 0 ? ", " : "").append(gameObject.getId());
+				if (plugin.showGameObjectAnimationId && gameObject.getRenderable() instanceof DynamicObject)
+				{
+					Animation animation = ((DynamicObject) gameObject.getRenderable()).getAnimation();
+					if (animation != null)
+					{
+						text.append(" (A: ").append(animation.getId()).append(")");
+					}
+				}
 			}
 		}
 

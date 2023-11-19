@@ -7,14 +7,22 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
+import net.runelite.api.Animation;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.DecorativeObject;
+import net.runelite.api.DynamicObject;
+import net.runelite.api.GameObject;
+import net.runelite.api.GroundObject;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.NpcOverrides;
 import net.runelite.api.Player;
+import net.runelite.api.Tile;
+import net.runelite.api.TileItem;
+import net.runelite.api.WallObject;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
@@ -57,7 +65,7 @@ public class IdentificatorPlugin extends Plugin
 		MenuAction.GROUND_ITEM_FIFTH_OPTION
 	);
 
-	String hoverText = null;
+	String hoverText = "";
 	boolean showHoverInfo;
 	boolean showOverheadInfo;
 	private boolean showMenuInfo;
@@ -77,6 +85,7 @@ public class IdentificatorPlugin extends Plugin
 	boolean showNpcOverrideModelIds;
 	boolean showNpcOverrideColours;
 	boolean showNpcOverrideTextures;
+	boolean showGameObjectAnimationId;
 	Color colourHover;
 	Color colourOverhead;
 	Color colourMenu;
@@ -186,6 +195,7 @@ public class IdentificatorPlugin extends Plugin
 		showNpcOverrideModelIds = config.showNpcOverrideModelIds();
 		showNpcOverrideColours = config.showNpcOverrideColours();
 		showNpcOverrideTextures = config.showNpcOverrideTextures();
+		showGameObjectAnimationId = config.showGameObjectAnimationId();
 		colourHover = config.colourHover();
 		colourOverhead = config.colourOverhead();
 		colourMenu = config.colourMenu();
@@ -196,10 +206,19 @@ public class IdentificatorPlugin extends Plugin
 		return npc == null || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName());
 	}
 
+	public boolean isGameObject(GameObject gameObject)
+	{
+		// 0 = Player
+		// 1 = NPC
+		// 2 = Object
+		// 3 = Item
+		return gameObject != null && (gameObject.getHash() >> 14 & 3) == 2;
+	}
+
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		hoverText = null;
+		hoverText = "";
 
 		if (triggerWithShift && !client.isKeyPressed(KeyCode.KC_SHIFT))
 		{
@@ -215,154 +234,137 @@ public class IdentificatorPlugin extends Plugin
 		{
 			if (showNpcId)
 			{
-				String text = "(ID: " + npc.getId() + ")";
-				hoverText = text;
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-				}
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + npc.getId() + ")";
 			}
 			if (showNpcAnimationId)
 			{
-				String text = "(A: " + npc.getAnimation() + ")";
-				if (hoverText == null)
-				{
-					hoverText = "";
-				}
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-				}
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(A: " + npc.getAnimation() + ")";
 			}
 			if (showNpcPoseAnimationId)
 			{
-				String text = "(P: " + npc.getPoseAnimation() + ")";
-				if (hoverText == null)
-				{
-					hoverText = "";
-				}
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-				}
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(P: " + npc.getPoseAnimation() + ")";
 			}
 			if (showNpcGraphicId)
 			{
-				String text = "(G: " + npc.getGraphic() + ")";
-				if (hoverText == null)
-				{
-					hoverText = "";
-				}
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-				}
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(G: " + npc.getGraphic() + ")";
 			}
-			if ((showNpcOverrideModelIds || showNpcOverrideColours || showNpcOverrideTextures) && npc.getModelOverrides() != null)
+			NpcOverrides modelOverrides = npc.getModelOverrides();
+			if (modelOverrides != null)
 			{
-				NpcOverrides modelOverrides = npc.getModelOverrides();
 				if (showNpcOverrideModelIds && modelOverrides.getModelIds() != null)
 				{
-					String text = "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
-					if (hoverText == null)
-					{
-						hoverText = "";
-					}
-					hoverText += (hoverText.length() > 0 ? " " : "") + text;
-					if (showMenuInfo)
-					{
-						entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-					}
+					hoverText += (hoverText.length() > 0 ? " " : "") + "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
 				}
 				if (showNpcOverrideColours && modelOverrides.getColorToReplaceWith() != null)
 				{
-					String text = "(C: " + Arrays.toString(modelOverrides.getColorToReplaceWith()) + ")";
-					if (hoverText == null)
-					{
-						hoverText = "";
-					}
-					hoverText += (hoverText.length() > 0 ? " " : "") + text;
-					if (showMenuInfo)
-					{
-						entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-					}
+					hoverText += (hoverText.length() > 0 ? " " : "") + "(C: " + Arrays.toString(modelOverrides.getColorToReplaceWith()) + ")";
 				}
 				if (showNpcOverrideTextures && modelOverrides.getTextureToReplaceWith() != null)
 				{
-					String text = "(T: " + Arrays.toString(modelOverrides.getTextureToReplaceWith()) + ")";
-					if (hoverText == null)
-					{
-						hoverText = "";
-					}
-					hoverText += (hoverText.length() > 0 ? " " : "") + text;
-					if (showMenuInfo)
-					{
-						entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-					}
+					hoverText += (hoverText.length() > 0 ? " " : "") + "(T: " + Arrays.toString(modelOverrides.getTextureToReplaceWith()) + ")";
 				}
+			}
+			if (showMenuInfo)
+			{
+				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
 			}
 		}
 		else if (player != null)
 		{
 			if (showPlayerAnimationId)
 			{
-				String text = "(A: " + player.getAnimation() + ")";
-				hoverText = text;
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-				}
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(A: " + player.getAnimation() + ")";
 			}
 			if (showPlayerPoseAnimationId)
 			{
-				String text = "(P: " + player.getPoseAnimation() + ")";
-				if (hoverText == null)
-				{
-					hoverText = "";
-				}
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
-				}
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(P: " + player.getPoseAnimation() + ")";
 			}
 			if (showPlayerGraphicId)
 			{
-				String text = "(G: " + player.getGraphic() + ")";
-				if (hoverText == null)
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(G: " + player.getGraphic() + ")";
+			}
+			if (showMenuInfo)
+			{
+				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
+			}
+		}
+		else if (OBJECT_MENU_TYPES.contains(menuAction) && client.getSelectedSceneTile() != null)
+		{
+			Tile tile = client.getSelectedSceneTile();
+
+			GameObject[] gameObjects = tile.getGameObjects();
+			GroundObject groundObject = tile.getGroundObject();
+			DecorativeObject decorativeObject = tile.getDecorativeObject();
+			WallObject wallObject = tile.getWallObject();
+
+			if (showGameObjectId && gameObjects != null)
+			{
+				String text = "";
+				for (GameObject gameObject : gameObjects)
 				{
-					hoverText = "";
+					if (isGameObject(gameObject))
+					{
+						text += (text.length() > 0 ? ", " : "") + gameObject.getId();
+					}
 				}
+				text = text.length() > 0 ? ("(ID: " + text + ")") : text;
 				hoverText += (hoverText.length() > 0 ? " " : "") + text;
-				if (showMenuInfo)
+			}
+			if (showGroundObjectId && groundObject != null)
+			{
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + groundObject.getId() + ")";
+			}
+			if (showDecorativeObjectId && decorativeObject != null)
+			{
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + decorativeObject.getId() + ")";
+			}
+			if (showWallObjectId && wallObject != null)
+			{
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + wallObject.getId() + ")";
+			}
+			if (showGameObjectAnimationId && gameObjects != null)
+			{
+				String text = "";
+				for (GameObject gameObject : gameObjects)
 				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + text, colourMenu));
+					if (isGameObject(gameObject) && gameObject.getRenderable() instanceof DynamicObject)
+					{
+						Animation animation = ((DynamicObject) gameObject.getRenderable()).getAnimation();
+						if (animation != null)
+						{
+							text += (text.length() > 0 ? ", " : "") + animation.getId();
+						}
+					}
 				}
+				text = text.length() > 0 ? ("(A: " + text + ")") : text;
+				hoverText += (hoverText.length() > 0 ? " " : "") + text;
+			}
+			if (showMenuInfo)
+			{
+				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
 			}
 		}
-		else if (OBJECT_MENU_TYPES.contains(menuAction))
+		else if (GROUND_ITEM_MENU_TYPES.contains(menuAction) && client.getSelectedSceneTile() != null)
 		{
-			if (showGameObjectId || showGroundObjectId || showDecorativeObjectId || showWallObjectId)
+			Tile tile = client.getSelectedSceneTile();
+			List<TileItem> groundItems = tile.getGroundItems();
+
+			if (showGroundItemId && groundItems != null)
 			{
-				hoverText = "(ID: " + entry.getIdentifier() + ")";
-				if (showMenuInfo)
+				String text = "";
+				for (TileItem groundItem : groundItems)
 				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
+					if (groundItem != null)
+					{
+						text += (text.length() > 0 ? ", " : "") + groundItem.getId();
+					}
 				}
+				text = text.length() > 0 ? ("(ID: " + text + ")") : text;
+				hoverText += (hoverText.length() > 0 ? " " : "") + text;
 			}
-		}
-		else if (GROUND_ITEM_MENU_TYPES.contains(menuAction))
-		{
-			if (showGroundItemId)
+			if (showMenuInfo)
 			{
-				hoverText = "(ID: " + entry.getIdentifier() + ")";
-				if (showMenuInfo)
-				{
-					entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
-				}
+				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
 			}
 		}
 	}
