@@ -28,8 +28,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
-import net.runelite.client.ui.components.ComboBoxListRenderer;
 import net.runelite.client.ui.components.FlatTextField;
+import net.runelite.client.ui.components.TitleCaseListCellRenderer;
 import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
@@ -445,7 +445,7 @@ class LineMarkerPanel extends JPanel
 			});
 
 			groupSelection.setVisible(false);
-			groupSelection.setRenderer(new ComboBoxListRenderer<>());
+			groupSelection.setRenderer(new TitleCaseListCellRenderer());
 			groupSelection.setPreferredSize(new Dimension(115, 24));
 			groupSelection.setSelectedIndex(groups.indexOf(marker));
 			groupSelection.setToolTipText("Marker group");
