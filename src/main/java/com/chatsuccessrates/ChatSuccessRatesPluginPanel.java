@@ -27,7 +27,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.ui.components.ComboBoxListRenderer;
+import net.runelite.client.ui.components.TitleCaseListCellRenderer;
 
 class ChatSuccessRatesPluginPanel extends PluginPanel
 {
@@ -138,8 +138,8 @@ class ChatSuccessRatesPluginPanel extends PluginPanel
 		successRatesPanel.setLayout(new BoxLayout(successRatesPanel, BoxLayout.Y_AXIS));
 		successRatesPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-		skillSelection.setRenderer(new ComboBoxListRenderer<>());
-		trackerSelection.setRenderer(new ComboBoxListRenderer<>());
+		skillSelection.setRenderer(new TitleCaseListCellRenderer());
+		trackerSelection.setRenderer(new TitleCaseListCellRenderer());
 
 		loadTrackers();
 
