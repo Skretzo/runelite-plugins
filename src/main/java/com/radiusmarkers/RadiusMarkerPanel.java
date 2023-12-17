@@ -26,8 +26,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
-import net.runelite.client.ui.components.ComboBoxListRenderer;
 import net.runelite.client.ui.components.FlatTextField;
+import net.runelite.client.ui.components.TitleCaseListCellRenderer;
 import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
@@ -531,7 +531,7 @@ class RadiusMarkerPanel extends JPanel
 		labelNpcId.setPreferredSize(new Dimension(58, 21));
 
 		JComboBox<AttackType> selectionAttackType = new JComboBox<>(AttackType.values());
-		selectionAttackType.setRenderer(new ComboBoxListRenderer<>());
+		selectionAttackType.setRenderer(new TitleCaseListCellRenderer());
 		selectionAttackType.setPreferredSize(new Dimension(84, 20));
 		selectionAttackType.setSelectedIndex(marker.getAttackType() == null ? 0 : marker.getAttackType().ordinal());
 		selectionAttackType.setToolTipText("Attack range type");
