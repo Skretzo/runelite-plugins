@@ -16,8 +16,8 @@ import net.runelite.api.MenuAction;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.ScriptCallbackEvent;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -201,7 +201,7 @@ public class ChatSuccessRatesPlugin extends Plugin
 	@Subscribe
 	public void onMenuOpened(MenuOpened event)
 	{
-		final Widget chatboxMessageLines = client.getWidget(WidgetInfo.CHATBOX_MESSAGE_LINES);
+		final Widget chatboxMessageLines = client.getWidget(ComponentID.CHATBOX_MESSAGE_LINES);
 		if (duplicateChatCache.isEmpty() ||
 			chatboxMessageLines == null ||
 			!chatboxMessageLines.getBounds().contains(
