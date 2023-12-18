@@ -7,8 +7,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -34,7 +34,7 @@ class LineMarkerMapOverlay extends Overlay
 		setPosition(OverlayPosition.DYNAMIC);
 		setPriority(OverlayPriority.LOW);
 		setLayer(OverlayLayer.MANUAL);
-		drawAfterLayer(WidgetInfo.WORLD_MAP_VIEW);
+		drawAfterLayer(ComponentID.WORLD_MAP_MAPVIEW);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ class LineMarkerMapOverlay extends Overlay
 
 	private void drawWorldMap(Graphics2D graphics)
 	{
-		final Widget worldMapView = client.getWidget(WidgetInfo.WORLD_MAP_VIEW);
+		final Widget worldMapView = client.getWidget(ComponentID.WORLD_MAP_MAPVIEW);
 		if (worldMapView == null)
 		{
 			return;
@@ -100,8 +100,8 @@ class LineMarkerMapOverlay extends Overlay
 
 	private Area getWorldMapClipArea(Rectangle baseRectangle)
 	{
-		final Widget overview = client.getWidget(WidgetInfo.WORLD_MAP_OVERVIEW_MAP);
-		final Widget surfaceSelector = client.getWidget(WidgetInfo.WORLD_MAP_SURFACE_SELECTOR);
+		final Widget overview = client.getWidget(ComponentID.WORLD_MAP_OVERVIEW_MAP);
+		final Widget surfaceSelector = client.getWidget(ComponentID.WORLD_MAP_SURFACE_SELECTOR);
 
 		Area clipArea = new Area(baseRectangle);
 
