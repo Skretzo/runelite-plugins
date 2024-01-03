@@ -90,9 +90,9 @@ class LineMarkerMapOverlay extends Overlay
 
 		final int offset = (delta.getX() - start.getX()) / 2;
 		final int x1 = start.getX() - offset;
-		final int y1 = start.getY() - offset;
+		final int y1 = start.getY() + offset;
 		final int x2 = end.getX() - offset;
-		final int y2 = end.getY() - offset;
+		final int y2 = end.getY() + offset;
 
 		graphics.setColor(line.getColour());
 		graphics.drawLine(x1, y1, x2, y2);
