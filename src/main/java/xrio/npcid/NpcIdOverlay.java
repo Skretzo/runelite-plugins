@@ -83,7 +83,7 @@ public class NpcIdOverlay extends Overlay
 
 		if (config.showName())
 		{
-			text += npc.getName();
+			text += config.stripTags() && npc.getName() != null ? npc.getName().replaceAll("</?[=\\w]*>", "") : npc.getName();
 		}
 
 		if (config.showId())
@@ -93,7 +93,7 @@ public class NpcIdOverlay extends Overlay
 
 		if (config.showIndex())
 		{
-			text += (config.showName() ? " " : "") + "#" + npc.getIndex();
+			text += (config.showName() && !config.showId() ? " " : "") + "#" + npc.getIndex();
 		}
 
 		final Point textLocation = npc.getCanvasTextLocation(graphics, text, npc.getLogicalHeight() + 40);

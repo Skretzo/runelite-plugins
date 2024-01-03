@@ -77,9 +77,20 @@ public interface NpcIdConfig extends Config
 		return false;
 	}
 
-	@Alpha
 	@ConfigItem(
 		position = 4,
+		keyName = "stripTags",
+		name = "Strip tags",
+		description = "Whether to strip NPC name formatting tags like &lt;col=00ffff&gt;&lt;/col&gt;."
+	)
+	default boolean stripTags()
+	{
+		return true;
+	}
+
+	@Alpha
+	@ConfigItem(
+		position = 5,
 		keyName = "textColour",
 		name = "Text colour",
 		description = "The colour of the NPC identification text."
