@@ -13,7 +13,9 @@ import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
+import net.runelite.api.NPCComposition;
 import net.runelite.api.NpcOverrides;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
 import net.runelite.api.Point;
@@ -91,7 +93,11 @@ public class IdentificatorOverlay extends Overlay
 
 					if (plugin.showGameObjectId)
 					{
-						text.append(gameObjectsToText(tile.getGameObjects()));
+						text.append(gameObjectsToText(text, tile.getGameObjects()));
+					}
+					if (plugin.showGameObjectMorphId)
+					{
+						text.append(morphedGameObjectsToText(text, tile.getGameObjects()));
 					}
 					if (plugin.showGroundObjectId)
 					{
@@ -107,8 +113,7 @@ public class IdentificatorOverlay extends Overlay
 					}
 					if (plugin.showGroundItemId)
 					{
-						String textGroundItems = groundItemsToText(tile.getGroundItems());
-						text.append((text.length() > 0 && textGroundItems.length() > 0) ? ", " : "").append(textGroundItems);
+						text.append(groundItemsToText(text, tile.getGroundItems()));
 					}
 
 					final Point textLocation = Perspective.getCanvasTextLocation(client, graphics, tile.getLocalLocation(), text.toString(), 40);
@@ -153,7 +158,21 @@ public class IdentificatorOverlay extends Overlay
 
 		if (plugin.showNpcId)
 		{
-			text += "(ID: " + npc.getId() + ")";
+			// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
+			// However npc.getComposition.getId() returns the original non-transformed NPC id.
+			NPCComposition npcComposition = npc.getComposition();
+			text += "(ID: " + (npcComposition != null ? npcComposition.getId() : npc.getId()) + ")";
+		}
+
+		if (plugin.showNpcMorphId)
+		{
+			// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
+			// However npc.getComposition.getId() returns the original non-transformed NPC id.
+			NPCComposition npcComposition = npc.getComposition();
+			if (npcComposition != null && npcComposition.getId() != npc.getId())
+			{
+				text += (text.length() == 0 ? "" : " ") + "(Morph ID: " + npc.getId() + ")";
+			}
 		}
 
 		if (plugin.showNpcAnimationId)
@@ -249,11 +268,11 @@ public class IdentificatorOverlay extends Overlay
 		return (text.length() > 0 ? ", " : "") + tileObject.getId();
 	}
 
-	private String gameObjectsToText(GameObject[] gameObjects)
+	private String gameObjectsToText(StringBuilder original, GameObject[] gameObjects)
 	{
 		StringBuilder text = new StringBuilder();
 
-		if (!plugin.showGameObjectId || gameObjects == null)
+		if (gameObjects == null)
 		{
 			return text.toString();
 		}
@@ -274,10 +293,31 @@ public class IdentificatorOverlay extends Overlay
 			}
 		}
 
-		return text.toString();
+		return (original.length() > 0 && text.length() > 0 ? ", " :  "") + text.toString();
 	}
 
-	private String groundItemsToText(List<TileItem> tileItems)
+	private String morphedGameObjectsToText(StringBuilder original, GameObject[] gameObjects)
+	{
+		StringBuilder text = new StringBuilder();
+
+		if (gameObjects == null)
+		{
+			return text.toString();
+		}
+
+		for (GameObject gameObject : gameObjects)
+		{
+			ObjectComposition morphedObjectComposition = plugin.getMorphedGameObject(gameObject);
+			if (morphedObjectComposition != null)
+			{
+				text.append(text.length() > 0 ? ", " : "").append(morphedObjectComposition.getId());
+			}
+		}
+
+		return (original.length() > 0 && text.length() > 0 ? ", " : "") + text.toString();
+	}
+
+	private String groundItemsToText(StringBuilder original, List<TileItem> tileItems)
 	{
 		StringBuilder text = new StringBuilder();
 
@@ -294,6 +334,6 @@ public class IdentificatorOverlay extends Overlay
 			}
 		}
 
-		return text.toString();
+		return (original.length() > 0 && text.length() > 0 ? ", " : "") + text.toString();
 	}
 }

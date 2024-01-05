@@ -18,7 +18,9 @@ import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
+import net.runelite.api.NPCComposition;
 import net.runelite.api.NpcOverrides;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.Player;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
@@ -71,6 +73,7 @@ public class IdentificatorPlugin extends Plugin
 	private boolean showMenuInfo;
 	boolean triggerWithShift;
 	boolean showNpcId;
+	boolean showNpcMorphId;
 	boolean showNpcAnimationId;
 	boolean showNpcPoseAnimationId;
 	boolean showNpcGraphicId;
@@ -78,6 +81,7 @@ public class IdentificatorPlugin extends Plugin
 	boolean showPlayerPoseAnimationId;
 	boolean showPlayerGraphicId;
 	boolean showGameObjectId;
+	boolean showGameObjectMorphId;
 	boolean showGroundObjectId;
 	boolean showDecorativeObjectId;
 	boolean showWallObjectId;
@@ -181,6 +185,7 @@ public class IdentificatorPlugin extends Plugin
 		showMenuInfo = config.showMenuInfo();
 		triggerWithShift = config.triggerWithShift();
 		showNpcId = config.showNpcId();
+		showNpcMorphId = config.showNpcMorphId();
 		showNpcAnimationId = config.showNpcAnimationId();
 		showNpcPoseAnimationId = config.showNpcPoseAnimationId();
 		showNpcGraphicId = config.showNpcGraphicId();
@@ -188,6 +193,7 @@ public class IdentificatorPlugin extends Plugin
 		showPlayerPoseAnimationId = config.showPlayerPoseAnimationId();
 		showPlayerGraphicId = config.showPlayerGraphicId();
 		showGameObjectId = config.showGameObjectId();
+		showGameObjectMorphId = config.showGameObjectMorphId();
 		showGroundObjectId = config.showGroundObjectId();
 		showDecorativeObjectId = config.showDecorativeObjectId();
 		showWallObjectId = config.showWallObjectId();
@@ -215,6 +221,19 @@ public class IdentificatorPlugin extends Plugin
 		return gameObject != null && (gameObject.getHash() >> 14 & 3) == 2;
 	}
 
+	public ObjectComposition getMorphedGameObject(GameObject gameObject)
+	{
+		if (isGameObject(gameObject))
+		{
+			ObjectComposition objectComposition = client.getObjectDefinition(gameObject.getId());
+			if (objectComposition != null && objectComposition.getImpostorIds() != null)
+			{
+				return objectComposition.getImpostor();
+			}
+		}
+		return null;
+	}
+
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
@@ -234,7 +253,20 @@ public class IdentificatorPlugin extends Plugin
 		{
 			if (showNpcId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + npc.getId() + ")";
+				// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
+				// However npc.getComposition.getId() returns the original non-transformed NPC id.
+				NPCComposition npcComposition = npc.getComposition();
+				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + (npcComposition != null ? npcComposition.getId() : npc.getId()) + ")";
+			}
+			if (showNpcMorphId)
+			{
+				// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
+				// However npc.getComposition.getId() returns the original non-transformed NPC id.
+				NPCComposition npcComposition = npc.getComposition();
+				if (npcComposition != null && npcComposition.getId() != npc.getId())
+				{
+					hoverText += (hoverText.length() > 0 ? " " : "") + "(Morph ID: " + npc.getId() + ")";
+				}
 			}
 			if (showNpcAnimationId)
 			{
@@ -310,6 +342,20 @@ public class IdentificatorPlugin extends Plugin
 				text = text.length() > 0 ? ("(ID: " + text + ")") : text;
 				hoverText += (hoverText.length() > 0 ? " " : "") + text;
 			}
+			if (showGameObjectMorphId && gameObjects != null)
+			{
+				String text = "";
+				for (GameObject gameObject : gameObjects)
+				{
+					ObjectComposition morphedGameObject = getMorphedGameObject(gameObject);
+					if (morphedGameObject != null)
+					{
+						text += (text.length() > 0 ? ", " : "") + morphedGameObject.getId();
+					}
+				}
+				text = text.length() > 0 ? ("(Morph ID: " + text + ")") : text;
+				hoverText += (hoverText.length() > 0 ? " " : "") + text;
+			}
 			if (showGroundObjectId && groundObject != null)
 			{
 				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + groundObject.getId() + ")";
@@ -351,15 +397,7 @@ public class IdentificatorPlugin extends Plugin
 
 			if (showGroundItemId && groundItems != null)
 			{
-				String text = "";
-				for (TileItem groundItem : groundItems)
-				{
-					if (groundItem != null)
-					{
-						text += (text.length() > 0 ? ", " : "") + groundItem.getId();
-					}
-				}
-				text = text.length() > 0 ? ("(ID: " + text + ")") : text;
+				String text = "(ID: " + event.getIdentifier() + ")";
 				hoverText += (hoverText.length() > 0 ? " " : "") + text;
 			}
 			if (showMenuInfo)
