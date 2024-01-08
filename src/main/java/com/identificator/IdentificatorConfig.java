@@ -207,10 +207,34 @@ public interface IdentificatorConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showGroundObjectMorphId",
+		name = "Show ground object morph id",
+		description = "Whether to display the current transformed/morph id of a ground object",
+		position = 17,
+		section = optionsSection
+	)
+	default boolean showGroundObjectMorphId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showGroundObjectAnimationId",
+		name = "Show ground object animation id",
+		description = "Whether to display the animation id of a dynamic ground object",
+		position = 18,
+		section = optionsSection
+	)
+	default boolean showGroundObjectAnimationId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "showDecorativeObjectId",
 		name = "Show decorative object id",
 		description = "Whether to display the id of a decorative object",
-		position = 17,
+		position = 19,
 		section = optionsSection
 	)
 	default boolean showDecorativeObjectId()
@@ -219,10 +243,34 @@ public interface IdentificatorConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showDecorativeObjectMorphId",
+		name = "Show decorative object morph id",
+		description = "Whether to display the current transformed/morph id of a decorative object",
+		position = 20,
+		section = optionsSection
+	)
+	default boolean showDecorativeObjectMorphId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showDecorativeObjectAnimationId",
+		name = "Show decorative object animation id",
+		description = "Whether to display the animation id of a dynamic decorative object",
+		position = 21,
+		section = optionsSection
+	)
+	default boolean showDecorativeObjectAnimationId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "showWallObjectId",
 		name = "Show wall object id",
 		description = "Whether to display the id of a wall object",
-		position = 18,
+		position = 22,
 		section = optionsSection
 	)
 	default boolean showWallObjectId()
@@ -231,10 +279,34 @@ public interface IdentificatorConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showWallObjectMorphId",
+		name = "Show wall object morph id",
+		description = "Whether to display the current transformed/morph id of a wall object",
+		position = 23,
+		section = optionsSection
+	)
+	default boolean showWallObjectMorphId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showWallObjectAnimationId",
+		name = "Show wall object animation id",
+		description = "Whether to display the animation id of a dynamic wall object",
+		position = 24,
+		section = optionsSection
+	)
+	default boolean showWallObjectAnimationId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "showGroundItemId",
 		name = "Show ground item id",
 		description = "Whether to display the id of a ground item",
-		position = 19,
+		position = 25,
 		section = optionsSection
 	)
 	default boolean showGroundItemId()
@@ -245,8 +317,8 @@ public interface IdentificatorConfig extends Config
 	@ConfigItem(
 		keyName = "showNpcOverrideModelIds",
 		name = "Show NPC override model ids",
-		description = "Whether to display NPC override model ids",
-		position = 20,
+		description = "Whether to display NPC override model ids (M)",
+		position = 26,
 		section = optionsSection
 	)
 	default boolean showNpcOverrideModelIds()
@@ -257,8 +329,8 @@ public interface IdentificatorConfig extends Config
 	@ConfigItem(
 		keyName = "showNpcOverrideColours",
 		name = "Show NPC override model colours",
-		description = "Whether to display NPC override model colours",
-		position = 21,
+		description = "Whether to display NPC override model colours (C)",
+		position = 27,
 		section = optionsSection
 	)
 	default boolean showNpcOverrideColours()
@@ -269,8 +341,8 @@ public interface IdentificatorConfig extends Config
 	@ConfigItem(
 		keyName = "showNpcOverrideTextures",
 		name = "Show NPC override model textures",
-		description = "Whether to display NPC override model textures",
-		position = 22,
+		description = "Whether to display NPC override model textures (T)",
+		position = 28,
 		section = optionsSection
 	)
 	default boolean showNpcOverrideTextures()
@@ -281,7 +353,7 @@ public interface IdentificatorConfig extends Config
 	@ConfigSection(
 		name = "Logging",
 		description = "Options for logging tick timestamp and player related IDs in a side panel",
-		position = 23
+		position = 29
 	)
 	String loggingSection = "optionsLogging";
 
@@ -289,7 +361,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logging",
 		name = "Enable logging",
 		description = "Whether to enable logging of tick timestamp and player related IDs in a side panel",
-		position = 24,
+		position = 30,
 		section = loggingSection
 	)
 	default boolean logging()
@@ -301,7 +373,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logRelativeTickTimestamp",
 		name = "Relative tick timestamp",
 		description = "Whether to make the tick timestamp relative to the last logged entry or make it static",
-		position = 25,
+		position = 31,
 		section = loggingSection
 	)
 	default boolean logRelativeTickTimestamp()
@@ -313,7 +385,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerAnimationId",
 		name = "Log animation IDs",
 		description = "Whether to log player animation IDs in a side panel",
-		position = 26,
+		position = 32,
 		section = loggingSection
 	)
 	default boolean logPlayerAnimationId()
@@ -325,7 +397,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerPoseAnimationId",
 		name = "Log pose animation IDs",
 		description = "Whether to log player pose animation IDs in a side panel",
-		position = 27,
+		position = 33,
 		section = loggingSection
 	)
 	default boolean logPlayerPoseAnimationId()
@@ -337,7 +409,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerGraphicId",
 		name = "Log graphic IDs",
 		description = "Whether to log player graphic IDs in a side panel",
-		position = 28,
+		position = 34,
 		section = loggingSection
 	)
 	default boolean logPlayerGraphicId()
@@ -348,7 +420,7 @@ public interface IdentificatorConfig extends Config
 	@ConfigSection(
 		name = "Colours",
 		description = "Options for the text colours",
-		position = 29
+		position = 35
 	)
 	String coloursSection = "coloursSection";
 
@@ -357,7 +429,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourHover",
 		name = "Hover text",
 		description = "The colour of the hover info text",
-		position = 30,
+		position = 36,
 		section = coloursSection
 	)
 	default Color colourHover()
@@ -370,7 +442,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourOverhead",
 		name = "Overhead text",
 		description = "The colour of the overhead info text",
-		position = 31,
+		position = 37,
 		section = coloursSection
 	)
 	default Color colourOverhead()
@@ -383,7 +455,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourMenu",
 		name = "Menu text",
 		description = "The colour of the menu info text",
-		position = 32,
+		position = 38,
 		section = coloursSection
 	)
 	default Color colourMenu()

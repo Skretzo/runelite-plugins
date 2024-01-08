@@ -5,23 +5,22 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.List;
-import net.runelite.api.Animation;
 import net.runelite.api.Client;
-import net.runelite.api.DynamicObject;
+import net.runelite.api.DecorativeObject;
 import net.runelite.api.GameObject;
+import net.runelite.api.GroundObject;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.NpcOverrides;
-import net.runelite.api.ObjectComposition;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
-import net.runelite.api.TileObject;
+import net.runelite.api.WallObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -89,46 +88,92 @@ public class IdentificatorOverlay extends Overlay
 						continue;
 					}
 
-					StringBuilder text = new StringBuilder();
+					GameObject[] gameObjects = tile.getGameObjects();
+					GroundObject groundObject = tile.getGroundObject();
+					DecorativeObject decorativeObject = tile.getDecorativeObject();
+					WallObject wallObject = tile.getWallObject();
+					List<TileItem> groundItems = tile.getGroundItems();
+
+					StringBuilder ids = new StringBuilder();
+					StringBuilder animations = new StringBuilder();
 
 					if (plugin.showGameObjectId)
 					{
-						text.append(gameObjectsToText(text, tile.getGameObjects()));
+						plugin.appendId(ids, plugin.gameObjectsToText(gameObjects));
 					}
 					if (plugin.showGameObjectMorphId)
 					{
-						text.append(morphedGameObjectsToText(text, tile.getGameObjects()));
+						plugin.appendId(ids, plugin.morphedGameObjectsToText(gameObjects));
 					}
-					if (plugin.showGroundObjectId)
+					if (plugin.showGameObjectAnimationId)
 					{
-						text.append(objectToText(text, tile.getGroundObject()));
+						plugin.appendId(animations, plugin.gameObjectAnimationsToText(gameObjects));
 					}
-					if (plugin.showDecorativeObjectId)
+					if (plugin.showGroundObjectId && groundObject != null)
 					{
-						text.append(objectToText(text, tile.getDecorativeObject()));
+						plugin.appendId(ids, groundObject.getId());
 					}
-					if (plugin.showWallObjectId)
+					if (plugin.showGroundObjectMorphId)
 					{
-						text.append(objectToText(text, tile.getWallObject()));
+						plugin.appendId(ids, plugin.morphedTileObjectToText(groundObject));
+					}
+					if (plugin.showGroundObjectAnimationId && groundObject != null)
+					{
+						plugin.appendAnimation(animations, groundObject.getRenderable());
+					}
+					if (plugin.showDecorativeObjectId && decorativeObject != null)
+					{
+						plugin.appendId(ids, decorativeObject.getId());
+					}
+					if (plugin.showDecorativeObjectMorphId)
+					{
+						plugin.appendId(ids, plugin.morphedTileObjectToText(decorativeObject));
+					}
+					if (plugin.showDecorativeObjectAnimationId && decorativeObject != null)
+					{
+						plugin.appendAnimation(animations, decorativeObject.getRenderable());
+						plugin.appendAnimation(animations, decorativeObject.getRenderable2());
+					}
+					if (plugin.showWallObjectId && wallObject != null)
+					{
+						plugin.appendId(ids, wallObject.getId());
+					}
+					if (plugin.showWallObjectMorphId)
+					{
+						plugin.appendId(ids, plugin.morphedTileObjectToText(wallObject));
+					}
+					if (plugin.showWallObjectAnimationId && wallObject != null)
+					{
+						plugin.appendAnimation(animations, wallObject.getRenderable1());
+						plugin.appendAnimation(animations, wallObject.getRenderable2());
 					}
 					if (plugin.showGroundItemId)
 					{
-						text.append(groundItemsToText(text, tile.getGroundItems()));
+						plugin.appendId(ids, plugin.groundItemsToText(groundItems));
+					}
+
+					StringBuilder text = new StringBuilder();
+					plugin.wrapId(text, "ID", ids.toString());
+					plugin.wrapId(text, "A", animations.toString());
+
+					if (text.length() <= 0)
+					{
+						continue;
 					}
 
 					final Point textLocation = Perspective.getCanvasTextLocation(client, graphics, tile.getLocalLocation(), text.toString(), 40);
 
-					if (text.length() > 0 && textLocation != null)
+					if (textLocation != null)
 					{
-						OverlayUtil.renderTextLocation(graphics, textLocation, "(ID: " + text.toString() + ")", plugin.colourOverhead);
+						OverlayUtil.renderTextLocation(graphics, textLocation, text.toString(), plugin.colourOverhead);
 					}
 				}
 			}
 		}
 
-		if (plugin.showHoverInfo && !plugin.hoverText.isEmpty() && isHoveringGameScene())
+		if (plugin.showHoverInfo && plugin.hoverText.length() > 0 && isHoveringGameScene())
 		{
-			tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag(plugin.hoverText, plugin.colourHover)));
+			tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag(plugin.hoverText.toString(), plugin.colourHover)));
 		}
 
 		return null;
@@ -154,14 +199,14 @@ public class IdentificatorOverlay extends Overlay
 			return;
 		}
 
-		String text = "";
+		StringBuilder text = new StringBuilder();
 
 		if (plugin.showNpcId)
 		{
 			// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
 			// However npc.getComposition.getId() returns the original non-transformed NPC id.
 			NPCComposition npcComposition = npc.getComposition();
-			text += "(ID: " + (npcComposition != null ? npcComposition.getId() : npc.getId()) + ")";
+			plugin.wrapId(text, "ID", (npcComposition != null ? npcComposition.getId() : npc.getId()));
 		}
 
 		if (plugin.showNpcMorphId)
@@ -171,23 +216,23 @@ public class IdentificatorOverlay extends Overlay
 			NPCComposition npcComposition = npc.getComposition();
 			if (npcComposition != null && npcComposition.getId() != npc.getId())
 			{
-				text += (text.length() == 0 ? "" : " ") + "(Morph ID: " + npc.getId() + ")";
+				plugin.wrapId(text, "Morph ID", npc.getId());
 			}
 		}
 
 		if (plugin.showNpcAnimationId)
 		{
-			text += (text.length() == 0 ? "" : " ") + "(A: " + npc.getAnimation() + ")";
+			plugin.wrapId(text, "A", npc.getAnimation());
 		}
 
 		if (plugin.showNpcPoseAnimationId)
 		{
-			text += (text.length() == 0 ? "" : " ") + "(P: " + npc.getPoseAnimation() + ")";
+			plugin.wrapId(text, "P", npc.getPoseAnimation());
 		}
 
 		if (plugin.showNpcGraphicId)
 		{
-			text += (text.length() == 0 ? "" : " ") + "(G: " + npc.getGraphic() + ")";
+			plugin.wrapId(text, "G", npc.getGraphic());
 		}
 
 		NpcOverrides modelOverrides = npc.getModelOverrides();
@@ -195,17 +240,17 @@ public class IdentificatorOverlay extends Overlay
 		{
 			if (plugin.showNpcOverrideModelIds && modelOverrides.getModelIds() != null)
 			{
-				text += (text.length() == 0 ? "" : " ") + "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
+				plugin.wrapId(text, "M", Arrays.toString(modelOverrides.getModelIds()));
 			}
 
 			if (plugin.showNpcOverrideColours && modelOverrides.getColorToReplaceWith() != null)
 			{
-				text += (text.length() == 0 ? "" : " ") + "(C: " + Arrays.toString(modelOverrides.getColorToReplaceWith()) + ")";
+				plugin.wrapId(text, "C", Arrays.toString(modelOverrides.getColorToReplaceWith()));
 			}
 
 			if (plugin.showNpcOverrideTextures && modelOverrides.getTextureToReplaceWith() != null)
 			{
-				text += (text.length() == 0 ? "" : " ") + "(T: " + Arrays.toString(modelOverrides.getTextureToReplaceWith()) + ")";
+				plugin.wrapId(text, "T", Arrays.toString(modelOverrides.getTextureToReplaceWith()));
 			}
 		}
 
@@ -214,11 +259,11 @@ public class IdentificatorOverlay extends Overlay
 			return;
 		}
 
-		final Point textLocation = npc.getCanvasTextLocation(graphics, text, npc.getLogicalHeight() + 40);
+		final Point textLocation = npc.getCanvasTextLocation(graphics, text.toString(), npc.getLogicalHeight() + 40);
 
 		if (textLocation != null)
 		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
+			OverlayUtil.renderTextLocation(graphics, textLocation, text.toString(), plugin.colourOverhead);
 		}
 	}
 
@@ -229,21 +274,21 @@ public class IdentificatorOverlay extends Overlay
 			return;
 		}
 
-		String text = "";
+		StringBuilder text = new StringBuilder();
 
 		if (plugin.showPlayerAnimationId)
 		{
-			text += "(A: " + player.getAnimation() + ")";
+			plugin.wrapId(text, "A", player.getAnimation());
 		}
 
 		if (plugin.showPlayerPoseAnimationId)
 		{
-			text += (text.length() == 0 ? "" : " ") + "(P: " + player.getPoseAnimation() + ")";
+			plugin.wrapId(text, "P", player.getPoseAnimation());
 		}
 
 		if (plugin.showPlayerGraphicId)
 		{
-			text += (text.length() == 0 ? "" : " ") + "(G: " + player.getGraphic() + ")";
+			plugin.wrapId(text, "G", player.getGraphic());
 		}
 
 		if (text.length() <= 0)
@@ -251,89 +296,11 @@ public class IdentificatorOverlay extends Overlay
 			return;
 		}
 
-		final Point textLocation = player.getCanvasTextLocation(graphics, text, player.getLogicalHeight() + 40);
+		final Point textLocation = player.getCanvasTextLocation(graphics, text.toString(), player.getLogicalHeight() + 40);
 
 		if (textLocation != null)
 		{
-			OverlayUtil.renderTextLocation(graphics, textLocation, text, plugin.colourOverhead);
+			OverlayUtil.renderTextLocation(graphics, textLocation, text.toString(), plugin.colourOverhead);
 		}
-	}
-
-	private String objectToText(StringBuilder text, TileObject tileObject)
-	{
-		if (tileObject == null)
-		{
-			return "";
-		}
-		return (text.length() > 0 ? ", " : "") + tileObject.getId();
-	}
-
-	private String gameObjectsToText(StringBuilder original, GameObject[] gameObjects)
-	{
-		StringBuilder text = new StringBuilder();
-
-		if (gameObjects == null)
-		{
-			return text.toString();
-		}
-
-		for (GameObject gameObject : gameObjects)
-		{
-			if (plugin.isGameObject(gameObject))
-			{
-				text.append(text.length() > 0 ? ", " : "").append(gameObject.getId());
-				if (plugin.showGameObjectAnimationId && gameObject.getRenderable() instanceof DynamicObject)
-				{
-					Animation animation = ((DynamicObject) gameObject.getRenderable()).getAnimation();
-					if (animation != null)
-					{
-						text.append(" (A: ").append(animation.getId()).append(")");
-					}
-				}
-			}
-		}
-
-		return (original.length() > 0 && text.length() > 0 ? ", " :  "") + text.toString();
-	}
-
-	private String morphedGameObjectsToText(StringBuilder original, GameObject[] gameObjects)
-	{
-		StringBuilder text = new StringBuilder();
-
-		if (gameObjects == null)
-		{
-			return text.toString();
-		}
-
-		for (GameObject gameObject : gameObjects)
-		{
-			ObjectComposition morphedObjectComposition = plugin.getMorphedGameObject(gameObject);
-			if (morphedObjectComposition != null)
-			{
-				text.append(text.length() > 0 ? ", " : "").append(morphedObjectComposition.getId());
-			}
-		}
-
-		return (original.length() > 0 && text.length() > 0 ? ", " : "") + text.toString();
-	}
-
-	private String groundItemsToText(StringBuilder original, List<TileItem> tileItems)
-	{
-		StringBuilder text = new StringBuilder();
-
-		if (!plugin.showGroundItemId || tileItems == null)
-		{
-			return text.toString();
-		}
-
-		for (TileItem tileItem : tileItems)
-		{
-			if (tileItem != null)
-			{
-				text.append(text.length() > 0 ? ", " : "").append(tileItem.getId());
-			}
-		}
-
-		return (original.length() > 0 && text.length() > 0 ? ", " : "") + text.toString();
 	}
 }

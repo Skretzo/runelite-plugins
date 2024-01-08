@@ -22,8 +22,10 @@ import net.runelite.api.NPCComposition;
 import net.runelite.api.NpcOverrides;
 import net.runelite.api.ObjectComposition;
 import net.runelite.api.Player;
+import net.runelite.api.Renderable;
 import net.runelite.api.Tile;
 import net.runelite.api.TileItem;
+import net.runelite.api.TileObject;
 import net.runelite.api.WallObject;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
@@ -67,7 +69,7 @@ public class IdentificatorPlugin extends Plugin
 		MenuAction.GROUND_ITEM_FIFTH_OPTION
 	);
 
-	String hoverText = "";
+	StringBuilder hoverText = new StringBuilder();
 	boolean showHoverInfo;
 	boolean showOverheadInfo;
 	private boolean showMenuInfo;
@@ -83,8 +85,14 @@ public class IdentificatorPlugin extends Plugin
 	boolean showGameObjectId;
 	boolean showGameObjectMorphId;
 	boolean showGroundObjectId;
+	boolean showGroundObjectMorphId;
+	boolean showGroundObjectAnimationId;
 	boolean showDecorativeObjectId;
+	boolean showDecorativeObjectMorphId;
+	boolean showDecorativeObjectAnimationId;
 	boolean showWallObjectId;
+	boolean showWallObjectMorphId;
+	boolean showWallObjectAnimationId;
 	boolean showGroundItemId;
 	boolean showNpcOverrideModelIds;
 	boolean showNpcOverrideColours;
@@ -195,8 +203,14 @@ public class IdentificatorPlugin extends Plugin
 		showGameObjectId = config.showGameObjectId();
 		showGameObjectMorphId = config.showGameObjectMorphId();
 		showGroundObjectId = config.showGroundObjectId();
+		showGroundObjectMorphId = config.showGroundObjectMorphId();
+		showGroundObjectAnimationId = config.showGroundObjectAnimationId();
 		showDecorativeObjectId = config.showDecorativeObjectId();
+		showDecorativeObjectMorphId = config.showDecorativeObjectMorphId();
+		showDecorativeObjectAnimationId = config.showDecorativeObjectAnimationId();
 		showWallObjectId = config.showWallObjectId();
+		showWallObjectMorphId = config.showWallObjectMorphId();
+		showWallObjectAnimationId = config.showWallObjectAnimationId();
 		showGroundItemId = config.showGroundItemId();
 		showNpcOverrideModelIds = config.showNpcOverrideModelIds();
 		showNpcOverrideColours = config.showNpcOverrideColours();
@@ -234,10 +248,155 @@ public class IdentificatorPlugin extends Plugin
 		return null;
 	}
 
+	public ObjectComposition getMorphedTileObject(TileObject tileObject)
+	{
+		if (tileObject != null)
+		{
+			ObjectComposition objectComposition = client.getObjectDefinition(tileObject.getId());
+			if (objectComposition != null && objectComposition.getImpostorIds() != null)
+			{
+				return objectComposition.getImpostor();
+			}
+		}
+		return null;
+	}
+
+	public void wrapId(StringBuilder original, String prefix, int id)
+	{
+		wrapId(original, prefix, "" + id);
+	}
+
+	public void wrapId(StringBuilder original, String prefix, String text)
+	{
+		if (text.length() > 0)
+		{
+			original.append(original.length() > 0 ? " " : "").append("(").append(prefix).append(": ").append(text).append(")");
+		}
+	}
+
+	public void appendId(StringBuilder text, int id)
+	{
+		appendId(text, "" + id);
+	}
+
+	public void appendId(StringBuilder original, String text)
+	{
+		if (text.length() > 0)
+		{
+			original.append(original.length() > 0 ? ", " : "").append(text);
+		}
+	}
+
+	public void appendAnimation(StringBuilder text, Renderable renderable)
+	{
+		if (renderable instanceof DynamicObject)
+		{
+			Animation animation = ((DynamicObject) renderable).getAnimation();
+			if (animation != null)
+			{
+				text.append(text.length() > 0 ? ", " : "").append(animation.getId());
+			}
+		}
+	}
+
+	public String gameObjectsToText(GameObject[] gameObjects)
+	{
+		StringBuilder text = new StringBuilder();
+
+		if (gameObjects == null)
+		{
+			return text.toString();
+		}
+
+		for (GameObject gameObject : gameObjects)
+		{
+			if (isGameObject(gameObject))
+			{
+				appendId(text, gameObject.getId());
+			}
+		}
+
+		return text.toString();
+	}
+
+	public String morphedGameObjectsToText(GameObject[] gameObjects)
+	{
+		StringBuilder text = new StringBuilder();
+
+		if (gameObjects == null)
+		{
+			return text.toString();
+		}
+
+		for (GameObject gameObject : gameObjects)
+		{
+			if (isGameObject(gameObject))
+			{
+				ObjectComposition morphedGameObject = getMorphedGameObject(gameObject);
+				if (morphedGameObject != null)
+				{
+					appendId(text, morphedGameObject.getId());
+				}
+			}
+		}
+
+		return text.toString();
+	}
+
+	public String gameObjectAnimationsToText(GameObject[] gameObjects)
+	{
+		StringBuilder text = new StringBuilder();
+
+		if (gameObjects == null)
+		{
+			return text.toString();
+		}
+
+		for (GameObject gameObject : gameObjects)
+		{
+			if (isGameObject(gameObject))
+			{
+				appendAnimation(text, gameObject.getRenderable());
+			}
+		}
+
+		return text.toString();
+	}
+
+	public String morphedTileObjectToText(TileObject tileObject)
+	{
+		ObjectComposition morphedTileObjectComposition = getMorphedTileObject(tileObject);
+		if (morphedTileObjectComposition == null)
+		{
+			return "";
+		}
+		return "" + morphedTileObjectComposition.getId();
+	}
+
+	public String groundItemsToText(List<TileItem> tileItems)
+	{
+		StringBuilder text = new StringBuilder();
+
+		if (tileItems == null)
+		{
+			return text.toString();
+		}
+
+		for (TileItem tileItem : tileItems)
+		{
+			if (tileItem != null)
+			{
+				appendId(text, tileItem.getId());
+			}
+		}
+
+		return text.toString();
+	}
+
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		hoverText = "";
+		hoverText = new StringBuilder();
 
 		if (triggerWithShift && !client.isKeyPressed(KeyCode.KC_SHIFT))
 		{
@@ -256,7 +415,7 @@ public class IdentificatorPlugin extends Plugin
 				// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
 				// However npc.getComposition.getId() returns the original non-transformed NPC id.
 				NPCComposition npcComposition = npc.getComposition();
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + (npcComposition != null ? npcComposition.getId() : npc.getId()) + ")";
+				wrapId(hoverText, "ID", (npcComposition != null ? npcComposition.getId() : npc.getId()));
 			}
 			if (showNpcMorphId)
 			{
@@ -265,35 +424,35 @@ public class IdentificatorPlugin extends Plugin
 				NPCComposition npcComposition = npc.getComposition();
 				if (npcComposition != null && npcComposition.getId() != npc.getId())
 				{
-					hoverText += (hoverText.length() > 0 ? " " : "") + "(Morph ID: " + npc.getId() + ")";
+					wrapId(hoverText, "Morph ID", npc.getId());
 				}
 			}
 			if (showNpcAnimationId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(A: " + npc.getAnimation() + ")";
+				wrapId(hoverText, "A", npc.getAnimation());
 			}
 			if (showNpcPoseAnimationId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(P: " + npc.getPoseAnimation() + ")";
+				wrapId(hoverText, "P", npc.getPoseAnimation());
 			}
 			if (showNpcGraphicId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(G: " + npc.getGraphic() + ")";
+				wrapId(hoverText, "G", npc.getGraphic());
 			}
 			NpcOverrides modelOverrides = npc.getModelOverrides();
 			if (modelOverrides != null)
 			{
 				if (showNpcOverrideModelIds && modelOverrides.getModelIds() != null)
 				{
-					hoverText += (hoverText.length() > 0 ? " " : "") + "(M: " + Arrays.toString(modelOverrides.getModelIds()) + ")";
+					wrapId(hoverText, "M", Arrays.toString(modelOverrides.getModelIds()));
 				}
 				if (showNpcOverrideColours && modelOverrides.getColorToReplaceWith() != null)
 				{
-					hoverText += (hoverText.length() > 0 ? " " : "") + "(C: " + Arrays.toString(modelOverrides.getColorToReplaceWith()) + ")";
+					wrapId(hoverText, "C", Arrays.toString(modelOverrides.getColorToReplaceWith()));
 				}
 				if (showNpcOverrideTextures && modelOverrides.getTextureToReplaceWith() != null)
 				{
-					hoverText += (hoverText.length() > 0 ? " " : "") + "(T: " + Arrays.toString(modelOverrides.getTextureToReplaceWith()) + ")";
+					wrapId(hoverText, "T", Arrays.toString(modelOverrides.getTextureToReplaceWith()));
 				}
 			}
 			if (showMenuInfo)
@@ -305,15 +464,15 @@ public class IdentificatorPlugin extends Plugin
 		{
 			if (showPlayerAnimationId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(A: " + player.getAnimation() + ")";
+				wrapId(hoverText, "A", player.getAnimation());
 			}
 			if (showPlayerPoseAnimationId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(P: " + player.getPoseAnimation() + ")";
+				wrapId(hoverText, "P", player.getPoseAnimation());
 			}
 			if (showPlayerGraphicId)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(G: " + player.getGraphic() + ")";
+				wrapId(hoverText, "G", player.getGraphic());
 			}
 			if (showMenuInfo)
 			{
@@ -329,61 +488,61 @@ public class IdentificatorPlugin extends Plugin
 			DecorativeObject decorativeObject = tile.getDecorativeObject();
 			WallObject wallObject = tile.getWallObject();
 
-			if (showGameObjectId && gameObjects != null)
+			if (showGameObjectId)
 			{
-				String text = "";
-				for (GameObject gameObject : gameObjects)
-				{
-					if (isGameObject(gameObject))
-					{
-						text += (text.length() > 0 ? ", " : "") + gameObject.getId();
-					}
-				}
-				text = text.length() > 0 ? ("(ID: " + text + ")") : text;
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
+				wrapId(hoverText, "ID", gameObjectsToText(gameObjects));
 			}
-			if (showGameObjectMorphId && gameObjects != null)
+			if (showGameObjectMorphId)
 			{
-				String text = "";
-				for (GameObject gameObject : gameObjects)
-				{
-					ObjectComposition morphedGameObject = getMorphedGameObject(gameObject);
-					if (morphedGameObject != null)
-					{
-						text += (text.length() > 0 ? ", " : "") + morphedGameObject.getId();
-					}
-				}
-				text = text.length() > 0 ? ("(Morph ID: " + text + ")") : text;
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
+				wrapId(hoverText, "Morph ID", morphedGameObjectsToText(gameObjects));
+			}
+			if (showGameObjectAnimationId)
+			{
+				wrapId(hoverText, "A", gameObjectAnimationsToText(gameObjects));
 			}
 			if (showGroundObjectId && groundObject != null)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + groundObject.getId() + ")";
+				wrapId(hoverText, "ID", groundObject.getId());
+			}
+			if (showGroundObjectMorphId)
+			{
+				wrapId(hoverText, "Morph ID", morphedTileObjectToText(groundObject));
+			}
+			if (showGroundObjectAnimationId && groundObject != null)
+			{
+				StringBuilder text = new StringBuilder();
+				appendAnimation(text, groundObject.getRenderable());
+				wrapId(hoverText, "A", text.toString());
 			}
 			if (showDecorativeObjectId && decorativeObject != null)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + decorativeObject.getId() + ")";
+				wrapId(hoverText, "ID", decorativeObject.getId());
+			}
+			if (showDecorativeObjectMorphId)
+			{
+				wrapId(hoverText, "Morph ID", morphedTileObjectToText(decorativeObject));
+			}
+			if (showDecorativeObjectAnimationId && decorativeObject != null)
+			{
+				StringBuilder text = new StringBuilder();
+				appendAnimation(text, decorativeObject.getRenderable());
+				appendAnimation(text, decorativeObject.getRenderable2());
+				wrapId(hoverText, "A", text.toString());
 			}
 			if (showWallObjectId && wallObject != null)
 			{
-				hoverText += (hoverText.length() > 0 ? " " : "") + "(ID: " + wallObject.getId() + ")";
+				wrapId(hoverText, "ID", wallObject.getId());
 			}
-			if (showGameObjectAnimationId && gameObjects != null)
+			if (showWallObjectMorphId)
 			{
-				String text = "";
-				for (GameObject gameObject : gameObjects)
-				{
-					if (isGameObject(gameObject) && gameObject.getRenderable() instanceof DynamicObject)
-					{
-						Animation animation = ((DynamicObject) gameObject.getRenderable()).getAnimation();
-						if (animation != null)
-						{
-							text += (text.length() > 0 ? ", " : "") + animation.getId();
-						}
-					}
-				}
-				text = text.length() > 0 ? ("(A: " + text + ")") : text;
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
+				wrapId(hoverText, "Morph ID", morphedTileObjectToText(wallObject));
+			}
+			if (showWallObjectAnimationId && wallObject != null)
+			{
+				StringBuilder text = new StringBuilder();
+				appendAnimation(text, wallObject.getRenderable1());
+				appendAnimation(text, wallObject.getRenderable2());
+				wrapId(hoverText, "A", text.toString());
 			}
 			if (showMenuInfo)
 			{
@@ -397,8 +556,7 @@ public class IdentificatorPlugin extends Plugin
 
 			if (showGroundItemId && groundItems != null)
 			{
-				String text = "(ID: " + event.getIdentifier() + ")";
-				hoverText += (hoverText.length() > 0 ? " " : "") + text;
+				wrapId(hoverText, "ID", event.getIdentifier());
 			}
 			if (showMenuInfo)
 			{
