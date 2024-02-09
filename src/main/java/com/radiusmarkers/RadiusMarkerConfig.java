@@ -311,4 +311,15 @@ public interface RadiusMarkerConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "hideNavButton",
+		name = "Hide side panel button",
+		description = "Allows you to hide the side panel button to reduce clutter when not needing to modify Radius Markers",
+		position = 26
+	)
+	default boolean hideNavButton()
+	{
+		return false;
+	}
 }
