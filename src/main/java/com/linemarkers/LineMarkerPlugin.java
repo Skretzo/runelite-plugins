@@ -33,6 +33,7 @@ import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.input.KeyListener;
 import net.runelite.client.input.KeyManager;
@@ -199,7 +200,10 @@ public class LineMarkerPlugin extends Plugin
 			.panel(pluginPanel)
 			.build();
 
-		clientToolbar.addNavigation(navigationButton);
+		if (!config.hideNavButton())
+		{
+			clientToolbar.addNavigation(navigationButton);
+		}
 	}
 
 	@Override
@@ -219,6 +223,26 @@ public class LineMarkerPlugin extends Plugin
 
 		pluginPanel = null;
 		navigationButton = null;
+	}
+
+	@Subscribe
+	public void onConfigChanged(final ConfigChanged event)
+	{
+		if (!CONFIG_GROUP.equals(event.getGroup()))
+		{
+			return;
+		}
+		if ("hideNavButton".equals(event.getKey()))
+		{
+			if (config.hideNavButton())
+			{
+				clientToolbar.removeNavigation(navigationButton);
+			}
+			else
+			{
+				clientToolbar.addNavigation(navigationButton);
+			}
+		}
 	}
 
 	@Subscribe

@@ -79,4 +79,15 @@ public interface LineMarkerConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+		keyName = "hideNavButton",
+		name = "Hide side panel button",
+		description = "Whether to hide the side panel button to reduce clutter when not needing to modify markers",
+		position = 6
+	)
+	default boolean hideNavButton()
+	{
+		return false;
+	}
 }
