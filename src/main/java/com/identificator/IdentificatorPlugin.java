@@ -98,9 +98,12 @@ public class IdentificatorPlugin extends Plugin
 	boolean showNpcOverrideColours;
 	boolean showNpcOverrideTextures;
 	boolean showGameObjectAnimationId;
+	boolean showNpcChatheadModelId;
+	boolean showNpcChatheadAnimationId;
 	Color colourHover;
 	Color colourOverhead;
 	Color colourMenu;
+	Color colourChathead;
 
 	private IdentificatorPanel panel;
 	private NavigationButton navigationButton;
@@ -123,6 +126,9 @@ public class IdentificatorPlugin extends Plugin
 	private IdentificatorOverlay identificatorOverlay;
 
 	@Inject
+	private IdentificatorTextOverlay identificatorTextOverlay;
+
+	@Inject
 	private OverlayManager overlayManager;
 
 	@Provides
@@ -136,6 +142,7 @@ public class IdentificatorPlugin extends Plugin
 	{
 		loadOptions();
 		overlayManager.add(identificatorOverlay);
+		overlayManager.add(identificatorTextOverlay);
 
 		panel = new IdentificatorPanel();
 
@@ -158,6 +165,7 @@ public class IdentificatorPlugin extends Plugin
 	protected void shutDown()
 	{
 		overlayManager.remove(identificatorOverlay);
+		overlayManager.remove(identificatorTextOverlay);
 		clientToolbar.removeNavigation(navigationButton);
 		panel = null;
 		navigationButton = null;
@@ -216,9 +224,12 @@ public class IdentificatorPlugin extends Plugin
 		showNpcOverrideColours = config.showNpcOverrideColours();
 		showNpcOverrideTextures = config.showNpcOverrideTextures();
 		showGameObjectAnimationId = config.showGameObjectAnimationId();
+		showNpcChatheadModelId = config.showNpcChatheadModelId();
+		showNpcChatheadAnimationId = config.showNpcChatheadAnimationId();
 		colourHover = config.colourHover();
 		colourOverhead = config.colourOverhead();
 		colourMenu = config.colourMenu();
+		colourChathead = config.colourChathead();
 	}
 
 	public boolean exclude(NPC npc)
