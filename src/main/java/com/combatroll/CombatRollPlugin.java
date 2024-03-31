@@ -16,7 +16,7 @@ import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.WidgetUtil;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -35,22 +35,22 @@ public class CombatRollPlugin extends Plugin
 	/**
 	 * Equipment attack bonus widget child IDs
 	 */
-	private static final int ATTACK_HEADER = 22;
-	private static final int ATTACK_STAB = 23;
-	private static final int ATTACK_SLASH = 24;
-	private static final int ATTACK_CRUSH = 25;
-	private static final int ATTACK_MAGIC = 26;
-	private static final int ATTACK_RANGED = 27;
+	private static final int ATTACK_HEADER = 23;
+	private static final int ATTACK_STAB = ATTACK_HEADER + 1;
+	private static final int ATTACK_SLASH = ATTACK_HEADER + 2;
+	private static final int ATTACK_CRUSH = ATTACK_HEADER + 3;
+	private static final int ATTACK_MAGIC = ATTACK_HEADER + 4;
+	private static final int ATTACK_RANGED = ATTACK_HEADER + 5;
 
 	/**
 	 * Equipment defence bonus widget child IDs
 	 */
-	private static final int DEFENCE_HEADER = 28;
-	private static final int DEFENCE_STAB = 29;
-	private static final int DEFENCE_SLASH = 30;
-	private static final int DEFENCE_CRUSH = 31;
-	private static final int DEFENCE_MAGIC = 32;
-	private static final int DEFENCE_RANGED = 33;
+	private static final int DEFENCE_HEADER = ATTACK_HEADER + 6;
+	private static final int DEFENCE_STAB = ATTACK_HEADER + 7;
+	private static final int DEFENCE_SLASH = ATTACK_HEADER + 8;
+	private static final int DEFENCE_CRUSH = ATTACK_HEADER + 9;
+	private static final int DEFENCE_MAGIC = ATTACK_HEADER + 10;
+	private static final int DEFENCE_RANGED = ATTACK_HEADER + 11;
 
 	private static final List<Integer> EQUIPMENT_STATS_WIDGET_CHILD_IDS = Arrays.asList(
 		ATTACK_STAB, ATTACK_SLASH, ATTACK_CRUSH, ATTACK_MAGIC, ATTACK_RANGED,
@@ -94,8 +94,8 @@ public class CombatRollPlugin extends Plugin
 		{
 			Widget widget = event.getScriptEvent().getSource();
 
-			int groupId = WidgetInfo.TO_GROUP(widget.getId());
-			int childId = WidgetInfo.TO_CHILD(widget.getId());
+			int groupId = WidgetUtil.componentToInterface(widget.getId());
+			int childId = WidgetUtil.componentToId(widget.getId());
 			int indexSlotHelm = 10;
 
 			if (groupId == EQUIPMENT_STATS_WIDGET_GROUP_ID && childId == indexSlotHelm)
@@ -442,7 +442,7 @@ public class CombatRollPlugin extends Plugin
 			return;
 		}
 
-		int id = WidgetInfo.TO_CHILD(widget.getId()) - offset;
+		int id = WidgetUtil.componentToId(widget.getId()) - offset;
 		String text = widget.getText();
 		if (reset && original.containsKey(id))
 		{
