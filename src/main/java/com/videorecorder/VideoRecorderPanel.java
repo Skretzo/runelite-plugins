@@ -5,9 +5,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -20,7 +22,7 @@ public class VideoRecorderPanel extends PluginPanel
 	private final VideoRecorderPlugin plugin;
 
 	@Inject
-	VideoRecorderPanel(VideoRecorderPlugin plugin)
+	VideoRecorderPanel(VideoRecorderPlugin plugin, VideoRecorderConfig config)
 	{
 		this.plugin = plugin;
 
@@ -36,6 +38,31 @@ public class VideoRecorderPanel extends PluginPanel
 
 		final JPanel bottomPanel = new JPanel(new BorderLayout());
 		bottomPanel.setBorder(new EmptyBorder(10, 0, 1, 0));
+		bottomPanel.setLayout(new BorderLayout());
+
+		final JPanel warningPanel = new JPanel();
+		warningPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		warningPanel.setLayout(new BorderLayout());
+		warningPanel.setBackground(Color.RED.darker().darker().darker());
+
+		final JLabel warningText = new JLabel();
+		warningText.setBorder(new EmptyBorder(0, 0, 5, 0));
+		warningText.setForeground(Color.WHITE);
+		warningText.setHorizontalAlignment(SwingConstants.CENTER);
+		warningText.setText("<html><body style = 'text-align:center'>" +
+			"Warning<br>Recording with this plugin while using the GPU plugin or 117HD plugin may cause your client to crash." +
+			"</body></html>");
+
+		final JButton warningButton = new JButton("Remove warning");
+		warningButton.setBackground(warningPanel.getBackground().darker());
+		warningButton.addActionListener(e ->
+		{
+			config.setShowWarning(false);
+			warningPanel.setVisible(false);
+		});
+
+		warningPanel.add(warningText, BorderLayout.NORTH);
+		warningPanel.add(warningButton, BorderLayout.CENTER);
 
 		final JLabel title = new JLabel(VideoRecorderPlugin.VIDEO_RECORDER);
 		title.setForeground(Color.WHITE);
@@ -52,7 +79,12 @@ public class VideoRecorderPanel extends PluginPanel
 		topPanel.add(title);
 		centerPanel.add(startButton);
 		centerPanel.add(stopButton);
-		bottomPanel.add(outputButton);
+		bottomPanel.add(outputButton, BorderLayout.NORTH);
+		if (config.showWarning())
+		{
+			bottomPanel.add(Box.createRigidArea(new Dimension(0, 10)), BorderLayout.CENTER);
+			bottomPanel.add(warningPanel, BorderLayout.SOUTH);
+		}
 
 		add(topPanel, BorderLayout.NORTH);
 		add(centerPanel, BorderLayout.CENTER);

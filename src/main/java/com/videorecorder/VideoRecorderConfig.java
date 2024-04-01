@@ -139,4 +139,23 @@ public interface VideoRecorderConfig extends Config
 	{
 		return Keybind.NOT_SET;
 	}
+
+	@ConfigItem(
+		keyName = "showWarning",
+		name = "Show warning",
+		description = "Whether to show a warning",
+		position = 10,
+		hidden = true
+	)
+	default boolean showWarning()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "showWarning",
+		name = "Set show warning",
+		description = ""
+	)
+	void setShowWarning(boolean state);
 }
