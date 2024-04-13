@@ -7,6 +7,7 @@
 |[![icon](../../blob/invalid-movement/icon.png)](../../tree/invalid-movement)|[Invalid Movement](../../tree/invalid-movement)|
 |[![icon](../../blob/line-markers/icon.png)](../../tree/line-markers)|[Line Markers](../../tree/line-markers)|
 |[![icon](../../blob/no-examine/icon.png)](../../tree/no-examine)|[No Examine](../../tree/no-examine)|
+|[![icon](../../blob/npc-id/icon.png)](../../tree/npc-id)|[NPC ID](../../tree/npc-id)|
 |[![icon](../../blob/radius-markers/icon.png)](../../tree/radius-markers)|[Radius Markers](../../tree/radius-markers)|
 |[![icon](../../blob/snakeman-mode/icon.png)](../../tree/snakeman-mode)|[Snakeman Mode](../../tree/snakeman-mode)|
 |[![icon](../../blob/tick-timestamp/icon.png)](../../tree/tick-timestamp)|[Tick Timestamp](../../tree/tick-timestamp)|
