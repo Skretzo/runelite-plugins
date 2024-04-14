@@ -13,3 +13,4 @@
 |[![icon](../../blob/tick-timestamp/icon.png)](../../tree/tick-timestamp)|[Tick Timestamp](../../tree/tick-timestamp)|
 |[![icon](../../blob/transcriber/icon.png)](../../tree/transcriber)|[Transcriber](../../tree/transcriber)|
 |[![icon](../../blob/video-recorder/icon.png)](../../tree/video-recorder)|[Video Recorder](../../tree/video-recorder)|
+|[![icon](../../blob/world-location/icon.png)](../../tree/world-location)|[World Location](../../tree/world-location)|
