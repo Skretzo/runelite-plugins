@@ -13,12 +13,9 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 
 class LineMarkerMinimapOverlay extends Overlay
 {
-	private static final int TILE_SIZE = 4;
-
 	private final Client client;
 	private final LineMarkerConfig config;
 	private final LineMarkerPlugin plugin;
@@ -31,7 +28,7 @@ class LineMarkerMinimapOverlay extends Overlay
 		this.plugin = plugin;
 
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 	}
 
@@ -97,13 +94,18 @@ class LineMarkerMinimapOverlay extends Overlay
 		final int offsetX = playerLocalPoint.getX() - localLocation.getX();
 		final int offsetY = playerLocalPoint.getY() - localLocation.getY();
 
-		final int x = (worldPoint.getX() - playerLocation.getX()) * TILE_SIZE + offsetX / 32 - TILE_SIZE / 2;
-		final int y = (worldPoint.getY() - playerLocation.getY()) * TILE_SIZE + offsetY / 32 - TILE_SIZE / 2 + 1;
+		final int dx = worldPoint.getX() - playerLocation.getX();
+		final int dy = worldPoint.getY() - playerLocation.getY();
+
+		final double tileSize = client.getMinimapZoom();
+
+		final int x = (int) (dx * tileSize + offsetX * tileSize / Perspective.LOCAL_TILE_SIZE - tileSize / 2);
+		final int y = (int) (dy * tileSize + offsetY * tileSize / Perspective.LOCAL_TILE_SIZE - tileSize / 2 + 1);
 
 		final int angle = client.getCameraYawTarget() & 0x7FF;
 
-		final int sin = (int) (65536.0D * Math.sin((double) angle * Perspective.UNIT));
-		final int cos = (int) (65536.0D * Math.cos((double) angle * Perspective.UNIT));
+		final int sin = Perspective.SINE[angle];
+		final int cos = Perspective.COSINE[angle];
 
 		final Widget minimapDrawWidget = plugin.getMinimapDrawWidget();
 		if (minimapDrawWidget == null || minimapDrawWidget.isHidden())
