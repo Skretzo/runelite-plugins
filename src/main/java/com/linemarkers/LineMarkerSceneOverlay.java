@@ -12,7 +12,6 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 
 class LineMarkerSceneOverlay extends Overlay
 {
@@ -29,7 +28,7 @@ class LineMarkerSceneOverlay extends Overlay
 		this.plugin = plugin;
 
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
 

@@ -12,7 +12,6 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 
 class LineMarkerMapOverlay extends Overlay
@@ -32,7 +31,7 @@ class LineMarkerMapOverlay extends Overlay
 		this.plugin = plugin;
 
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.MANUAL);
 		drawAfterLayer(ComponentID.WORLD_MAP_MAPVIEW);
 	}
