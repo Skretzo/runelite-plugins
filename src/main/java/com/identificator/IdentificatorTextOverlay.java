@@ -1,6 +1,8 @@
 package com.identificator;
 
 import com.google.inject.Inject;
+
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import net.runelite.api.Client;
@@ -28,6 +30,8 @@ public class IdentificatorTextOverlay extends Overlay
 	public Dimension render(Graphics2D graphics)
 	{
 		renderChathead(graphics);
+
+		renderInventory(graphics);
 
 		return null;
 	}
@@ -64,5 +68,36 @@ public class IdentificatorTextOverlay extends Overlay
 
 		graphics.setColor(plugin.colourChathead);
 		graphics.drawString(text.toString(), textX, textY);
+	}
+
+	private void renderInventory(Graphics2D graphics)
+	{
+		Widget inventory = client.getWidget(ComponentID.INVENTORY_CONTAINER);
+
+		if (inventory == null || inventory.isHidden() ||
+			!plugin.showOverheadInfo || !plugin.showInventoryItemId)
+		{
+			return;
+		}
+
+		for (Widget item : inventory.getDynamicChildren())
+		{
+			if (item.getItemId() == 6512) // null
+			{
+				continue;
+			}
+			StringBuilder text = new StringBuilder();
+			plugin.appendId(text, item.getItemId());
+
+			int textWidth = graphics.getFontMetrics().stringWidth(text.toString());
+			int textHeight = graphics.getFontMetrics().getHeight();
+			int textX = Math.max(item.getCanvasLocation().getX() - textWidth / 2 + item.getWidth() / 2, 15);
+			int textY = item.getCanvasLocation().getY() + textHeight / 2 + item.getHeight() / 2;
+
+			graphics.setColor(Color.BLACK);
+			graphics.drawString(text.toString(), textX + 1, textY + 1);
+			graphics.setColor(plugin.colourInventory);
+			graphics.drawString(text.toString(), textX, textY);
+		}
 	}
 }

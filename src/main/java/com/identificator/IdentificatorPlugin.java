@@ -94,6 +94,7 @@ public class IdentificatorPlugin extends Plugin
 	boolean showWallObjectMorphId;
 	boolean showWallObjectAnimationId;
 	boolean showGroundItemId;
+	boolean showInventoryItemId;
 	boolean showNpcOverrideModelIds;
 	boolean showNpcOverrideColours;
 	boolean showNpcOverrideTextures;
@@ -104,6 +105,7 @@ public class IdentificatorPlugin extends Plugin
 	Color colourOverhead;
 	Color colourMenu;
 	Color colourChathead;
+	Color colourInventory;
 
 	private IdentificatorPanel panel;
 	private NavigationButton navigationButton;
@@ -220,6 +222,7 @@ public class IdentificatorPlugin extends Plugin
 		showWallObjectMorphId = config.showWallObjectMorphId();
 		showWallObjectAnimationId = config.showWallObjectAnimationId();
 		showGroundItemId = config.showGroundItemId();
+		showInventoryItemId = config.showInventoryItemId();
 		showNpcOverrideModelIds = config.showNpcOverrideModelIds();
 		showNpcOverrideColours = config.showNpcOverrideColours();
 		showNpcOverrideTextures = config.showNpcOverrideTextures();
@@ -230,6 +233,7 @@ public class IdentificatorPlugin extends Plugin
 		colourOverhead = config.colourOverhead();
 		colourMenu = config.colourMenu();
 		colourChathead = config.colourChathead();
+		colourInventory = config.colourInventory();
 	}
 
 	public boolean exclude(NPC npc)
@@ -407,8 +411,6 @@ public class IdentificatorPlugin extends Plugin
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		hoverText = new StringBuilder();
-
 		if (triggerWithShift && !client.isKeyPressed(KeyCode.KC_SHIFT))
 		{
 			return;
@@ -418,9 +420,13 @@ public class IdentificatorPlugin extends Plugin
 		final MenuAction menuAction = entry.getType();
 		final NPC npc = entry.getNpc();
 		final Player player = entry.getPlayer();
+		final int itemOp = entry.getItemOp();
+		final int itemId = entry.getItemId();
 
 		if (!exclude(npc))
 		{
+			hoverText = new StringBuilder();
+
 			if (showNpcId)
 			{
 				// Both npc.getId() and npc.getTransformedComposition.getId() returns the transformed NPC id.
@@ -473,6 +479,8 @@ public class IdentificatorPlugin extends Plugin
 		}
 		else if (player != null)
 		{
+			hoverText = new StringBuilder();
+
 			if (showPlayerAnimationId)
 			{
 				wrapId(hoverText, "A", player.getAnimation());
@@ -492,6 +500,8 @@ public class IdentificatorPlugin extends Plugin
 		}
 		else if (OBJECT_MENU_TYPES.contains(menuAction) && client.getSelectedSceneTile() != null)
 		{
+			hoverText = new StringBuilder();
+
 			Tile tile = client.getSelectedSceneTile();
 
 			GameObject[] gameObjects = tile.getGameObjects();
@@ -562,12 +572,27 @@ public class IdentificatorPlugin extends Plugin
 		}
 		else if (GROUND_ITEM_MENU_TYPES.contains(menuAction) && client.getSelectedSceneTile() != null)
 		{
+			hoverText = new StringBuilder();
+
 			Tile tile = client.getSelectedSceneTile();
 			List<TileItem> groundItems = tile.getGroundItems();
 
 			if (showGroundItemId && groundItems != null)
 			{
 				wrapId(hoverText, "ID", event.getIdentifier());
+			}
+			if (showMenuInfo)
+			{
+				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
+			}
+		}
+		else if (itemOp > -1 && itemId > 0)
+		{
+			hoverText = new StringBuilder();
+
+			if (showInventoryItemId)
+			{
+				wrapId(hoverText, "ID", itemId);
 			}
 			if (showMenuInfo)
 			{

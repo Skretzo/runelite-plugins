@@ -171,7 +171,7 @@ public class IdentificatorOverlay extends Overlay
 			}
 		}
 
-		if (plugin.showHoverInfo && plugin.hoverText.length() > 0 && isHoveringGameScene())
+		if (plugin.showHoverInfo && plugin.hoverText.length() > 0 && (isHoveringGameScene() || isHoveringInventory()))
 		{
 			tooltipManager.add(new Tooltip(ColorUtil.wrapWithColorTag(plugin.hoverText.toString(), plugin.colourHover)));
 		}
@@ -185,6 +185,19 @@ public class IdentificatorOverlay extends Overlay
 		for (int i = menuEntries.length - 1; i >= 0; i--)
 		{
 			if (MenuAction.WALK.equals(menuEntries[i].getType()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isHoveringInventory()
+	{
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		for (int i = menuEntries.length - 1; i >= 0; i--)
+		{
+			if (menuEntries[i].getItemOp() > -1 && menuEntries[i].getItemId() > 0)
 			{
 				return true;
 			}
