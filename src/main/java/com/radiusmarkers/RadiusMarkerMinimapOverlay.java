@@ -129,6 +129,11 @@ class RadiusMarkerMinimapOverlay extends Overlay
 	private void drawSquare(Graphics2D graphics, WorldPoint center, Color color,
 		int radius, int size, boolean excludeCorner)
 	{
+		if (center.getPlane() != client.getPlane())
+		{
+			return;
+		}
+
 		final WorldPoint southWest = center.dx(-radius).dy(-radius);
 		final int diameter = 2 * radius + size;
 
