@@ -24,8 +24,8 @@ dependencies {
 }
 
 group = 'com.radiusmarkers'
-version = '1.9.3'
-sourceCompatibility = '1.8'
+version = '1.9.4'
+sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
