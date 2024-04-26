@@ -30,6 +30,7 @@ import net.runelite.api.WallObject;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOpened;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -472,10 +473,6 @@ public class IdentificatorPlugin extends Plugin
 					wrapId(hoverText, "T", Arrays.toString(modelOverrides.getTextureToReplaceWith()));
 				}
 			}
-			if (showMenuInfo)
-			{
-				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
-			}
 		}
 		else if (player != null)
 		{
@@ -492,10 +489,6 @@ public class IdentificatorPlugin extends Plugin
 			if (showPlayerGraphicId)
 			{
 				wrapId(hoverText, "G", player.getGraphic());
-			}
-			if (showMenuInfo)
-			{
-				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
 			}
 		}
 		else if (OBJECT_MENU_TYPES.contains(menuAction) && client.getSelectedSceneTile() != null)
@@ -565,10 +558,6 @@ public class IdentificatorPlugin extends Plugin
 				appendAnimation(text, wallObject.getRenderable2());
 				wrapId(hoverText, "A", text.toString());
 			}
-			if (showMenuInfo)
-			{
-				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
-			}
 		}
 		else if (GROUND_ITEM_MENU_TYPES.contains(menuAction) && client.getSelectedSceneTile() != null)
 		{
@@ -581,10 +570,6 @@ public class IdentificatorPlugin extends Plugin
 			{
 				wrapId(hoverText, "ID", event.getIdentifier());
 			}
-			if (showMenuInfo)
-			{
-				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
-			}
 		}
 		else if (itemOp > -1 && itemId > 0)
 		{
@@ -594,11 +579,30 @@ public class IdentificatorPlugin extends Plugin
 			{
 				wrapId(hoverText, "ID", itemId);
 			}
-			if (showMenuInfo)
+		}
+	}
+
+	@Subscribe
+	public void onMenuOpened(MenuOpened event)
+	{
+		if (!showMenuInfo || (triggerWithShift && !client.isKeyPressed(KeyCode.KC_SHIFT)))
+		{
+			return;
+		}
+
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		for (int i = menuEntries.length - 1; i >= 0; i--)
+		{
+			if (!exclude(menuEntries[i].getNpc()) ||
+				menuEntries[i].getPlayer() != null ||
+				OBJECT_MENU_TYPES.contains(menuEntries[i].getType()) ||
+				GROUND_ITEM_MENU_TYPES.contains(menuEntries[i].getType()) ||
+				(menuEntries[i].getItemOp() > -1 && menuEntries[i].getItemId() > 0))
 			{
-				entry.setTarget(entry.getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
+				menuEntries[i].setTarget(menuEntries[i].getTarget() + ColorUtil.wrapWithColorTag(" " + hoverText, colourMenu));
 			}
 		}
+		client.setMenuEntries(menuEntries);
 	}
 
 	@Subscribe
