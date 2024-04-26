@@ -34,7 +34,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
-import net.runelite.api.RenderOverview;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
@@ -85,9 +84,8 @@ class WorldMapOverlay extends Overlay
 	{
 		final int gridTruncate = ~(gridSize - 1);
 
-		RenderOverview ro = client.getRenderOverview();
 		Widget map = client.getWidget(ComponentID.WORLD_MAP_MAPVIEW);
-		float pixelsPerTile = ro.getWorldMapZoom();
+		float pixelsPerTile = client.getWorldMap().getWorldMapZoom();
 
 		if (map == null)
 		{
@@ -105,7 +103,7 @@ class WorldMapOverlay extends Overlay
 		int widthInTiles = (int) Math.ceil(worldMapRect.getWidth() / pixelsPerTile);
 		int heightInTiles = (int) Math.ceil(worldMapRect.getHeight() / pixelsPerTile);
 
-		Point worldMapPosition = ro.getWorldMapPosition();
+		Point worldMapPosition = client.getWorldMap().getWorldMapPosition();
 
 		// Offset in tiles from anchor sides
 		int yTileMin = worldMapPosition.getY() - heightInTiles / 2;
