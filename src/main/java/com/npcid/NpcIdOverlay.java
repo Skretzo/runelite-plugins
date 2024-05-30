@@ -60,7 +60,7 @@ public class NpcIdOverlay extends Overlay
 			return null;
 		}
 
-		for (NPC npc : client.getCachedNPCs())
+		for (NPC npc : client.getNpcs())
 		{
 			renderNpcOverlay(graphics, npc, config.textColour());
 		}
