@@ -56,7 +56,7 @@ public class IdentificatorOverlay extends Overlay
 
 		if (plugin.showOverheadInfo)
 		{
-			for (NPC npc : client.getCachedNPCs())
+			for (NPC npc : client.getNpcs())
 			{
 				renderNpc(graphics, npc);
 			}
