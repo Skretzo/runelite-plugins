@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = 'com.radiusmarkers'
-version = '1.9.4'
+version = '1.9.5'
 sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
