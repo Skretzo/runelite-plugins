@@ -10,14 +10,13 @@ import java.util.List;
 import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Point;
-import net.runelite.api.RenderOverview;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.worldmap.WorldMap;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 
 class RadiusMarkerMapOverlay extends Overlay
@@ -37,7 +36,7 @@ class RadiusMarkerMapOverlay extends Overlay
 		this.plugin = plugin;
 
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.MANUAL);
 		drawAfterLayer(ComponentID.WORLD_MAP_MAPVIEW);
 	}
@@ -143,16 +142,17 @@ class RadiusMarkerMapOverlay extends Overlay
 	private void drawSquare(Graphics2D graphics, WorldPoint worldPoint, Color color, Area mapClipArea,
 		int radius, int size, boolean excludeCorner)
 	{
-		final Point start = worldMapOverlay.mapWorldPointToGraphicsPoint(worldPoint.dx(-radius).dy(radius + size - 1));
-		final Point end = worldMapOverlay.mapWorldPointToGraphicsPoint(worldPoint.dx(radius + size).dy(-(radius + 1)));
+		final Point start = mapWorldPointToGraphicsPoint(
+			worldPoint.getX() - radius, worldPoint.getY() + radius + size - 1);
+		final Point end = mapWorldPointToGraphicsPoint(
+			worldPoint.getX() + radius + size, worldPoint.getY() - (radius + 1));
 
 		if (start == null || end == null)
 		{
 			return;
 		}
 
-		RenderOverview renderOverview = client.getRenderOverview();
-		float pixelsPerTile = renderOverview.getWorldMapZoom();
+		float pixelsPerTile = client.getWorldMap().getWorldMapZoom();
 		final int tileSize = (int) pixelsPerTile;
 
 		int x = start.getX();
@@ -172,7 +172,6 @@ class RadiusMarkerMapOverlay extends Overlay
 			corners.add(new Area(new Rectangle(x, y + height - tileSize, tileSize, tileSize)));
 			corners.add(new Area(new Rectangle(x + width - tileSize, y, tileSize, tileSize)));
 			corners.add(new Area(new Rectangle(x + width - tileSize, y + height - tileSize, tileSize, tileSize)));
-			Rectangle r = new Rectangle();
 			square.subtract(corners);
 		}
 
@@ -196,5 +195,42 @@ class RadiusMarkerMapOverlay extends Overlay
 		}
 
 		return clipArea;
+	}
+
+	private Point mapWorldPointToGraphicsPoint(int worldPointX, int worldPointY)
+	{
+		WorldMap worldMap = client.getWorldMap();
+
+		float pixelsPerTile = worldMap.getWorldMapZoom();
+
+		Widget map = client.getWidget(ComponentID.WORLD_MAP_MAPVIEW);
+		if (map != null)
+		{
+			Rectangle worldMapRect = map.getBounds();
+
+			int widthInTiles = (int) Math.ceil(worldMapRect.getWidth() / pixelsPerTile);
+			int heightInTiles = (int) Math.ceil(worldMapRect.getHeight() / pixelsPerTile);
+
+			Point worldMapPosition = worldMap.getWorldMapPosition();
+
+			//Offset in tiles from anchor sides
+			int yTileMax = worldMapPosition.getY() - heightInTiles / 2;
+			int yTileOffset = (yTileMax - worldPointY - 1) * -1;
+			int xTileOffset = worldPointX + widthInTiles / 2 - worldMapPosition.getX();
+
+			int xGraphDiff = ((int) (xTileOffset * pixelsPerTile));
+			int yGraphDiff = (int) (yTileOffset * pixelsPerTile);
+
+			//Center on tile.
+			yGraphDiff -= pixelsPerTile - Math.ceil(pixelsPerTile / 2);
+			xGraphDiff += pixelsPerTile - Math.ceil(pixelsPerTile / 2);
+
+			yGraphDiff = worldMapRect.height - yGraphDiff;
+			yGraphDiff += (int) worldMapRect.getY();
+			xGraphDiff += (int) worldMapRect.getX();
+
+			return new Point(xGraphDiff, yGraphDiff);
+		}
+		return null;
 	}
 }
