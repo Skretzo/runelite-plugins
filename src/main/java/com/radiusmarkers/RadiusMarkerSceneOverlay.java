@@ -143,7 +143,7 @@ class RadiusMarkerSceneOverlay extends Overlay
 
 	private GeneralPath getSquare(final WorldPoint worldPoint, final int radius, final int size, boolean excludeCorner)
 	{
-		GeneralPath path = new GeneralPath();
+		GeneralPath path = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
 		if (client.getLocalPlayer() == null)
 		{
@@ -166,6 +166,7 @@ class RadiusMarkerSceneOverlay extends Overlay
 		final int[] xs = new int[4 * diameter + 1];
 		final int[] ys = new int[xs.length];
 
+		boolean hasFirst = false;
 		for (int i = 0; i < xs.length; i++)
 		{
 			if (i < diameter)
@@ -198,8 +199,7 @@ class RadiusMarkerSceneOverlay extends Overlay
 				y = ys[i];
 			}
 
-			boolean hasFirst = false;
-			if (playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+			if (!hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
 			{
 				hasFirst = moveTo(path, x, y, z);
 			}
