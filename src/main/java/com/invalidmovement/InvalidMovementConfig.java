@@ -75,7 +75,7 @@ public interface InvalidMovementConfig extends Config
 	)
 	default int radiusScene()
 	{
-		return -1;
+		return 25;
 	}
 
 	@Range(

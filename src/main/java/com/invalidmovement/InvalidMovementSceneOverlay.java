@@ -12,7 +12,6 @@ import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -124,19 +123,19 @@ class InvalidMovementSceneOverlay extends Overlay
 
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_SOUTH))
 					{
-						drawWall(path, x, y, z, LOCAL_TILE_SIZE, 0);
+						drawWall(path, localPoint.getX(), localPoint.getY(), z, LOCAL_TILE_SIZE, 0);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_WEST))
 					{
-						drawWall(path, x, y, z, 0, LOCAL_TILE_SIZE);
+						drawWall(path, localPoint.getX(), localPoint.getY(), z, 0, LOCAL_TILE_SIZE);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_NORTH))
 					{
-						drawWall(path, x, y + 1, z, LOCAL_TILE_SIZE, 0);
+						drawWall(path, localPoint.getX(), localPoint.getY() + LOCAL_TILE_SIZE, z, LOCAL_TILE_SIZE, 0);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_EAST))
 					{
-						drawWall(path, x + 1, y, z, 0, LOCAL_TILE_SIZE);
+						drawWall(path, localPoint.getX() + LOCAL_TILE_SIZE, localPoint.getY(), z, 0, LOCAL_TILE_SIZE);
 					}
 
 					graphics.draw(path);
