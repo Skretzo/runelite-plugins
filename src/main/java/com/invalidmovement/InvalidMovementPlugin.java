@@ -15,9 +15,6 @@ import net.runelite.client.ui.overlay.OverlayManager;
 public class InvalidMovementPlugin extends Plugin
 {
 	@Inject
-	private InvalidMovementConfig config;
-
-	@Inject
 	private InvalidMovementMapOverlay mapOverlay;
 
 	@Inject

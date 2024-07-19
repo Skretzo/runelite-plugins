@@ -10,13 +10,13 @@ import java.util.Set;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 
 class InvalidMovementMapOverlay extends Overlay
@@ -34,15 +34,15 @@ class InvalidMovementMapOverlay extends Overlay
 		this.config = config;
 
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.MANUAL);
-		drawAfterLayer(WidgetInfo.WORLD_MAP_VIEW);
+		drawAfterLayer(ComponentID.WORLD_MAP_MAPVIEW);
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (config.showWorldMap() && client.getWidget(WidgetInfo.WORLD_MAP_VIEW) != null)
+		if (config.showWorldMap() && client.getWidget(ComponentID.WORLD_MAP_MAPVIEW) != null)
 		{
 			renderWorldMap(graphics);
 		}
@@ -52,12 +52,22 @@ class InvalidMovementMapOverlay extends Overlay
 
 	private void renderWorldMap(Graphics2D graphics)
 	{
-		final Rectangle bounds = client.getWidget(WidgetInfo.WORLD_MAP_VIEW).getBounds();
+		final Rectangle bounds = client.getWidget(ComponentID.WORLD_MAP_MAPVIEW).getBounds();
 		if (bounds == null)
 		{
 			return;
 		}
 		final Area mapClipArea = getWorldMapClipArea(bounds);
+
+		if (client.getLocalPlayer() == null)
+		{
+			return;
+		}
+
+		final LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
+		final int playerX = playerLocation.getSceneX();
+		final int playerY = playerLocation.getSceneY();
+		final int radius = config.radiusWorldMap() < 0 ? Integer.MAX_VALUE / 2 : config.radiusWorldMap();
 
 		if (client.getCollisionMaps() == null)
 		{
@@ -70,10 +80,16 @@ class InvalidMovementMapOverlay extends Overlay
 
 		final Tile[][] tiles = client.getScene().getTiles()[z];
 
-		for (final Tile[] tileRows : tiles)
+		final int startX = Math.max(playerX - radius, 0);
+		final int endX = Math.min(playerX + radius, tiles[0].length);
+		final int startY = Math.max(playerY - radius, 0);
+		final int endY = Math.min(playerY + radius, tiles.length);
+
+		for (int y = startY; y < endY; y++)
 		{
-			for (final Tile tile : tileRows)
+			for (int x = startX; x < endX; x++)
 			{
+				Tile tile = tiles[x][y];
 				if (tile == null)
 				{
 					continue;
@@ -180,8 +196,8 @@ class InvalidMovementMapOverlay extends Overlay
 
 	private Area getWorldMapClipArea(Rectangle baseRectangle)
 	{
-		final Widget overview = client.getWidget(WidgetInfo.WORLD_MAP_OVERVIEW_MAP);
-		final Widget surfaceSelector = client.getWidget(WidgetInfo.WORLD_MAP_SURFACE_SELECTOR);
+		final Widget overview = client.getWidget(ComponentID.WORLD_MAP_OVERVIEW_MAP);
+		final Widget surfaceSelector = client.getWidget(ComponentID.WORLD_MAP_SURFACE_SELECTOR);
 
 		Area clipArea = new Area(baseRectangle);
 

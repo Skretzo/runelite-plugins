@@ -16,7 +16,6 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 
 class InvalidMovementSceneOverlay extends Overlay
 {
@@ -33,7 +32,7 @@ class InvalidMovementSceneOverlay extends Overlay
 		this.config = config;
 
 		setPosition(OverlayPosition.DYNAMIC);
-		setPriority(OverlayPriority.LOW);
+		setPriority(Overlay.PRIORITY_LOW);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 	}
 
@@ -54,7 +53,10 @@ class InvalidMovementSceneOverlay extends Overlay
 			return;
 		}
 
-		final WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
+		final LocalPoint playerLocation = client.getLocalPlayer().getLocalLocation();
+		final int playerX = playerLocation.getSceneX();
+		final int playerY = playerLocation.getSceneY();
+		final int radius = config.radiusScene() < 0 ? Integer.MAX_VALUE / 2 : config.radiusScene();
 
 		if (client.getCollisionMaps() == null)
 		{
@@ -69,22 +71,22 @@ class InvalidMovementSceneOverlay extends Overlay
 
 		final Tile[][] tiles = client.getScene().getTiles()[z];
 
-		for (Tile[] tileRows : tiles)
+		final int startX = Math.max(playerX - radius, 0);
+		final int endX = Math.min(playerX + radius, tiles[0].length);
+		final int startY = Math.max(playerY - radius, 0);
+		final int endY = Math.min(playerY + radius, tiles.length);
+
+		for (int y = startY; y < endY; y++)
 		{
-			for (Tile tile : tileRows)
+			for (int x = startX; x < endX; x++)
 			{
+				Tile tile = tiles[x][y];
 				if (tile == null)
 				{
 					continue;
 				}
-				final WorldPoint worldPoint = tile.getWorldLocation();
 
-				if (playerLocation.distanceTo(worldPoint) >= MAX_DRAW_DISTANCE)
-				{
-					continue;
-				}
-
-				final LocalPoint localPoint = LocalPoint.fromWorld(client, worldPoint);
+				final LocalPoint localPoint = tile.getLocalLocation();
 				if (localPoint == null)
 				{
 					continue;
@@ -118,26 +120,23 @@ class InvalidMovementSceneOverlay extends Overlay
 				{
 					final GeneralPath path = new GeneralPath();
 
-					final int x = worldPoint.getX();
-					final int y = worldPoint.getY();
-
 					graphics.setColor(config.colourWall());
 
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_SOUTH))
 					{
-						drawWall(path, playerLocation, x, y, z, 1, 0);
+						drawWall(path, x, y, z, LOCAL_TILE_SIZE, 0);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_WEST))
 					{
-						drawWall(path, playerLocation, x, y, z, 0, 1);
+						drawWall(path, x, y, z, 0, LOCAL_TILE_SIZE);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_NORTH))
 					{
-						drawWall(path, playerLocation, x, y + 1, z, 1, 0);
+						drawWall(path, x, y + 1, z, LOCAL_TILE_SIZE, 0);
 					}
 					if (movementFlags.contains(MovementFlag.BLOCK_MOVEMENT_EAST))
 					{
-						drawWall(path, playerLocation, x + 1, y, z, 0, 1);
+						drawWall(path, x + 1, y, z, 0, LOCAL_TILE_SIZE);
 					}
 
 					graphics.draw(path);
@@ -146,14 +145,14 @@ class InvalidMovementSceneOverlay extends Overlay
 		}
 	}
 
-	private void drawWall(final GeneralPath path, WorldPoint playerLocation, int x, int y, int z, int dx, int dy)
+	private void drawWall(final GeneralPath path, int x, int y, int z, int dx, int dy)
 	{
 		final boolean hasFirst = moveTo(path, x, y, z);
 
 		x += dx;
 		y += dy;
 
-		if (hasFirst && playerLocation.distanceTo(new WorldPoint(x, y, z)) < MAX_DRAW_DISTANCE)
+		if (hasFirst)
 		{
 			lineTo(path, x, y, z);
 		}
@@ -181,16 +180,9 @@ class InvalidMovementSceneOverlay extends Overlay
 
 	private Point XYToPoint(final int x, final int y, final int z)
 	{
-		LocalPoint localPoint = LocalPoint.fromWorld(client, x, y);
-
-		if (localPoint == null)
-		{
-			return null;
-		}
-
 		return Perspective.localToCanvas(
 			client,
-			new LocalPoint(localPoint.getX() - LOCAL_TILE_SIZE / 2, localPoint.getY() - LOCAL_TILE_SIZE / 2),
+			new LocalPoint(x - LOCAL_TILE_SIZE / 2, y - LOCAL_TILE_SIZE / 2),
 			z);
 	}
 }
