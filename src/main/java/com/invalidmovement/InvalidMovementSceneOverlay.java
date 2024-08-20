@@ -19,7 +19,6 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 class InvalidMovementSceneOverlay extends Overlay
 {
 	private static final int LOCAL_TILE_SIZE = Perspective.LOCAL_TILE_SIZE;
-	private static final int MAX_DRAW_DISTANCE = 32;
 
 	private final Client client;
 	private final InvalidMovementConfig config;
