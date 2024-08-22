@@ -11,6 +11,8 @@ import net.runelite.api.Client;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.NPCComposition;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.client.config.ConfigManager;
@@ -54,7 +56,7 @@ public class NoExaminePlugin extends Plugin
 		{
 			MenuAction menuAction = menuEntry.getType();
 
-			if (!isExamine(menuAction, menuEntry.getOption()) &&
+			if (!isExamine(menuEntry) &&
 				!isCancel(menuAction) &&
 				!isRemove(menuAction, menuEntry.getOption()) &&
 				!isWalkHere(menuAction))
@@ -66,16 +68,51 @@ public class NoExaminePlugin extends Plugin
 		client.setMenuEntries(alteredMenuEntries.toArray(new MenuEntry[0]));
 	}
 
-	private boolean isExamine(MenuAction menuAction, String option)
+	private boolean isExamine(MenuEntry menuEntry)
 	{
 		if (client.isKeyPressed(KeyCode.KC_SHIFT) && config.examineShift())
 		{
 			return false;
 		}
+		MenuAction menuAction = menuEntry.getType();
+		String option = menuEntry.getOption();
 		return (MenuAction.EXAMINE_ITEM_GROUND.equals(menuAction) && config.examineItemsGround()) ||
-				(MenuAction.EXAMINE_NPC.equals(menuAction) && config.examineNpcs()) ||
-				(MenuAction.EXAMINE_OBJECT.equals(menuAction) && config.examineObjects()) ||
+				(MenuAction.EXAMINE_NPC.equals(menuAction) && config.examineNpcs() && !isLonely(menuEntry, config.keepLonelyExamineNpcs())) ||
+				(MenuAction.EXAMINE_OBJECT.equals(menuAction) && config.examineObjects() && !isLonely(menuEntry, config.keepLonelyExamineObjects())) ||
 				(MenuAction.CC_OP_LOW_PRIORITY.equals(menuAction) && config.examineItemInventory() && EXAMINE.equals(option));
+	}
+
+	private boolean isLonely(MenuEntry menuEntry, boolean keepLonely)
+	{
+		MenuAction menuAction = menuEntry.getType();
+		NPCComposition npcDefinition;
+		ObjectComposition objectDefinition;
+		boolean isLonelyExamineNpc = (keepLonely &&
+			MenuAction.EXAMINE_NPC.equals(menuAction) &&
+			menuEntry.getNpc() != null &&
+			(npcDefinition = client.getNpcDefinition(menuEntry.getNpc().getId())) != null &&
+			isAllNull(npcDefinition.getActions()));
+		boolean isLonelyExamineObject = (keepLonely &&
+			MenuAction.EXAMINE_OBJECT.equals(menuAction) &&
+			(objectDefinition = client.getObjectDefinition(menuEntry.getIdentifier())) != null &&
+			isAllNull(objectDefinition.getActions()));
+		if (isLonelyExamineNpc || isLonelyExamineObject)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isAllNull(String[] actions)
+	{
+		for (String action : actions)
+		{
+			if (action != null)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private boolean isPoh()

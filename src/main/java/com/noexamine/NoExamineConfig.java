@@ -75,6 +75,30 @@ public interface NoExamineConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+		keyName = "keepLonelyExamineNpcs",
+		name = "Keep lonely NPC examines",
+		description = "Whether to not remove examine menu options on NPCs with no other options",
+		position = 6,
+		section = sectionExamine
+	)
+	default boolean keepLonelyExamineNpcs()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "keepLonelyExamineObjects",
+		name = "Keep lonely object examines",
+		description = "Whether to not remove examine menu options on objects with no other options",
+		position = 6,
+		section = sectionExamine
+	)
+	default boolean keepLonelyExamineObjects()
+	{
+		return false;
+	}
+
 	@ConfigSection(
 		name = "Cancel",
 		description = "Settings for removing cancel menu options",
