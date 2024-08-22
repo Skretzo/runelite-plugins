@@ -21,12 +21,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Tile;
 import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.ComponentID;
@@ -134,7 +136,7 @@ public class LineMarkerPlugin extends Plugin
 		{
 			if (e.getKeyCode() == KeyEvent.VK_SHIFT)
 			{
-				isHotkeyPressed = true;
+				hotkeyPressed();
 			}
 		}
 
@@ -143,12 +145,22 @@ public class LineMarkerPlugin extends Plugin
 		{
 			if (e.getKeyCode() == KeyEvent.VK_SHIFT)
 			{
-				lastLine = null;
-				lastGroup = null;
-				isHotkeyPressed = false;
+				hotkeyReleased();
 			}
 		}
 	};
+
+	private void hotkeyPressed()
+	{
+		isHotkeyPressed = true;
+	}
+
+	private void hotkeyReleased()
+	{
+		lastLine = null;
+		lastGroup = null;
+		isHotkeyPressed = false;
+	}
 
 	private MouseWheelListener mouseWheelListener = event ->
 	{
@@ -254,6 +266,15 @@ public class LineMarkerPlugin extends Plugin
 		}
 
 		mirrorMarkers();
+	}
+
+	@Subscribe
+	public void onFocusChanged(FocusChanged event)
+	{
+		if (isHotkeyPressed && !client.isKeyPressed(KeyCode.KC_SHIFT))
+		{
+			hotkeyReleased();
+		}
 	}
 
 	@Subscribe
@@ -511,6 +532,10 @@ public class LineMarkerPlugin extends Plugin
 			if (group.getLines().isEmpty())
 			{
 				groups.remove(group);
+				if (group.equals(lastGroup))
+				{
+					lastGroup = null;
+				}
 				break;
 			}
 		}
