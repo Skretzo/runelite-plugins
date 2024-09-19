@@ -212,10 +212,12 @@ public class ChatSuccessRatesPlugin extends Plugin
 		if (isTrackedMessage(message, messageType))
 		{
 			MessageNode node;
-			if (messageType == MESBOX) {
+			if (messageType == MESBOX)
+			{
 				node = client.addChatMessage(GAMEMESSAGE, "", message, "");
 			}
-			else {
+			else
+			{
 				node = event.getMessageNode();
 			}
 
