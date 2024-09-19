@@ -8,6 +8,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.SkillColor;
 import static com.chatsuccessrates.ChatSuccessRatesPlugin.COLLAPSIBLE_MESSAGETYPES;
 import static com.chatsuccessrates.ChatSuccessRatesPlugin.MESSAGE_DELIM;
+import static net.runelite.api.ChatMessageType.MESBOX;
 
 public class CustomConfig extends ChatSuccessRatesTracker
 {
@@ -36,7 +37,7 @@ public class CustomConfig extends ChatSuccessRatesTracker
 	@Subscribe
 	public void onChatMessage(final ChatMessage event)
 	{
-		if (config == null || !COLLAPSIBLE_MESSAGETYPES.contains(event.getType()))
+		if (config == null || !COLLAPSIBLE_MESSAGETYPES.contains(event.getType()) || event.getType() == MESBOX)
 		{
 			return;
 		}
@@ -51,6 +52,7 @@ public class CustomConfig extends ChatSuccessRatesTracker
 			if (message.equals(successMessage))
 			{
 				update(level, 1, 0);
+				return;
 			}
 		}
 		for (String failureMessage : config.messageFailure().split(MESSAGE_DELIM))
@@ -58,6 +60,7 @@ public class CustomConfig extends ChatSuccessRatesTracker
 			if (message.equals(failureMessage))
 			{
 				update(level, 0, 1);
+				return;
 			}
 		}
 	}

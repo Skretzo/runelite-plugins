@@ -14,6 +14,7 @@ import java.util.Set;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
+import net.runelite.api.MessageNode;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.MenuOpened;
 import net.runelite.api.events.ScriptCallbackEvent;
@@ -210,9 +211,16 @@ public class ChatSuccessRatesPlugin extends Plugin
 		ChatMessageType messageType = event.getType();
 		if (isTrackedMessage(message, messageType))
 		{
-			message = formatMessage(message);
+			MessageNode node;
+			if (messageType == MESBOX) {
+				node = client.addChatMessage(GAMEMESSAGE, "", message, "");
+			}
+			else {
+				node = event.getMessageNode();
+			}
 
-			event.getMessageNode().setValue(message);
+			message = formatMessage(message);
+			node.setValue(message);
 
 			Duplicate duplicate = DUPLICATE_CACHE.get(messageType).remove(message);
 			if (duplicate == null)
