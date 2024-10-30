@@ -2,6 +2,7 @@ package com.linemarkers;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -30,7 +31,7 @@ class Line
 
 	public static List<Line> instances(Client client, Line line)
 	{
-		return WorldPoint.toLocalInstance(client, line.location).stream().map(wp ->
+		return WorldPoint.toLocalInstance(client, line.location).stream().filter(Objects::nonNull).map(wp ->
 			new Line(line.colour, line.edge, line.width, wp)).collect(Collectors.toList());
 	}
 }
