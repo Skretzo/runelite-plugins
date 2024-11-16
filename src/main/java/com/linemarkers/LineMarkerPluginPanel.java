@@ -51,7 +51,6 @@ class LineMarkerPluginPanel extends PluginPanel
 
 	private final Client client;
 	private final LineMarkerPlugin plugin;
-	private final LineMarkerConfig config;
 
 	@Getter
 	private Filter filter = Filter.ALL;
@@ -87,11 +86,10 @@ class LineMarkerPluginPanel extends PluginPanel
 		};
 	}
 
-	public LineMarkerPluginPanel(Client client, LineMarkerPlugin plugin, LineMarkerConfig config)
+	public LineMarkerPluginPanel(Client client, LineMarkerPlugin plugin)
 	{
 		this.client = client;
 		this.plugin = plugin;
-		this.config = config;
 
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -248,7 +246,7 @@ class LineMarkerPluginPanel extends PluginPanel
 				(Filter.VISIBLE.equals(filter) && group.isVisible()) ||
 				(Filter.INVISIBLE.equals(filter) && !group.isVisible())))
 			{
-				markerView.add(new LineMarkerPanel(plugin, config, group));
+				markerView.add(new LineMarkerPanel(plugin, group));
 				markerView.add(Box.createRigidArea(new Dimension(0, 10)));
 			}
 		}

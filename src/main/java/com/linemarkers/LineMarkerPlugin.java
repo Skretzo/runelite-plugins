@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -113,6 +114,13 @@ public class LineMarkerPlugin extends Plugin
 	@Inject
 	private ColorPickerManager colourPickerManager;
 
+	Color defaultColour = null;
+	Edge defaultEdge = null;
+	double defaultWidth;
+	boolean showMinimap;
+	boolean showWorldMap;
+	boolean hideNavButton;
+
 	private LineMarkerPluginPanel pluginPanel;
 	private NavigationButton navigationButton;
 	private BufferedImage minimapSpriteFixed;
@@ -191,6 +199,8 @@ public class LineMarkerPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		cacheConfig();
+
 		keyManager.registerKeyListener(keyListener);
 		mouseManager.registerMouseWheelListener(mouseWheelListener);
 
@@ -200,7 +210,7 @@ public class LineMarkerPlugin extends Plugin
 
 		loadMarkers();
 
-		pluginPanel = new LineMarkerPluginPanel(client, this, config);
+		pluginPanel = new LineMarkerPluginPanel(client, this);
 		pluginPanel.rebuild();
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);
@@ -212,7 +222,7 @@ public class LineMarkerPlugin extends Plugin
 			.panel(pluginPanel)
 			.build();
 
-		if (!config.hideNavButton())
+		if (!hideNavButton)
 		{
 			clientToolbar.addNavigation(navigationButton);
 		}
@@ -244,9 +254,12 @@ public class LineMarkerPlugin extends Plugin
 		{
 			return;
 		}
+
+		cacheConfig();
+
 		if ("hideNavButton".equals(event.getKey()))
 		{
-			if (config.hideNavButton())
+			if (hideNavButton)
 			{
 				clientToolbar.removeNavigation(navigationButton);
 			}
@@ -306,6 +319,16 @@ public class LineMarkerPlugin extends Plugin
 		}
 	}
 
+	private void cacheConfig()
+	{
+		defaultColour = config.defaultColour();
+		defaultEdge = config.defaultEdge();
+		defaultWidth = config.defaultWidth();
+		showMinimap = config.showMinimap();
+		showWorldMap = config.showWorldMap();
+		hideNavButton = config.hideNavButton();
+	}
+
 	private void addMarker(MenuEntry entry)
 	{
 		Tile tile = client.getSelectedSceneTile();
@@ -314,7 +337,7 @@ public class LineMarkerPlugin extends Plugin
 			return;
 		}
 
-		lastLine = new Line(config, WorldPoint.fromLocalInstance(client, tile.getLocalLocation()));
+		lastLine = new Line(this, WorldPoint.fromLocalInstance(client, tile.getLocalLocation()));
 
 		if (lastGroup == null)
 		{

@@ -17,17 +17,15 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 class LineMarkerMapOverlay extends Overlay
 {
 	private final Client client;
-	private final LineMarkerConfig config;
 	private final LineMarkerPlugin plugin;
 
 	@Inject
 	private WorldMapOverlay worldMapOverlay;
 
 	@Inject
-	LineMarkerMapOverlay(Client client, LineMarkerConfig config, LineMarkerPlugin plugin)
+	LineMarkerMapOverlay(Client client, LineMarkerPlugin plugin)
 	{
 		this.client = client;
-		this.config = config;
 		this.plugin = plugin;
 
 		setPosition(OverlayPosition.DYNAMIC);
@@ -39,7 +37,7 @@ class LineMarkerMapOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (config.showWorldMap())
+		if (plugin.showWorldMap)
 		{
 			drawWorldMap(graphics);
 		}

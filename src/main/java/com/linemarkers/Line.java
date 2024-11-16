@@ -26,9 +26,9 @@ class Line
 	@Setter(AccessLevel.NONE)
 	WorldPoint location;
 
-	Line(LineMarkerConfig config, WorldPoint location)
+	Line(LineMarkerPlugin plugin, WorldPoint location)
 	{
-		this(config.defaultColour(), config.defaultEdge(), config.defaultWidth(), location);
+		this(plugin.defaultColour, plugin.defaultEdge, plugin.defaultWidth, location);
 	}
 
 	public static List<Line> instances(Client client, Line line)

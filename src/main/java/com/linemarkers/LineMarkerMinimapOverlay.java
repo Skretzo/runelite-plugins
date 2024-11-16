@@ -17,14 +17,12 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 class LineMarkerMinimapOverlay extends Overlay
 {
 	private final Client client;
-	private final LineMarkerConfig config;
 	private final LineMarkerPlugin plugin;
 
 	@Inject
-	LineMarkerMinimapOverlay(Client client, LineMarkerConfig config, LineMarkerPlugin plugin)
+	LineMarkerMinimapOverlay(Client client, LineMarkerPlugin plugin)
 	{
 		this.client = client;
-		this.config = config;
 		this.plugin = plugin;
 
 		setPosition(OverlayPosition.DYNAMIC);
@@ -35,7 +33,7 @@ class LineMarkerMinimapOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (config.showMinimap())
+		if (plugin.showMinimap)
 		{
 			drawMinimap(graphics);
 		}
@@ -77,7 +75,7 @@ class LineMarkerMinimapOverlay extends Overlay
 
 	private Point worldToMinimap(final WorldPoint worldPoint)
 	{
-		if (client.getLocalPlayer() == null)
+		if (client.getLocalPlayer() == null || client.getPlane() != worldPoint.getPlane())
 		{
 			return null;
 		}

@@ -102,7 +102,7 @@ class LineMarkerPanel extends JPanel
 		COLLAPSE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(expandIcon, -100));
 	}
 
-	LineMarkerPanel(LineMarkerPlugin plugin, LineMarkerConfig config, LineGroup marker)
+	LineMarkerPanel(LineMarkerPlugin plugin, LineGroup marker)
 	{
 		this.plugin = plugin;
 		this.marker = marker;
@@ -324,7 +324,7 @@ class LineMarkerPanel extends JPanel
 
 			JLabel colour = new JLabel();
 			colour.setToolTipText("Edit line colour");
-			colour.setForeground(line.getColour() == null ? config.defaultColour() : line.getColour());
+			colour.setForeground(line.getColour() == null ? plugin.defaultColour : line.getColour());
 			colour.setBorder(line.getWidth() == 0 ? null : new MatteBorder(0, 0, 3, 0, line.getColour()));
 			colour.setIcon(line.getWidth() == 0 ? NO_SETTINGS_ICON : SETTINGS_ICON);
 			colour.addMouseListener(new MouseAdapter()
@@ -332,7 +332,7 @@ class LineMarkerPanel extends JPanel
 				@Override
 				public void mousePressed(MouseEvent mouseEvent)
 				{
-					RuneliteColorPicker colourPicker = getColourPicker(line.getColour() == null ? config.defaultColour() : line.getColour());
+					RuneliteColorPicker colourPicker = getColourPicker(line.getColour() == null ? plugin.defaultColour : line.getColour());
 					colourPicker.setOnColorChange(c ->
 					{
 						line.setColour(c);
