@@ -27,7 +27,6 @@ package com.npcid;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
-
 import java.awt.Color;
 import java.util.Set;
 import net.runelite.api.MenuAction;

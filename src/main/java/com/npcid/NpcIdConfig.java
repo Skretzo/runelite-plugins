@@ -33,7 +33,7 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup(NpcIdConfig.GROUP)
 public interface NpcIdConfig extends Config
 {
-	static String GROUP = "npcid";
+	static final String GROUP = "npcid";
 
 	@ConfigItem(
 		position = 0,
