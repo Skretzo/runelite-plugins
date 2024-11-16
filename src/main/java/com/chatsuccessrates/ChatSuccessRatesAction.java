@@ -5,6 +5,8 @@ import com.chatsuccessrates.trackers.CatchingPetfish;
 import com.chatsuccessrates.trackers.CustomConfig;
 import com.chatsuccessrates.trackers.FiringPottery;
 import com.chatsuccessrates.trackers.LightingLogs;
+import com.chatsuccessrates.trackers.MiningRock;
+import com.chatsuccessrates.trackers.PickingLock;
 import com.chatsuccessrates.trackers.Pickpocketing;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,21 @@ public enum ChatSuccessRatesAction
 	CATCHING_GREENFISH(new CatchingPetfish(CatchingPetfish.TYPE_GREEN)),
 	CATCHING_SPINEFISH(new CatchingPetfish(CatchingPetfish.TYPE_SPINE)),
 
+	// Mining
+	MINING_ADAMANTITE(new MiningRock("adamantite")),
+	MINING_BLURITE(new MiningRock("blurite")),
+	MINING_CLAY(new MiningRock("clay")),
+	MINING_COAL(new MiningRock("coal")),
+	MINING_COPPER(new MiningRock("copper")),
+	MINING_GOLD(new MiningRock("gold")),
+	MINING_IRON(new MiningRock("iron")),
+	MINING_MITHRIL(new MiningRock("mithril")),
+	MINING_RUNITE(new MiningRock("runite")),
+	MINING_SILVER(new MiningRock("silver")),
+	MINING_TIN(new MiningRock("tin")),
+
 	// Thieving
+	LOCKPICKING_PORT_SARIM_JAIL(new PickingLock("prison door", "door", 9565)),
 	PICKPOCKETING_ELF(new Pickpocketing("elf")),
 	PICKPOCKETING_GNOME(new Pickpocketing("gnome")),
 	PICKPOCKETING_HERO(new Pickpocketing("hero")),
