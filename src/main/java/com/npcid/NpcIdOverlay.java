@@ -39,14 +39,12 @@ import net.runelite.client.ui.overlay.OverlayUtil;
 public class NpcIdOverlay extends Overlay
 {
 	private final Client client;
-	private final NpcIdConfig config;
 	private final NpcIdPlugin plugin;
 
 	@Inject
-	NpcIdOverlay(Client client, NpcIdConfig config, NpcIdPlugin plugin)
+	NpcIdOverlay(Client client, NpcIdPlugin plugin)
 	{
 		this.client = client;
-		this.config = config;
 		this.plugin = plugin;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
@@ -55,14 +53,14 @@ public class NpcIdOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!config.showId() && !config.showIndex() && !config.showName())
+		if (!plugin.showId && !plugin.showIndex && !plugin.showName)
 		{
 			return null;
 		}
 
 		for (NPC npc : client.getNpcs())
 		{
-			renderNpcOverlay(graphics, npc, config.textColour());
+			renderNpcOverlay(graphics, npc, plugin.textColour);
 		}
 
 		return null;
@@ -75,28 +73,28 @@ public class NpcIdOverlay extends Overlay
 			return;
 		}
 
-		if ((config.hoverOnly() && plugin.hoverNpcIndex != npc.getIndex()) ||
-			(config.hidePets() && npc.getComposition().isFollower()) ||
-			(config.hideRandomEvents() && NpcIdPlugin.RANDOM_EVENT_NPC_IDS.contains(npc.getId())))
+		if ((plugin.hoverOnly && plugin.hoverNpcIndex != npc.getIndex()) ||
+			(plugin.hidePets && npc.getComposition().isFollower()) ||
+			(plugin.hideRandomEvents && NpcIdPlugin.RANDOM_EVENT_NPC_IDS.contains(npc.getId())))
 		{
 			return;
 		}
 
 		String text = "";
 
-		if (config.showName())
+		if (plugin.showName)
 		{
-			text += config.stripTags() ? npc.getName().replaceAll("</?[=\\w]*>", "") : npc.getName();
+			text += plugin.stripTags ? npc.getName().replaceAll("</?[=\\w]*>", "") : npc.getName();
 		}
 
-		if (config.showId())
+		if (plugin.showId)
 		{
-			text += (config.showName() ? " " : "") + npc.getId();
+			text += (plugin.showName ? " " : "") + npc.getId();
 		}
 
-		if (config.showIndex())
+		if (plugin.showIndex)
 		{
-			text += (config.showName() && !config.showId() ? " " : "") + "#" + npc.getIndex();
+			text += (plugin.showName && !plugin.showId ? " " : "") + "#" + npc.getIndex();
 		}
 
 		final Point textLocation = npc.getCanvasTextLocation(graphics, text, npc.getLogicalHeight() + 40);

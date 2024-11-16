@@ -30,14 +30,16 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("npcid")
+@ConfigGroup(NpcIdConfig.GROUP)
 public interface NpcIdConfig extends Config
 {
+	static String GROUP = "npcid";
+
 	@ConfigItem(
 		position = 0,
 		keyName = "showId",
 		name = "Show ID",
-		description = "Show the NPC ID above the NPC."
+		description = "Show the NPC ID above the NPC"
 	)
 	default boolean showId()
 	{
@@ -48,7 +50,7 @@ public interface NpcIdConfig extends Config
 		position = 1,
 		keyName = "showIndex",
 		name = "Show index",
-		description = "Show the unique NPC index above the NPC."
+		description = "Show the unique NPC index above the NPC"
 	)
 	default boolean showIndex()
 	{
@@ -59,7 +61,7 @@ public interface NpcIdConfig extends Config
 		position = 2,
 		keyName = "showName",
 		name = "Show name",
-		description = "Show the NPC name without combat level above the NPC."
+		description = "Show the NPC name without combat level above the NPC"
 	)
 	default boolean showName()
 	{
@@ -70,7 +72,7 @@ public interface NpcIdConfig extends Config
 		position = 3,
 		keyName = "hoverOnly",
 		name = "Show on hover only",
-		description = "Show the NPC identification text only when hovering the NPC."
+		description = "Show the NPC identification text only when hovering the NPC"
 	)
 	default boolean hoverOnly()
 	{
@@ -79,9 +81,31 @@ public interface NpcIdConfig extends Config
 
 	@ConfigItem(
 		position = 4,
+		keyName = "showIdInMenu",
+		name = "Show ID in menu",
+		description = "Show the NPC ID in the right-click menu"
+	)
+	default boolean showIdInMenu()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		position = 5,
+		keyName = "showIndexInMenu",
+		name = "Show index in menu",
+		description = "Show the unique NPC index in the right-click menu"
+	)
+	default boolean showIndexInMenu()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		position = 6,
 		keyName = "stripTags",
 		name = "Strip tags",
-		description = "Whether to strip NPC name formatting tags like &lt;col=00ffff&gt;&lt;/col&gt;."
+		description = "Whether to strip NPC name formatting tags like &lt;col=00ffff&gt;&lt;/col&gt;"
 	)
 	default boolean stripTags()
 	{
@@ -90,10 +114,10 @@ public interface NpcIdConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		position = 5,
+		position = 7,
 		keyName = "textColour",
 		name = "Text colour",
-		description = "The colour of the NPC identification text."
+		description = "The colour of the NPC identification text"
 	)
 	default Color textColour()
 	{
@@ -101,7 +125,7 @@ public interface NpcIdConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 6,
+		position = 8,
 		keyName = "hidePets",
 		name = "Hide pets",
 		description = "Whether to hide NPC identification text for pets"
@@ -112,7 +136,7 @@ public interface NpcIdConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 7,
+		position = 9,
 		keyName = "hideRandomEvents",
 		name = "Hide random events",
 		description = "Whether to hide NPC identification text for random event NPCs"

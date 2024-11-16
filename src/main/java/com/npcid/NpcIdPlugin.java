@@ -27,15 +27,21 @@ package com.npcid;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+
+import java.awt.Color;
 import java.util.Set;
 import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.NpcID;
 import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOpened;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ColorUtil;
 
 @PluginDescriptor(
 	name = "NPC ID",
@@ -77,7 +83,21 @@ public class NpcIdPlugin extends Plugin
 		NpcID.SERGEANT_DAMIEN_6743,
 		NpcID.COUNT_CHECK_12551, NpcID.COUNT_CHECK_12552
 	);
-	public int hoverNpcIndex = -1;
+	int hoverNpcIndex = -1;
+	boolean showId;
+	boolean showIndex;
+	boolean showName;
+	boolean showAboveNpc;
+	boolean hoverOnly;
+	boolean showIdInMenu;
+	boolean showIndexInMenu;
+	boolean stripTags;
+	Color textColour = null;
+	boolean hidePets;
+	boolean hideRandomEvents;
+
+	@Inject
+	private NpcIdConfig config;
 
 	@Inject
 	private NpcIdOverlay npcOverlay;
@@ -94,6 +114,7 @@ public class NpcIdPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		cacheConfig();
 		overlayManager.add(npcOverlay);
 	}
 
@@ -101,6 +122,49 @@ public class NpcIdPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		overlayManager.remove(npcOverlay);
+	}
+
+	private void cacheConfig()
+	{
+		showId = config.showId();
+		showIndex = config.showIndex();
+		showName = config.showName();
+		showIdInMenu = config.showIdInMenu();
+		showIndexInMenu = config.showIndexInMenu();
+		hoverOnly = config.hoverOnly();
+		stripTags = config.stripTags();
+		textColour = config.textColour();
+		hidePets = config.hidePets();
+		hideRandomEvents = config.hideRandomEvents();
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (NpcIdConfig.GROUP.equals(event.getGroup()))
+		{
+			cacheConfig();
+		}
+	}
+
+	@Subscribe
+	public void onMenuOpened(MenuOpened event)
+	{
+		if (!showIdInMenu && !showIndexInMenu)
+		{
+			return;
+		}
+
+		MenuEntry[] entries = event.getMenuEntries();
+		for (int i = 0; i < entries.length; i++)
+		{
+			if (entries[i].getNpc() != null)
+			{
+				String text = showIdInMenu ? (" " + entries[i].getNpc().getId()) : "";
+				text += showIndexInMenu ? ((!showIdInMenu ? " " : "") + "#" + entries[i].getNpc().getIndex()) : "";
+				entries[i].setTarget(entries[i].getTarget() + ColorUtil.wrapWithColorTag(text, textColour));
+			}
+		}
 	}
 
 	@Subscribe
