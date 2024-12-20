@@ -12,5 +12,6 @@
 |[![icon](../../blob/snakeman-mode/icon.png)](../../tree/snakeman-mode)|[Snakeman Mode](../../tree/snakeman-mode)|
 |[![icon](../../blob/tick-timestamp/icon.png)](../../tree/tick-timestamp)|[Tick Timestamp](../../tree/tick-timestamp)|
 |[![icon](../../blob/transcriber/icon.png)](../../tree/transcriber)|[Transcriber](../../tree/transcriber)|
+|[![icon](../../blob/tunnel-vision/icon.png)](../../tree/tunnel-vision)|[Tunnel vision](../../tree/tunnel-vision)|
 |[![icon](../../blob/video-recorder/icon.png)](../../tree/video-recorder)|[Video Recorder](../../tree/video-recorder)|
 |[![icon](../../blob/world-location/icon.png)](../../tree/world-location)|[World Location](../../tree/world-location)|
