@@ -145,4 +145,37 @@ public interface NpcIdConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		position = 10,
+		keyName = "showTransmitOrder",
+		name = "Show transmit order",
+		description = "Whether to show NPC transmit order above the NPC." +
+			"<br>The transmit order is the order in which the client sees the NPCs." +
+			"<br>The first NPC that spawned or entered the scene will be 0." +
+			"<br>The last NPC that respawned or entered the scene will have the highest number." +
+			"<br>Ties are resolved by iterating 8x8 zones from south-west to north-east " +
+			"<br>around the player, and the order in which the NPCs entered the 8x8 zones."
+	)
+	default boolean showTransmitOrder()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		position = 11,
+		keyName = "showTransmitOrderInMenu",
+		name = "Show transmit order in menu",
+		description = "Whether to show NPC transmit order in the right-click menu." +
+			"<br>The transmit order is the order in which the client sees the NPCs." +
+			"<br>The first NPC that spawned or entered the scene will be 0." +
+			"<br>The last NPC that respawned or entered the scene will have the highest number." +
+			"<br>Ties are resolved by iterating 8x8 zones from south-west to north-east " +
+			"<br>around the player, and the order in which the NPCs entered the 8x8 zones." +
+			"<br>The transmit order is only a snapshot of the game tick the menu was opened."
+	)
+	default boolean showTransmitOrderInMenu()
+	{
+		return false;
+	}
 }

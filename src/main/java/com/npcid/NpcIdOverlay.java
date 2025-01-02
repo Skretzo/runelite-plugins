@@ -53,20 +53,21 @@ public class NpcIdOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!plugin.showId && !plugin.showIndex && !plugin.showName)
+		if (!plugin.showId && !plugin.showIndex && !plugin.showName && !plugin.showTransmitOrder)
 		{
 			return null;
 		}
 
+		int i = 0;
 		for (NPC npc : client.getNpcs())
 		{
-			renderNpcOverlay(graphics, npc, plugin.textColour);
+			renderNpcOverlay(graphics, npc, plugin.textColour, i++);
 		}
 
 		return null;
 	}
 
-	private void renderNpcOverlay(Graphics2D graphics, NPC npc, Color colour)
+	private void renderNpcOverlay(Graphics2D graphics, NPC npc, Color colour, int transmitOrder)
 	{
 		if (npc == null || npc.getId() < 0 || npc.getName() == null || npc.getName().isEmpty() || "null".equals(npc.getName()))
 		{
@@ -95,6 +96,11 @@ public class NpcIdOverlay extends Overlay
 		if (plugin.showIndex)
 		{
 			text += (plugin.showName && !plugin.showId ? " " : "") + "#" + npc.getIndex();
+		}
+
+		if (plugin.showTransmitOrder)
+		{
+			text += (plugin.showName || plugin.showId || plugin.showIndex ? " " : "") + "[" + transmitOrder + "]";
 		}
 
 		final Point textLocation = npc.getCanvasTextLocation(graphics, text, npc.getLogicalHeight() + 40);

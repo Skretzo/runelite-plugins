@@ -29,8 +29,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.awt.Color;
 import java.util.Set;
+import net.runelite.api.Client;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.NPC;
 import net.runelite.api.NpcID;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOpened;
@@ -94,6 +96,11 @@ public class NpcIdPlugin extends Plugin
 	Color textColour = null;
 	boolean hidePets;
 	boolean hideRandomEvents;
+	boolean showTransmitOrder;
+	boolean showTransmitOrderInMenu;
+
+	@Inject
+	private Client client;
 
 	@Inject
 	private NpcIdConfig config;
@@ -135,6 +142,8 @@ public class NpcIdPlugin extends Plugin
 		textColour = config.textColour();
 		hidePets = config.hidePets();
 		hideRandomEvents = config.hideRandomEvents();
+		showTransmitOrder = config.showTransmitOrder();
+		showTransmitOrderInMenu = config.showTransmitOrderInMenu();
 	}
 
 	@Subscribe
@@ -149,7 +158,7 @@ public class NpcIdPlugin extends Plugin
 	@Subscribe
 	public void onMenuOpened(MenuOpened event)
 	{
-		if (!showIdInMenu && !showIndexInMenu)
+		if (!showIdInMenu && !showIndexInMenu && !showTransmitOrderInMenu)
 		{
 			return;
 		}
@@ -157,10 +166,24 @@ public class NpcIdPlugin extends Plugin
 		MenuEntry[] entries = event.getMenuEntries();
 		for (int i = 0; i < entries.length; i++)
 		{
-			if (entries[i].getNpc() != null)
+			NPC npc = entries[i].getNpc();
+			if (npc != null)
 			{
-				String text = showIdInMenu ? (" " + entries[i].getNpc().getId()) : "";
-				text += showIndexInMenu ? ((!showIdInMenu ? " " : "") + "#" + entries[i].getNpc().getIndex()) : "";
+				String text = showIdInMenu ? (" " + npc.getId()) : "";
+				text += showIndexInMenu ? ((!showIdInMenu ? " " : "") + "#" + npc.getIndex()) : "";
+				if (showTransmitOrderInMenu)
+				{
+					int transmitOrder = 0;
+					for (NPC transmittedNpc : client.getNpcs())
+					{
+						if (npc.equals(transmittedNpc))
+						{
+							text += " [" + transmitOrder + "]";
+							break;
+						}
+						transmitOrder++;
+					}
+				}
 				entries[i].setTarget(entries[i].getTarget() + ColorUtil.wrapWithColorTag(text, textColour));
 			}
 		}
