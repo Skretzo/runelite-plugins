@@ -17,16 +17,12 @@ import net.runelite.api.worldmap.WorldMap;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 
 class RadiusMarkerMapOverlay extends Overlay
 {
 	private final Client client;
 	private final RadiusMarkerConfig config;
 	private final RadiusMarkerPlugin plugin;
-
-	@Inject
-	private WorldMapOverlay worldMapOverlay;
 
 	@Inject
 	RadiusMarkerMapOverlay(Client client, RadiusMarkerConfig config, RadiusMarkerPlugin plugin)

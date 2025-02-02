@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.function.Consumer;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -269,20 +270,11 @@ class RadiusMarkerPluginPanel extends PluginPanel
 	{
 		markerView.removeAll();
 
-		int regionId = client.getLocalPlayer() == null ? -1 : client.getLocalPlayer().getWorldLocation().getRegionID();
-
-		for (final ColourRadiusMarker marker : plugin.getMarkers())
+		filterMarkersAndDo(marker ->
 		{
-			if (marker.getName().toLowerCase().contains(getSearchText().toLowerCase()) &&
-				(PanelFilter.ALL.equals(panelFilter) ||
-				(PanelFilter.REGION.equals(panelFilter) && marker.getWorldPoint().getRegionID() == regionId) ||
-				(PanelFilter.VISIBLE.equals(panelFilter) && marker.isVisible()) ||
-				(PanelFilter.INVISIBLE.equals(panelFilter) && !marker.isVisible())))
-			{
-				markerView.add(new RadiusMarkerPanel(plugin, config, marker));
-				markerView.add(Box.createRigidArea(new Dimension(0, 10)));
-			}
-		}
+			markerView.add(new RadiusMarkerPanel(plugin, config, marker));
+			markerView.add(Box.createRigidArea(new Dimension(0, 10)));
+		});
 
 		boolean empty = markerView.getComponentCount() == 0;
 		noMarkersPanel.setContent("Radius Markers",
@@ -300,6 +292,23 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 		repaint();
 		revalidate();
+	}
+
+	private void filterMarkersAndDo(Consumer<ColourRadiusMarker> consumer)
+	{
+		int regionId = client.getLocalPlayer() == null ? -1 : client.getLocalPlayer().getWorldLocation().getRegionID();
+
+		for (final ColourRadiusMarker marker : plugin.getMarkers())
+		{
+			if (marker.getName().toLowerCase().contains(getSearchText().toLowerCase()) &&
+				(PanelFilter.ALL.equals(panelFilter) ||
+				(PanelFilter.REGION.equals(panelFilter) && marker.getWorldPoint().getRegionID() == regionId) ||
+				(PanelFilter.VISIBLE.equals(panelFilter) && marker.isVisible()) ||
+				(PanelFilter.INVISIBLE.equals(panelFilter) && !marker.isVisible())))
+			{
+				consumer.accept(marker);
+			}
+		}
 	}
 
 	public String getSearchText()

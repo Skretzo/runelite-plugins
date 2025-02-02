@@ -190,9 +190,7 @@ public class RadiusMarkerPlugin extends Plugin
 
 		if (MenuAction.EXAMINE_NPC.equals(menuAction) && renameMarker != null)
 		{
-			final int id = event.getIdentifier();
-			final NPC[] cachedNPCs = client.getCachedNPCs();
-			final NPC npc = cachedNPCs[id];
+			final NPC npc = client.getTopLevelWorldView().npcs().byIndex(event.getIdentifier());
 
 			if (npc == null || npc.getName() == null)
 			{
@@ -212,8 +210,7 @@ public class RadiusMarkerPlugin extends Plugin
 
 	private void updateMarkerInfo(MenuEntry entry)
 	{
-		final NPC[] cachedNPCs = client.getCachedNPCs();
-		final NPC npc = cachedNPCs[entry.getIdentifier()];
+		final NPC npc = client.getTopLevelWorldView().npcs().byIndex(entry.getIdentifier());
 
 		if (npc == null || npc.getName() == null || renameMarker == null)
 		{
