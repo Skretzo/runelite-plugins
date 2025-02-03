@@ -1,8 +1,8 @@
 package com.radiusmarkers;
 
-import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
@@ -327,8 +327,9 @@ class RadiusMarkerPluginPanel extends PluginPanel
 			if (marker != null && marker.getPanel() != null)
 			{
 				Rectangle markerPosition = marker.getPanel().getBounds();
-				markerPosition.setLocation((int) markerPosition.getX(), (int) markerPosition.getY() - 10 -
-					(int) markerPosition.getHeight() / 2 + ((Applet) client).getParent().getHeight());
+				markerPosition.setLocation(
+					(int) markerPosition.getX(),
+					(int) markerPosition.getY() + ((Component) client).getParent().getHeight() / 3);
 				scrollRectToVisible(markerPosition);
 			}
 		});
