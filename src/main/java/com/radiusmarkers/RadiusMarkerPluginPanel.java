@@ -296,11 +296,12 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 	private void filterMarkersAndDo(Consumer<ColourRadiusMarker> consumer)
 	{
+		String searchText = getSearchText().toLowerCase();
 		int regionId = client.getLocalPlayer() == null ? -1 : client.getLocalPlayer().getWorldLocation().getRegionID();
 
 		for (final ColourRadiusMarker marker : plugin.getMarkers())
 		{
-			if (marker.getName().toLowerCase().contains(getSearchText().toLowerCase()) &&
+			if (marker.getName().toLowerCase().contains(searchText) &&
 				(PanelFilter.ALL.equals(panelFilter) ||
 				(PanelFilter.REGION.equals(panelFilter) && marker.getWorldPoint().getRegionID() == regionId) ||
 				(PanelFilter.VISIBLE.equals(panelFilter) && marker.isVisible()) ||
