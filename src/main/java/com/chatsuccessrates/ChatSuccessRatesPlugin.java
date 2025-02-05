@@ -241,9 +241,9 @@ public class ChatSuccessRatesPlugin extends Plugin
 	{
 		final Widget chatboxMessageLines = client.getWidget(ComponentID.CHATBOX_MESSAGE_LINES);
 		if (chatboxMessageLines == null ||
-			!chatboxMessageLines.getBounds().contains(
-				client.getMouseCanvasPosition().getX(),
-				client.getMouseCanvasPosition().getY()))
+			chatboxMessageLines.isHidden() ||
+			isEmpty(DUPLICATE_CACHE) ||
+			!chatboxMessageLines.contains(client.getMouseCanvasPosition()))
 		{
 			return;
 		}
@@ -275,6 +275,18 @@ public class ChatSuccessRatesPlugin extends Plugin
 			}
 		}
 		return summary.toString();
+	}
+
+	private boolean isEmpty(Map<ChatMessageType, EvictingLinkedHashMap<String, Duplicate>> duplicateCache)
+	{
+		for (ChatMessageType chatMessageType : duplicateCache.keySet())
+		{
+			if (!duplicateCache.get(chatMessageType).isEmpty())
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private boolean isTrackedMessage(String message, ChatMessageType type)
