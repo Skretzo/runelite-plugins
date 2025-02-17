@@ -27,7 +27,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 	description = "Reorders stacks of NPCs that contain invisible NPCs" +
 		"<br>from showing the 5 \"oldest\" to instead show the 5 \"newest\"." +
 		"<br>The \"newest\" NPC is the last npc to spawn or enter the scene.",
-	tags = {"stacking", "reordering", "hide", "hiding"}
+	tags = {"stacking", "reordering", "hide", "hiding", "invert", "reverse"}
 )
 public class NpcStackReordererPlugin extends Plugin
 {
