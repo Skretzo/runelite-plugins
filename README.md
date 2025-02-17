@@ -2,6 +2,9 @@
 
 Reorders NPC stacks with invisible NPCs from showing the oldest NPCs to instead show the newest NPCs.
 
+![image](https://github.com/user-attachments/assets/ff758913-071b-4735-be57-52e058df48f1)  
+*A stack of 6 cows. Without the plugin enabled the 6th cow (newest, [10]) is invisible. With the plugin enabled the 1st cow (oldest, [1]) is invisible.*
+
 ## Info
 Only 5 NPCs of size bigger than 1x1 can be displayed at once in a stack when they all have at least one tile in common. The 6th, 7th, ... , Nth NPCs will turn invisible, even in the right-click menu. Apart from some exceptions, the NPCs are ordered from the oldest to newest. This is the order in which they were transmitted to the client and first appeared in the render viewport. Recently respawned NPCs are the newest. Ties are resolved in a first-in-first-out order for all 8x8 map chunks/zones in the current render viewport around the player starting from south-west and ending at north-east.
 
