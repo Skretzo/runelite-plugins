@@ -208,15 +208,15 @@ if __name__ == "__main__":
     """
     NPC stack (bottom to top) and runelite npc array order:
 
-	[1x1_Goblin, 2x2_Cow1, 2x2_Cow2, 2x2_Cow3, 2x2_Cow4, 2x2_Cow5, 1x1_Farmer]
-	Without plugin the 2x2_Cow5 turns invisible in the stack
+    [1x1_Goblin, 2x2_Cow1, 2x2_Cow2, 2x2_Cow3, 2x2_Cow4, 2x2_Cow5, 1x1_Farmer]
+    Without plugin the 2x2_Cow5 turns invisible in the stack
 
-	Then I removed 1x1_Goblin from the stack
+    Then I removed 1x1_Goblin from the stack
 	
-	[2x2_Cow1, 2x2_Cow2, 2x2_Cow3, 2x2_Cow4, 2x2_Cow5, 1x1_Farmer]
-	Without plugin the 1x1_Farmer turns invisible in the stack
-	
-	[1x1_Goblin, 1x1_Farmer, 2x2_Cow1, 2x2_Cow2, 2x2_Cow3, 2x2_Cow4, 2x2_Cow5]
-	Without plugin the 2x2_Cow5 turns invisible in the stack,
-	but the 2x2_Cow4 does not turn invisible => 1x1_Goblin and 1x1_Farmer counts as 1
+    [2x2_Cow1, 2x2_Cow2, 2x2_Cow3, 2x2_Cow4, 2x2_Cow5, 1x1_Farmer]
+    Without plugin the 1x1_Farmer turns invisible in the stack
+
+    [1x1_Goblin, 1x1_Farmer, 2x2_Cow1, 2x2_Cow2, 2x2_Cow3, 2x2_Cow4, 2x2_Cow5]
+    Without plugin the 2x2_Cow5 turns invisible in the stack,
+    but the 2x2_Cow4 does not turn invisible => 1x1_Goblin and 1x1_Farmer counts as 1
     """
