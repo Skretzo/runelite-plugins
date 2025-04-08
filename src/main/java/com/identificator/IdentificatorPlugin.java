@@ -96,6 +96,9 @@ public class IdentificatorPlugin extends Plugin
 	boolean showWallObjectAnimationId;
 	boolean showGroundItemId;
 	boolean showInventoryItemId;
+	boolean showInterfaceItemId;
+	boolean showInterfaceModelId;
+	boolean showInterfaceSpriteId;
 	boolean showNpcOverrideModelIds;
 	boolean showNpcOverrideColours;
 	boolean showNpcOverrideTextures;
@@ -107,6 +110,7 @@ public class IdentificatorPlugin extends Plugin
 	Color colourMenu;
 	Color colourChathead;
 	Color colourInventory;
+	Color colourInterface;
 
 	private IdentificatorPanel panel;
 	private NavigationButton navigationButton;
@@ -224,6 +228,9 @@ public class IdentificatorPlugin extends Plugin
 		showWallObjectAnimationId = config.showWallObjectAnimationId();
 		showGroundItemId = config.showGroundItemId();
 		showInventoryItemId = config.showInventoryItemId();
+		showInterfaceItemId = config.showInterfaceItemId();
+		showInterfaceModelId = config.showInterfaceModelId();
+		showInterfaceSpriteId = config.showInterfaceSpriteId();
 		showNpcOverrideModelIds = config.showNpcOverrideModelIds();
 		showNpcOverrideColours = config.showNpcOverrideColours();
 		showNpcOverrideTextures = config.showNpcOverrideTextures();
@@ -235,6 +242,7 @@ public class IdentificatorPlugin extends Plugin
 		colourMenu = config.colourMenu();
 		colourChathead = config.colourChathead();
 		colourInventory = config.colourInventory();
+		colourInterface = config.colourInterface();
 	}
 
 	public boolean exclude(NPC npc)

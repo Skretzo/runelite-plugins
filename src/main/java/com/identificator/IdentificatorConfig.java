@@ -327,10 +327,46 @@ public interface IdentificatorConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showInterfaceItemId",
+		name = "Show interface item id",
+		description = "Whether to display the item id (I) of an interface icon",
+		position = 27,
+		section = optionsSection
+	)
+	default boolean showInterfaceItemId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showInterfaceModelId",
+		name = "Show interface model id",
+		description = "Whether to display the model id (M) of an interface icon",
+		position = 28,
+		section = optionsSection
+	)
+	default boolean showInterfaceModelId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "showInterfaceSpriteId",
+		name = "Show interface sprite id",
+		description = "Whether to display the sprite id (S) of an interface icon",
+		position = 29,
+		section = optionsSection
+	)
+	default boolean showInterfaceSpriteId()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "showNpcOverrideModelIds",
 		name = "Show NPC override model ids",
 		description = "Whether to display NPC override model ids (M)",
-		position = 27,
+		position = 30,
 		section = optionsSection
 	)
 	default boolean showNpcOverrideModelIds()
@@ -342,7 +378,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "showNpcOverrideColours",
 		name = "Show NPC override model colours",
 		description = "Whether to display NPC override model colours (C)",
-		position = 28,
+		position = 31,
 		section = optionsSection
 	)
 	default boolean showNpcOverrideColours()
@@ -354,7 +390,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "showNpcOverrideTextures",
 		name = "Show NPC override model textures",
 		description = "Whether to display NPC override model textures (T)",
-		position = 29,
+		position = 32,
 		section = optionsSection
 	)
 	default boolean showNpcOverrideTextures()
@@ -366,7 +402,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "showNpcChatheadModelId",
 		name = "Show NPC chathead model ID",
 		description = "Whether to display NPC chathead model ID",
-		position = 30,
+		position = 33,
 		section = optionsSection
 	)
 	default boolean showNpcChatheadModelId()
@@ -378,7 +414,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "showNpcChatheadAnimationId",
 		name = "Show NPC chathead animation ID",
 		description = "Whether to display NPC chathead animation ID",
-		position = 31,
+		position = 34,
 		section = optionsSection
 	)
 	default boolean showNpcChatheadAnimationId()
@@ -389,7 +425,7 @@ public interface IdentificatorConfig extends Config
 	@ConfigSection(
 		name = "Logging",
 		description = "Options for logging tick timestamp and player related IDs in a side panel",
-		position = 32
+		position = 35
 	)
 	String loggingSection = "optionsLogging";
 
@@ -397,7 +433,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logging",
 		name = "Enable logging",
 		description = "Whether to enable logging of tick timestamp and player related IDs in a side panel",
-		position = 33,
+		position = 36,
 		section = loggingSection
 	)
 	default boolean logging()
@@ -409,7 +445,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logRelativeTickTimestamp",
 		name = "Relative tick timestamp",
 		description = "Whether to make the tick timestamp relative to the last logged entry or make it static",
-		position = 34,
+		position = 37,
 		section = loggingSection
 	)
 	default boolean logRelativeTickTimestamp()
@@ -421,7 +457,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerAnimationId",
 		name = "Log animation IDs",
 		description = "Whether to log player animation IDs in a side panel",
-		position = 35,
+		position = 38,
 		section = loggingSection
 	)
 	default boolean logPlayerAnimationId()
@@ -433,7 +469,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerPoseAnimationId",
 		name = "Log pose animation IDs",
 		description = "Whether to log player pose animation IDs in a side panel",
-		position = 36,
+		position = 39,
 		section = loggingSection
 	)
 	default boolean logPlayerPoseAnimationId()
@@ -445,7 +481,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "logPlayerGraphicId",
 		name = "Log graphic IDs",
 		description = "Whether to log player graphic IDs in a side panel",
-		position = 37,
+		position = 40,
 		section = loggingSection
 	)
 	default boolean logPlayerGraphicId()
@@ -456,7 +492,7 @@ public interface IdentificatorConfig extends Config
 	@ConfigSection(
 		name = "Colours",
 		description = "Options for the text colours",
-		position = 38
+		position = 41
 	)
 	String coloursSection = "coloursSection";
 
@@ -465,7 +501,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourHover",
 		name = "Hover text",
 		description = "The colour of the hover info text",
-		position = 39,
+		position = 42,
 		section = coloursSection
 	)
 	default Color colourHover()
@@ -478,7 +514,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourOverhead",
 		name = "Overhead text",
 		description = "The colour of the overhead info text",
-		position = 40,
+		position = 43,
 		section = coloursSection
 	)
 	default Color colourOverhead()
@@ -491,7 +527,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourMenu",
 		name = "Menu text",
 		description = "The colour of the menu info text",
-		position = 41,
+		position = 44,
 		section = coloursSection
 	)
 	default Color colourMenu()
@@ -504,7 +540,7 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourChathead",
 		name = "Chathead text",
 		description = "The colour of the chathead info text",
-		position = 42,
+		position = 45,
 		section = coloursSection
 	)
 	default Color colourChathead()
@@ -517,10 +553,23 @@ public interface IdentificatorConfig extends Config
 		keyName = "colourInventory",
 		name = "Inventory text",
 		description = "The colour of the inventory info text",
-		position = 43,
+		position = 46,
 		section = coloursSection
 	)
 	default Color colourInventory()
+	{
+		return Color.WHITE;
+	}
+
+	@Alpha
+	@ConfigItem(
+		keyName = "colourInterface",
+		name = "Interface text",
+		description = "The colour of the interface info text",
+		position = 47,
+		section = coloursSection
+	)
+	default Color colourInterface()
 	{
 		return Color.WHITE;
 	}
