@@ -11,7 +11,9 @@ import net.runelite.api.Model;
 import net.runelite.api.Renderable;
 import net.runelite.api.Scene;
 import net.runelite.api.Tile;
+import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -20,7 +22,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 @PluginDescriptor(
 	name = "Polygon Limiter",
-	description = "Removes objects with too many polygons to improve performance"
+	description = "Removes objects with too many polygons to improve performance",
+	tags = {"performance", "polygons", "vertex", "vertices"}
 )
 public class PolygonLimiterPlugin extends Plugin
 {
@@ -29,9 +32,6 @@ public class PolygonLimiterPlugin extends Plugin
 
 	@Inject
 	private ClientThread clientThread;
-
-	@Inject
-	private ConfigManager configManager;
 
 	@Inject
 	private PolygonLimiterConfig config;
@@ -56,8 +56,9 @@ public class PolygonLimiterPlugin extends Plugin
 	{
 		clientThread.invoke(() ->
 		{
-			if (client.getGameState() == GameState.LOGGED_IN)
+			if (GameState.LOGGED_IN.equals(client.getGameState()))
 			{
+				// Forces the game to reset the removed/hidden models
 				client.setGameState(GameState.LOADING);
 			}
 		});
@@ -66,15 +67,27 @@ public class PolygonLimiterPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		if (GameState.LOGGED_IN.equals(gameStateChanged.getGameState()))
 		{
 			hide();
 		}
 	}
 
+	@Subscribe
+	public void onGameObjectSpawned(GameObjectSpawned event)
+	{
+		hide();
+	}
+
+	@Subscribe
+	public void onGroundObjectSpawned(GroundObjectSpawned event)
+	{
+		hide();
+	}
+
 	private void hide()
 	{
-		Scene scene = client.getScene();
+		Scene scene = client.getTopLevelWorldView().getScene();
 		for (int z = 0; z < Constants.MAX_Z; ++z)
 		{
 			Tile[][] tiles = scene.getTiles()[z];
