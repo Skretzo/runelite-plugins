@@ -76,13 +76,42 @@ public class PolygonLimiterPlugin extends Plugin
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
-		hide();
+		GameObject gameObject = event.getGameObject();
+		if (gameObject != null)
+		{
+			Renderable renderable = gameObject == null ? null : gameObject.getRenderable();
+			if (renderable != null)
+			{
+				Model model = renderable instanceof Model ? (Model) renderable : renderable.getModel();
+				if (model != null && model.getVerticesCount() > config.gameObjectLimit())
+				{
+					Scene scene = client.getTopLevelWorldView().getScene();
+					scene.removeGameObject(gameObject);
+				}
+			}
+		}
 	}
 
 	@Subscribe
 	public void onGroundObjectSpawned(GroundObjectSpawned event)
 	{
-		hide();
+		GroundObject groundObject = event.getGroundObject();
+		if (groundObject != null)
+		{
+			Renderable renderable = groundObject.getRenderable();
+			if (renderable != null)
+			{
+				Model model = renderable instanceof Model ? (Model) renderable : renderable.getModel();
+				if (model != null && model.getVerticesCount() > config.groundObjectLimit())
+				{
+					Tile tile = event.getTile();
+					if (tile != null)
+					{
+						tile.setGroundObject(null);
+					}
+				}
+			}
+		}
 	}
 
 	private void hide()
@@ -106,7 +135,7 @@ public class PolygonLimiterPlugin extends Plugin
 						scene.removeTile(tile);
 						continue;
 					}
-					
+
 					for (GameObject gameObject : tile.getGameObjects())
 					{
 						Renderable renderable = gameObject == null ? null : gameObject.getRenderable();
