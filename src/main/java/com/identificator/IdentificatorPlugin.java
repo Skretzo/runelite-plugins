@@ -256,7 +256,7 @@ public class IdentificatorPlugin extends Plugin
 		// 1 = NPC
 		// 2 = Object
 		// 3 = Item
-		return gameObject != null && (gameObject.getHash() >> 14 & 3) == 2;
+		return gameObject != null && (gameObject.getHash() >> 16 & 7) == 2;
 	}
 
 	public ObjectComposition getMorphedGameObject(GameObject gameObject)
