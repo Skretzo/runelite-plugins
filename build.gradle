@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = 'com.chatsuccessrates'
-version = '1.2.6'
+version = '1.2.7'
 sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
