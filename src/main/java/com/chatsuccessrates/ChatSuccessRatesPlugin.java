@@ -177,11 +177,11 @@ public class ChatSuccessRatesPlugin extends Plugin
 
 		int[] intStack = client.getIntStack();
 		int intStackSize = client.getIntStackSize();
-		String[] stringStack = client.getStringStack();
-		int stringStackSize = client.getStringStackSize();
+		Object[] stringStack = client.getObjectStack();
+		int stringStackSize = client.getObjectStackSize();
 
 		final int messageId = intStack[intStackSize - 1];
-		String message = stringStack[stringStackSize - 1];
+		String message = (String) stringStack[stringStackSize - 1];
 
 		Duplicate duplicate = null;
 		for (ChatMessageType chatMessageType : DUPLICATE_CACHE.keySet())
