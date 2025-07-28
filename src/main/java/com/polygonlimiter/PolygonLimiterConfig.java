@@ -61,4 +61,15 @@ public interface PolygonLimiterConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "removeTilesRadius",
+		name = "Remove all tiles radius",
+		description = "The radius in which to remove all tiles outside of.<br>Restart the plugin to apply changes." +
+			"<br>Use the skybox plugin to change the colour of the void for green screening."
+	)
+	default int removeTilesRadius()
+	{
+		return 0;
+	}
 }

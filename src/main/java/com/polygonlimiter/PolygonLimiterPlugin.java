@@ -11,6 +11,7 @@ import net.runelite.api.Model;
 import net.runelite.api.Renderable;
 import net.runelite.api.Scene;
 import net.runelite.api.Tile;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GroundObjectSpawned;
@@ -117,6 +118,7 @@ public class PolygonLimiterPlugin extends Plugin
 	private void hide()
 	{
 		Scene scene = client.getTopLevelWorldView().getScene();
+		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 		for (int z = 0; z < Constants.MAX_Z; ++z)
 		{
 			Tile[][] tiles = scene.getTiles()[z];
@@ -130,7 +132,8 @@ public class PolygonLimiterPlugin extends Plugin
 						continue;
 					}
 
-					if (config.removeTiles())
+					if (config.removeTiles() && (config.removeTilesRadius() <= 0 ||
+						(playerLocation.distanceTo2D(tile.getWorldLocation())) > config.removeTilesRadius()))
 					{
 						scene.removeTile(tile);
 						continue;
