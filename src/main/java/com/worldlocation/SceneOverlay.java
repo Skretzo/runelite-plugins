@@ -199,16 +199,15 @@ public class SceneOverlay extends Overlay
 					WorldPoint wp = tile.getWorldLocation();
 					int tileX = wp.getX();
 					int tileY = wp.getY();
+					int tileZ = wp.getPlane();
 					if (InstanceInfoType.TEMPLATE.equals(config.instanceInfoType()) && client.isInInstancedRegion())
 					{
-						int[][][] instanceTemplateChunks = client.getInstanceTemplateChunks();
-						LocalPoint localPoint = tile.getLocalLocation();
-						int chunkData = instanceTemplateChunks[z][localPoint.getSceneX() / 8][localPoint.getSceneY() / 8];
-
-						tileX = (chunkData >> 14 & 0x3FF) * 8 + (tileX % 8);
-						tileY = (chunkData >> 3 & 0x7FF) * 8 + (tileY % 8);
+						wp = WorldPoint.fromLocalInstance(client, tile.getLocalLocation());
+						tileX = wp.getX();
+						tileY = wp.getY();
+						tileZ = wp.getPlane();
 					}
-					tooltipManager.add(new Tooltip(tileX + ", " + tileY + ", " + z));
+					tooltipManager.add(new Tooltip(tileX + ", " + tileY + ", " + tileZ));
 					OverlayUtil.renderPolygon(graphics, poly, tileColour);
 				}
 			}
