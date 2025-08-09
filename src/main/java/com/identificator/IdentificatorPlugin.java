@@ -31,6 +31,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOpened;
+import net.runelite.api.gameval.ObjectID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -68,6 +69,17 @@ public class IdentificatorPlugin extends Plugin
 		MenuAction.GROUND_ITEM_THIRD_OPTION,
 		MenuAction.GROUND_ITEM_FOURTH_OPTION,
 		MenuAction.GROUND_ITEM_FIFTH_OPTION
+	);
+	static final List<Integer> GAME_OBJECT_BLACKLIST = ImmutableList.of(
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON1,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON2,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON3,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON4,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON5,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON6,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON7,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON8,
+		ObjectID.TOA_SCABARAS_MEMORYGAME_BUTTON9
 	);
 
 	StringBuilder hoverText = new StringBuilder();
@@ -256,7 +268,17 @@ public class IdentificatorPlugin extends Plugin
 		// 1 = NPC
 		// 2 = Object
 		// 3 = Item
-		return gameObject != null && (gameObject.getHash() >> 16 & 7) == 2;
+		boolean isValid = gameObject != null && (gameObject.getHash() >> 16 & 7) == 2;
+		if (isValid && !isGameObjectBlacklisted(gameObject.getId()))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isGameObjectBlacklisted(int objectId)
+	{
+		return GAME_OBJECT_BLACKLIST.contains(objectId);
 	}
 
 	public ObjectComposition getMorphedGameObject(GameObject gameObject)
@@ -266,6 +288,10 @@ public class IdentificatorPlugin extends Plugin
 			ObjectComposition objectComposition = client.getObjectDefinition(gameObject.getId());
 			if (objectComposition != null && objectComposition.getImpostorIds() != null)
 			{
+				if (isGameObjectBlacklisted(objectComposition.getImpostor().getId()))
+				{
+					return null;
+				}
 				return objectComposition.getImpostor();
 			}
 		}
