@@ -2,6 +2,7 @@ package com.chatsuccessrates;
 
 import com.chatsuccessrates.trackers.BendingNails;
 import com.chatsuccessrates.trackers.CatchingPetfish;
+import com.chatsuccessrates.trackers.ChoppingCanoeStation;
 import com.chatsuccessrates.trackers.CustomConfig;
 import com.chatsuccessrates.trackers.FiringPottery;
 import com.chatsuccessrates.trackers.LightingLogs;
@@ -10,19 +11,20 @@ import com.chatsuccessrates.trackers.PickingLock;
 import com.chatsuccessrates.trackers.Pickpocketing;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.runelite.api.ItemID;
+import net.runelite.api.gameval.AnimationID;
+import net.runelite.api.gameval.ItemID;
 
 @RequiredArgsConstructor
 public enum ChatSuccessRatesAction
 {
 	// Construction
-	BENDING_BRONZE_NAILS(new BendingNails(ItemID.BRONZE_NAILS)),
-	BENDING_IRON_NAILS(new BendingNails(ItemID.IRON_NAILS)),
-	BENDING_STEEL_NAILS(new BendingNails(ItemID.STEEL_NAILS)),
-	BENDING_BLACK_NAILS(new BendingNails(ItemID.BLACK_NAILS)),
-	BENDING_MITHRIL_NAILS(new BendingNails(ItemID.MITHRIL_NAILS)),
-	BENDING_ADAMANTITE_NAILS(new BendingNails(ItemID.ADAMANTITE_NAILS)),
-	BENDING_RUNE_NAILS(new BendingNails(ItemID.RUNE_NAILS)),
+	BENDING_BRONZE_NAILS(new BendingNails(ItemID.NAILS_BRONZE)),
+	BENDING_IRON_NAILS(new BendingNails(ItemID.NAILS_IRON)),
+	BENDING_STEEL_NAILS(new BendingNails(ItemID.NAILS)),
+	BENDING_BLACK_NAILS(new BendingNails(ItemID.NAILS_BLACK)),
+	BENDING_MITHRIL_NAILS(new BendingNails(ItemID.NAILS_MITHRIL)),
+	BENDING_ADAMANTITE_NAILS(new BendingNails(ItemID.NAILS_ADAMANT)),
+	BENDING_RUNE_NAILS(new BendingNails(ItemID.NAILS_RUNE)),
 
 	// Crafting
 	FIRING_BOWL(new FiringPottery("bowl")),
@@ -63,6 +65,15 @@ public enum ChatSuccessRatesAction
 	PICKPOCKETING_VYRE(new Pickpocketing("vyre")),
 	PICKPOCKETING_WARRIOR(new Pickpocketing("warrior")),
 	PICKPOCKETING_WOMAN(new Pickpocketing("woman")),
+
+	// Woodcutting
+	CANOE_STATION_CHOPPING_BRONZE(new ChoppingCanoeStation("bronze", AnimationID.HUMAN_WOODCUTTING_BRONZE_AXE)),
+	CANOE_STATION_CHOPPING_IRON(new ChoppingCanoeStation("iron", AnimationID.HUMAN_WOODCUTTING_IRON_AXE)),
+	CANOE_STATION_CHOPPING_STEEL(new ChoppingCanoeStation("steel", AnimationID.HUMAN_WOODCUTTING_STEEL_AXE)),
+	CANOE_STATION_CHOPPING_BLACK(new ChoppingCanoeStation("black", AnimationID.HUMAN_WOODCUTTING_BLACK_AXE)),
+	CANOE_STATION_CHOPPING_MITHRIL(new ChoppingCanoeStation("mithril", AnimationID.HUMAN_WOODCUTTING_MITHRIL_AXE)),
+	CANOE_STATION_CHOPPING_ADAMANT(new ChoppingCanoeStation("adamant", AnimationID.HUMAN_WOODCUTTING_ADAMANT_AXE)),
+	CANOE_STATION_CHOPPING_RUNE(new ChoppingCanoeStation("rune", AnimationID.HUMAN_WOODCUTTING_RUNE_AXE)),
 
 	// Other
 	CUSTOM_CONFIG(new CustomConfig());
