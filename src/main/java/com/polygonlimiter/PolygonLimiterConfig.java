@@ -3,6 +3,7 @@ package com.polygonlimiter;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Range;
 
 @ConfigGroup("polygonlimiter")
 public interface PolygonLimiterConfig extends Config
@@ -52,6 +53,19 @@ public interface PolygonLimiterConfig extends Config
 	*/
 
 	@ConfigItem(
+		keyName = "keepInteractableObjects",
+		name = "Keep interactable objects",
+		description = "Whether to keep objects with interactions (e.g. 'Chop down Tree')<br>" +
+			"regardless of the object model vertices limit.<br>" +
+			"The 'Examine' option is not considered as an interaction.<br>" +
+			"Restart the plugin to apply changes."
+	)
+	default boolean keepInteractableObjects()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "removeTiles",
 		name = "Remove all tiles",
 		description = "Whether to remove all tiles.<br>Restart the plugin to apply changes." +
@@ -62,6 +76,9 @@ public interface PolygonLimiterConfig extends Config
 		return false;
 	}
 
+	@Range(
+		min = -1
+	)
 	@ConfigItem(
 		keyName = "removeTilesRadius",
 		name = "Remove all tiles radius",
@@ -70,6 +87,6 @@ public interface PolygonLimiterConfig extends Config
 	)
 	default int removeTilesRadius()
 	{
-		return 0;
+		return -1;
 	}
 }

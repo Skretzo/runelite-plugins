@@ -1,6 +1,7 @@
 package com.polygonlimiter;
 
 import com.google.inject.Provides;
+import java.util.Arrays;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
@@ -8,6 +9,7 @@ import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.GroundObject;
 import net.runelite.api.Model;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.Renderable;
 import net.runelite.api.Scene;
 import net.runelite.api.Tile;
@@ -28,6 +30,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class PolygonLimiterPlugin extends Plugin
 {
+	private static final String[] NO_OBJECT_INTERACTIONS = new String[]{null, null, null, null, null};
 	@Inject
 	private Client client;
 
@@ -87,7 +90,15 @@ public class PolygonLimiterPlugin extends Plugin
 				if (model != null && model.getVerticesCount() > config.gameObjectLimit())
 				{
 					Scene scene = client.getTopLevelWorldView().getScene();
-					scene.removeGameObject(gameObject);
+					ObjectComposition gameObjectComposition = null;
+					if (scene != null && (!config.keepInteractableObjects() ||
+						((gameObjectComposition = client.getObjectDefinition(gameObject.getId())) != null &&
+						(gameObjectComposition.getImpostorIds() == null ||
+						(gameObjectComposition = gameObjectComposition.getImpostor()) != null) &&
+						Arrays.equals(NO_OBJECT_INTERACTIONS, gameObjectComposition.getActions()))))
+					{
+						scene.removeGameObject(gameObject);
+					}
 				}
 			}
 		}
@@ -106,7 +117,12 @@ public class PolygonLimiterPlugin extends Plugin
 				if (model != null && model.getVerticesCount() > config.groundObjectLimit())
 				{
 					Tile tile = event.getTile();
-					if (tile != null)
+					ObjectComposition groundObjectComposition = null;
+					if (tile != null && (!config.keepInteractableObjects() ||
+						((groundObjectComposition = client.getObjectDefinition(groundObject.getId())) != null &&
+						(groundObjectComposition.getImpostorIds() == null ||
+						(groundObjectComposition = groundObjectComposition.getImpostor()) != null) &&
+						Arrays.equals(NO_OBJECT_INTERACTIONS, groundObjectComposition.getActions()))))
 					{
 						tile.setGroundObject(null);
 					}
@@ -132,7 +148,7 @@ public class PolygonLimiterPlugin extends Plugin
 						continue;
 					}
 
-					if (config.removeTiles() && (config.removeTilesRadius() <= 0 ||
+					if (config.removeTiles() && (config.removeTilesRadius() < 0 ||
 						(playerLocation.distanceTo2D(tile.getWorldLocation())) > config.removeTilesRadius()))
 					{
 						scene.removeTile(tile);
@@ -147,7 +163,15 @@ public class PolygonLimiterPlugin extends Plugin
 							Model model = renderable instanceof Model ? (Model) renderable : renderable.getModel();
 							if (model != null && model.getVerticesCount() > config.gameObjectLimit())
 							{
-								scene.removeGameObject(gameObject);
+								ObjectComposition gameObjectComposition = null;
+								if (!config.keepInteractableObjects() ||
+									((gameObjectComposition = client.getObjectDefinition(gameObject.getId())) != null &&
+									(gameObjectComposition.getImpostorIds() == null ||
+									(gameObjectComposition = gameObjectComposition.getImpostor()) != null) &&
+									Arrays.equals(NO_OBJECT_INTERACTIONS, gameObjectComposition.getActions())))
+								{
+									scene.removeGameObject(gameObject);
+								}
 							}
 						}
 					}
@@ -161,7 +185,15 @@ public class PolygonLimiterPlugin extends Plugin
 							Model model = renderable instanceof Model ? (Model) renderable : renderable.getModel();
 							if (model != null && model.getVerticesCount() > config.groundObjectLimit())
 							{
-								tile.setGroundObject(null);
+								ObjectComposition groundObjectComposition = null;
+								if (!config.keepInteractableObjects() ||
+									((groundObjectComposition = client.getObjectDefinition(groundObject.getId())) != null &&
+									(groundObjectComposition.getImpostorIds() == null ||
+									(groundObjectComposition = groundObjectComposition.getImpostor()) != null) &&
+									Arrays.equals(NO_OBJECT_INTERACTIONS, groundObjectComposition.getActions())))
+								{
+									tile.setGroundObject(null);
+								}
 							}
 						}
 					}
