@@ -109,40 +109,40 @@ public class IdentificatorOverlay extends Overlay
 					{
 						plugin.appendId(animations, plugin.gameObjectAnimationsToText(gameObjects));
 					}
-					if (plugin.showGroundObjectId && groundObject != null)
+					if (plugin.showGroundObjectId)
 					{
-						plugin.appendId(ids, groundObject.getId());
+						plugin.appendId(ids, plugin.tileObjectToText(groundObject));
 					}
 					if (plugin.showGroundObjectMorphId)
 					{
 						plugin.appendId(ids, plugin.morphedTileObjectToText(groundObject));
 					}
-					if (plugin.showGroundObjectAnimationId && groundObject != null)
+					if (plugin.showGroundObjectAnimationId && groundObject != null && !plugin.isBlacklisted(groundObject.getId()))
 					{
 						plugin.appendAnimation(animations, groundObject.getRenderable());
 					}
-					if (plugin.showDecorativeObjectId && decorativeObject != null)
+					if (plugin.showDecorativeObjectId)
 					{
-						plugin.appendId(ids, decorativeObject.getId());
+						plugin.appendId(ids, plugin.tileObjectToText(decorativeObject));
 					}
 					if (plugin.showDecorativeObjectMorphId)
 					{
 						plugin.appendId(ids, plugin.morphedTileObjectToText(decorativeObject));
 					}
-					if (plugin.showDecorativeObjectAnimationId && decorativeObject != null)
+					if (plugin.showDecorativeObjectAnimationId && decorativeObject != null && !plugin.isBlacklisted(decorativeObject.getId()))
 					{
 						plugin.appendAnimation(animations, decorativeObject.getRenderable());
 						plugin.appendAnimation(animations, decorativeObject.getRenderable2());
 					}
-					if (plugin.showWallObjectId && wallObject != null)
+					if (plugin.showWallObjectId)
 					{
-						plugin.appendId(ids, wallObject.getId());
+						plugin.appendId(ids, plugin.tileObjectToText(wallObject));
 					}
 					if (plugin.showWallObjectMorphId)
 					{
 						plugin.appendId(ids, plugin.morphedTileObjectToText(wallObject));
 					}
-					if (plugin.showWallObjectAnimationId && wallObject != null)
+					if (plugin.showWallObjectAnimationId && wallObject != null && !plugin.isBlacklisted(wallObject.getId()))
 					{
 						plugin.appendAnimation(animations, wallObject.getRenderable1());
 						plugin.appendAnimation(animations, wallObject.getRenderable2());

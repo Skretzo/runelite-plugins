@@ -269,14 +269,14 @@ public class IdentificatorPlugin extends Plugin
 		// 2 = Object
 		// 3 = Item
 		boolean isValid = gameObject != null && (gameObject.getHash() >> 16 & 7) == 2;
-		if (isValid && !isGameObjectBlacklisted(gameObject.getId()))
+		if (isValid && !isBlacklisted(gameObject.getId()))
 		{
 			return true;
 		}
 		return false;
 	}
 
-	public boolean isGameObjectBlacklisted(int objectId)
+	public boolean isBlacklisted(int objectId)
 	{
 		return GAME_OBJECT_BLACKLIST.contains(objectId);
 	}
@@ -286,9 +286,10 @@ public class IdentificatorPlugin extends Plugin
 		if (isGameObject(gameObject))
 		{
 			ObjectComposition objectComposition = client.getObjectDefinition(gameObject.getId());
-			if (objectComposition != null && objectComposition.getImpostorIds() != null)
+			if (objectComposition != null && objectComposition.getImpostorIds() != null
+				&& objectComposition.getImpostor() != null)
 			{
-				if (isGameObjectBlacklisted(objectComposition.getImpostor().getId()))
+				if (isBlacklisted(objectComposition.getImpostor().getId()))
 				{
 					return null;
 				}
@@ -305,6 +306,10 @@ public class IdentificatorPlugin extends Plugin
 			ObjectComposition objectComposition = client.getObjectDefinition(tileObject.getId());
 			if (objectComposition != null && objectComposition.getImpostorIds() != null)
 			{
+				if (isBlacklisted(objectComposition.getImpostor().getId()))
+				{
+					return null;
+				}
 				return objectComposition.getImpostor();
 			}
 		}
@@ -411,6 +416,15 @@ public class IdentificatorPlugin extends Plugin
 		}
 
 		return text.toString();
+	}
+
+	public String tileObjectToText(TileObject tileObject)
+	{
+		if (tileObject == null || isBlacklisted(tileObject.getId()))
+		{
+			return "";
+		}
+		return "" + tileObject.getId();
 	}
 
 	public String morphedTileObjectToText(TileObject tileObject)
@@ -548,44 +562,44 @@ public class IdentificatorPlugin extends Plugin
 			{
 				wrapId(hoverText, "A", gameObjectAnimationsToText(gameObjects));
 			}
-			if (showGroundObjectId && groundObject != null)
+			if (showGroundObjectId)
 			{
-				wrapId(hoverText, "ID", groundObject.getId());
+				wrapId(hoverText, "ID", tileObjectToText(groundObject));
 			}
 			if (showGroundObjectMorphId)
 			{
 				wrapId(hoverText, "Morph ID", morphedTileObjectToText(groundObject));
 			}
-			if (showGroundObjectAnimationId && groundObject != null)
+			if (showGroundObjectAnimationId && groundObject != null && !isBlacklisted(groundObject.getId()))
 			{
 				StringBuilder text = new StringBuilder();
 				appendAnimation(text, groundObject.getRenderable());
 				wrapId(hoverText, "A", text.toString());
 			}
-			if (showDecorativeObjectId && decorativeObject != null)
+			if (showDecorativeObjectId)
 			{
-				wrapId(hoverText, "ID", decorativeObject.getId());
+				wrapId(hoverText, "ID", tileObjectToText(decorativeObject));
 			}
 			if (showDecorativeObjectMorphId)
 			{
 				wrapId(hoverText, "Morph ID", morphedTileObjectToText(decorativeObject));
 			}
-			if (showDecorativeObjectAnimationId && decorativeObject != null)
+			if (showDecorativeObjectAnimationId && decorativeObject != null && !isBlacklisted(decorativeObject.getId()))
 			{
 				StringBuilder text = new StringBuilder();
 				appendAnimation(text, decorativeObject.getRenderable());
 				appendAnimation(text, decorativeObject.getRenderable2());
 				wrapId(hoverText, "A", text.toString());
 			}
-			if (showWallObjectId && wallObject != null)
+			if (showWallObjectId)
 			{
-				wrapId(hoverText, "ID", wallObject.getId());
+				wrapId(hoverText, "ID", tileObjectToText(wallObject));
 			}
 			if (showWallObjectMorphId)
 			{
 				wrapId(hoverText, "Morph ID", morphedTileObjectToText(wallObject));
 			}
-			if (showWallObjectAnimationId && wallObject != null)
+			if (showWallObjectAnimationId && wallObject != null && !isBlacklisted(wallObject.getId()))
 			{
 				StringBuilder text = new StringBuilder();
 				appendAnimation(text, wallObject.getRenderable1());
