@@ -31,6 +31,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOpened;
+import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.ObjectID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -123,6 +124,7 @@ public class IdentificatorPlugin extends Plugin
 	Color colourChathead;
 	Color colourInventory;
 	Color colourInterface;
+	int interfaceGroupId;
 
 	private IdentificatorPanel panel;
 	private NavigationButton navigationButton;
@@ -707,5 +709,11 @@ public class IdentificatorPlugin extends Plugin
 		{
 			loginTickCount = client.getTickCount();
 		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		interfaceGroupId = event.getGroupId();
 	}
 }

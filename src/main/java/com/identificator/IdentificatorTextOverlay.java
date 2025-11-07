@@ -40,7 +40,7 @@ public class IdentificatorTextOverlay extends Overlay
 
 	private void renderInterfaces(Graphics2D graphics)
 	{
-		renderInterface(graphics, 214, 29); // Skill guide icons
+		renderInterface(graphics, plugin.interfaceGroupId, 0);
 	}
 
 	private void renderInterface(Graphics2D graphics, int groupId, int childId)
@@ -51,43 +51,85 @@ public class IdentificatorTextOverlay extends Overlay
 		{
 			return;
 		}
-		
-		for (Widget child : widget.getDynamicChildren())
+
+		if (widget.getDynamicChildren() != null)
 		{
-			if (child == null)
+			for (Widget child : widget.getDynamicChildren())
 			{
-				continue;
+				renderInterfaceWidget(graphics, child);
+				renderInterface(graphics, child, childId);
 			}
-
-			StringBuilder text = new StringBuilder();
-
-			if (plugin.showInterfaceItemId && child.getItemId() >= 0 && child.getItemId() != 7620) // blank
-			{
-				plugin.appendId(text, "I: " + child.getItemId());
-			}
-	
-			if (plugin.showInterfaceModelId && child.getModelId() >= 0)
-			{
-				plugin.appendId(text, "M: " + child.getModelId());
-			}
-	
-			if (plugin.showInterfaceSpriteId && child.getSpriteId() >= 0)
-			{
-				plugin.appendId(text, "S: " + child.getSpriteId());
-			}
-
-			if (text.length() <= 0)
-			{
-				return;
-			}
-	
-			int width = graphics.getFontMetrics().stringWidth(text.toString());
-			int textX = Math.max(child.getCanvasLocation().getX() - width / 2 + child.getWidth() / 2, 15);
-			int textY = child.getCanvasLocation().getY();
-	
-			graphics.setColor(plugin.colourInterface);
-			graphics.drawString(text.toString(), textX, textY);
 		}
+		if (widget.getStaticChildren() != null)
+		{
+			for (Widget child : widget.getStaticChildren())
+			{
+				renderInterfaceWidget(graphics, child);
+				renderInterface(graphics, child, childId);
+			}
+		}
+		if (widget.getChildren() != null)
+		{
+			for (Widget child : widget.getChildren())
+			{
+				renderInterfaceWidget(graphics, child);
+				renderInterface(graphics, child, childId);
+			}
+		}
+	}
+
+	private void renderInterface(Graphics2D graphics, Widget widget, int lastChildId)
+	{
+		if (widget == null)
+		{
+			return;
+		}
+
+		int id = widget.getId();
+		int groupId = id >> 16;
+		int childId = id & 0xffff;
+
+		if (childId > lastChildId)
+		{
+			renderInterface(graphics, groupId, childId);
+		}
+	}
+
+	private void renderInterfaceWidget(Graphics2D graphics, Widget widget)
+	{
+		if (widget == null)
+		{
+			return;
+		}
+
+		StringBuilder text = new StringBuilder();
+
+		if (plugin.showInterfaceItemId && widget.getItemId() >= 0 && widget.getItemId() != 7620) // blank
+		{
+			plugin.appendId(text, "I: " + widget.getItemId());
+		}
+
+		if (plugin.showInterfaceModelId && widget.getModelId() >= 0)
+		{
+			plugin.appendId(text, "M: " + widget.getModelId());
+		}
+
+		if (plugin.showInterfaceSpriteId && widget.getSpriteId() >= 0)
+		{
+			plugin.appendId(text, "S: " + widget.getSpriteId());
+		}
+
+		if (text.length() <= 0)
+		{
+			return;
+		}
+
+		int width = graphics.getFontMetrics().stringWidth(text.toString());
+		int textX = Math.max(widget.getCanvasLocation().getX() - width / 2 + widget.getWidth() / 2, 15);
+		int textY = widget.getCanvasLocation().getY() + widget.getHeight() / 2;
+
+		graphics.setColor(plugin.colourInterface);
+		graphics.drawString(text.toString(), textX, textY);
 	}
 
 	private void renderChathead(Graphics2D graphics)
