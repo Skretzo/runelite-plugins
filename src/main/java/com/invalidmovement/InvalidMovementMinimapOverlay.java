@@ -14,12 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import net.runelite.api.Client;
+import net.runelite.api.CollisionData;
 import net.runelite.api.Perspective;
 import static net.runelite.api.Perspective.UNIT;
 import net.runelite.api.Point;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Tile;
 import net.runelite.api.Varbits;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
@@ -75,7 +77,11 @@ class InvalidMovementMinimapOverlay extends Overlay
 		final int playerY = playerLocation.getSceneY();
 		final int radius = config.radiusMinimap() < 0 ? Integer.MAX_VALUE / 2 : config.radiusMinimap();
 
-		if (client.getCollisionMaps() == null)
+		WorldView worldView = client.getTopLevelWorldView();
+
+		CollisionData[] collisionData = worldView.getCollisionMaps();
+
+		if (collisionData == null)
 		{
 			return;
 		}
@@ -87,11 +93,11 @@ class InvalidMovementMinimapOverlay extends Overlay
 		}
 		graphics.setClip(minimapClipArea);
 
-		final int z = client.getPlane();
+		final int z = worldView.getPlane();
 
-		final int[][] flags = client.getCollisionMaps()[z].getFlags();
+		final int[][] flags = collisionData[z].getFlags();
 
-		final Tile[][] tiles = client.getScene().getTiles()[z];
+		final Tile[][] tiles = worldView.getScene().getTiles()[z];
 
 		final int startX = Math.max(playerX - radius, 0);
 		final int endX = Math.min(playerX + radius, tiles[0].length);

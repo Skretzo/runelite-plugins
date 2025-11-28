@@ -8,9 +8,11 @@ import java.awt.Polygon;
 import java.awt.geom.GeneralPath;
 import java.util.Set;
 import net.runelite.api.Client;
+import net.runelite.api.CollisionData;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.Tile;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -56,18 +58,22 @@ class InvalidMovementSceneOverlay extends Overlay
 		final int playerY = playerLocation.getSceneY();
 		final int radius = config.radiusScene() < 0 ? Integer.MAX_VALUE / 2 : config.radiusScene();
 
-		if (client.getCollisionMaps() == null)
+		WorldView worldView = client.getTopLevelWorldView();
+
+		CollisionData[] collisionData = worldView.getCollisionMaps();
+
+		if (collisionData == null)
 		{
 			return;
 		}
 
 		final BasicStroke borderStroke = new BasicStroke((float) config.wallWidth());
 
-		final int z = client.getPlane();
+		final int z = worldView.getPlane();
 
-		final int[][] flags = client.getCollisionMaps()[z].getFlags();
+		final int[][] flags = collisionData[z].getFlags();
 
-		final Tile[][] tiles = client.getScene().getTiles()[z];
+		final Tile[][] tiles = worldView.getScene().getTiles()[z];
 
 		final int startX = Math.max(playerX - radius, 0);
 		final int endX = Math.min(playerX + radius, tiles[0].length);
