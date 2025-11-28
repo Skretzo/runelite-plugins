@@ -29,6 +29,7 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.ComponentID;
@@ -562,12 +563,13 @@ public class RadiusMarkerPlugin extends Plugin
 
 	public Collection<WorldPoint> getInstanceWorldPoints(WorldPoint worldPointTemplate)
 	{
-		if (!client.isInInstancedRegion())
+		WorldView worldView = client.getTopLevelWorldView();
+		if (worldView == null || !worldView.isInstance())
 		{
 			return Collections.singleton(worldPointTemplate);
 		}
 
-		return WorldPoint.toLocalInstance(client, worldPointTemplate);
+		return WorldPoint.toLocalInstance(worldView, worldPointTemplate);
 	}
 
 	public Shape getMinimapClipArea()

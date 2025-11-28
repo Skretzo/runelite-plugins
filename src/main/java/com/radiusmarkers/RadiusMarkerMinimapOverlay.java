@@ -12,6 +12,7 @@ import net.runelite.api.Client;
 import net.runelite.api.NPC;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
@@ -192,14 +193,16 @@ class RadiusMarkerMinimapOverlay extends Overlay
 
 	private Point worldToMinimap(final WorldPoint worldPoint)
 	{
-		if (client.getLocalPlayer() == null)
+		WorldView worldView = client.getTopLevelWorldView();
+
+		if (worldView == null || client.getLocalPlayer() == null)
 		{
 			return null;
 		}
 
 		final WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 		final LocalPoint localLocation = client.getLocalPlayer().getLocalLocation();
-		final LocalPoint playerLocalPoint = LocalPoint.fromWorld(client, playerLocation);
+		final LocalPoint playerLocalPoint = LocalPoint.fromWorld(worldView, playerLocation);
 
 		if (playerLocalPoint == null)
 		{
