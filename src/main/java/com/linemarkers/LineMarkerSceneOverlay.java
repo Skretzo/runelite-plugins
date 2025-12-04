@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.overlay.Overlay;
@@ -35,6 +36,25 @@ class LineMarkerSceneOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		WorldView worldView = client.getTopLevelWorldView();
+		if (worldView == null || client.getLocalPlayer() == null)
+		{
+			return null;
+		}
+
+		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
+		int playerWorldId = client.getLocalPlayer().getWorldView().getId();
+		boolean isOnBoat = playerWorldId != -1;
+		if (isOnBoat)
+		{
+			playerLocation = WorldPoint.fromLocalInstance(client,
+				worldView.worldEntities().byIndex(playerWorldId).getLocalLocation());
+		}
+		if (playerLocation == null)
+		{
+			return null;
+		}
+
 		for (final LineGroup group : plugin.getMarkers())
 		{
 			if (!group.isVisible())
@@ -44,21 +64,21 @@ class LineMarkerSceneOverlay extends Overlay
 
 			for (final Line line : group.getLines())
 			{
-				if (line.getLocation().getPlane() != client.getPlane())
+				if (line.getLocation().getPlane() != worldView.getPlane())
 				{
 					continue;
 				}
 
-				drawLine(graphics, line);
+				drawLine(graphics, line, playerLocation);
 			}
 		}
 
 		return null;
 	}
 
-	private void drawLine(Graphics2D graphics, Line line)
+	private void drawLine(Graphics2D graphics, Line line, WorldPoint playerLocation)
 	{
-		if (client.getLocalPlayer() == null || client.getLocalPlayer().getWorldLocation().distanceTo(line.getLocation()) > MAX_DISTANCE)
+		if (playerLocation.distanceTo(line.getLocation()) > MAX_DISTANCE)
 		{
 			return;
 		}

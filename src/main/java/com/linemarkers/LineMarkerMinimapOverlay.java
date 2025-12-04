@@ -7,6 +7,7 @@ import java.awt.RenderingHints;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
@@ -45,6 +46,25 @@ class LineMarkerMinimapOverlay extends Overlay
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		graphics.setClip(plugin.getMinimapClipArea());
 
+		WorldView worldView = client.getTopLevelWorldView();
+		if (worldView == null || client.getLocalPlayer() == null)
+		{
+			return;
+		}
+
+		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
+		int playerWorldId = client.getLocalPlayer().getWorldView().getId();
+		boolean isOnBoat = playerWorldId != -1;
+		if (isOnBoat)
+		{
+			playerLocation = WorldPoint.fromLocalInstance(client,
+				worldView.worldEntities().byIndex(playerWorldId).getLocalLocation());
+		}
+		if (playerLocation == null)
+		{
+			return;
+		}
+
 		for (final LineGroup group : plugin.getMarkers())
 		{
 			if (!group.isVisible())
@@ -54,15 +74,19 @@ class LineMarkerMinimapOverlay extends Overlay
 
 			for (Line line : group.getLines())
 			{
-				drawLine(graphics, line);
+				if (line.getLocation().getPlane() != worldView.getPlane())
+				{
+					continue;
+				}
+				drawLine(graphics, line, playerLocation);
 			}
 		}
 	}
 
-	private void drawLine(Graphics2D graphics, Line line)
+	private void drawLine(Graphics2D graphics, Line line, WorldPoint playerLocation)
 	{
-		final Point start = worldToMinimap(Edge.start(line));
-		final Point end = worldToMinimap(Edge.end(line));
+		final Point start = worldToMinimap(Edge.start(line), playerLocation);
+		final Point end = worldToMinimap(Edge.end(line), playerLocation);
 
 		if (start == null || end == null)
 		{
@@ -73,14 +97,8 @@ class LineMarkerMinimapOverlay extends Overlay
 		graphics.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
 	}
 
-	private Point worldToMinimap(final WorldPoint worldPoint)
+	private Point worldToMinimap(final WorldPoint worldPoint, WorldPoint playerLocation)
 	{
-		if (client.getLocalPlayer() == null || client.getPlane() != worldPoint.getPlane())
-		{
-			return null;
-		}
-
-		final WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 		final LocalPoint localLocation = client.getLocalPlayer().getLocalLocation();
 		final LocalPoint playerLocalPoint = LocalPoint.fromWorld(client, playerLocation);
 

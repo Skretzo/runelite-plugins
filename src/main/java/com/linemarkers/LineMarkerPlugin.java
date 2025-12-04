@@ -28,6 +28,7 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Tile;
 import net.runelite.api.Varbits;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameStateChanged;
@@ -273,7 +274,9 @@ public class LineMarkerPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		if (!GameState.LOGGED_IN.equals(event.getGameState()) || !client.isInInstancedRegion())
+		WorldView worldView = client.getTopLevelWorldView();
+
+		if (!GameState.LOGGED_IN.equals(event.getGameState()) || worldView == null || !worldView.isInstance())
 		{
 			return;
 		}
@@ -331,7 +334,13 @@ public class LineMarkerPlugin extends Plugin
 
 	private void addMarker(MenuEntry entry)
 	{
-		Tile tile = client.getSelectedSceneTile();
+		WorldView worldView = client.getTopLevelWorldView();
+		if (worldView == null)
+		{
+			return;
+		}
+
+		Tile tile = worldView.getSelectedSceneTile();
 		if (tile == null)
 		{
 			return;
