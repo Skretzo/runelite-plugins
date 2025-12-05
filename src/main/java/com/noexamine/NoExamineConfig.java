@@ -109,7 +109,7 @@ public interface NoExamineConfig extends Config
 	@ConfigItem(
 		keyName = "cancelEverywhere",
 		name = "Everywhere",
-		description = "Whether to remove cancel menu options everywhere",
+		description = "Whether to remove cancel menu options everywhere in the right-click menu",
 		position = 7,
 		section = sectionCancel
 	)
@@ -138,17 +138,36 @@ public interface NoExamineConfig extends Config
 	}
 
 	@ConfigSection(
+		name = "Set heading",
+		description = "Settings for removing set heading menu options",
+		position = 10
+	)
+	String sectionSetHeading = "sectionSetHeading";
+
+	@ConfigItem(
+		keyName = "setHeadingEverywhere",
+		name = "Everywhere",
+		description = "Whether to remove set heading menu options everywhere in the right-click menu",
+		position = 11,
+		section = sectionSetHeading
+	)
+	default boolean setHeadingEverywhere()
+	{
+		return false;
+	}
+
+	@ConfigSection(
 		name = "Walk here",
 		description = "Settings for removing walk here menu options",
-		position = 10
+		position = 12
 	)
 	String sectionWalkHere = "sectionWalkHere";
 
 	@ConfigItem(
 		keyName = "walkHereEverywhere",
 		name = "Everywhere",
-		description = "Whether to remove walk here menu options everywhere",
-		position = 11,
+		description = "Whether to remove walk here menu options everywhere in the right-click menu",
+		position = 13,
 		section = sectionWalkHere
 	)
 	default boolean walkHereEverywhere()

@@ -59,7 +59,8 @@ public class NoExaminePlugin extends Plugin
 			if (!isExamine(menuEntry) &&
 				!isCancel(menuAction) &&
 				!isRemove(menuAction, menuEntry.getOption()) &&
-				!isWalkHere(menuAction))
+				!isWalkHere(menuAction) &&
+				!isSetHeading(menuAction))
 			{
 				alteredMenuEntries.add(menuEntry);
 			}
@@ -134,5 +135,10 @@ public class NoExaminePlugin extends Plugin
 	private boolean isWalkHere(MenuAction menuAction)
 	{
 		return MenuAction.WALK.equals(menuAction) && config.walkHereEverywhere();
+	}
+
+	private boolean isSetHeading(MenuAction menuAction)
+	{
+		return MenuAction.SET_HEADING.equals(menuAction) && config.setHeadingEverywhere();
 	}
 }

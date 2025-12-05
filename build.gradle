@@ -15,8 +15,8 @@ def runeLiteVersion = 'latest.release'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
-	compileOnly 'org.projectlombok:lombok:1.18.20'
-	annotationProcessor 'org.projectlombok:lombok:1.18.20'
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -25,7 +25,7 @@ dependencies {
 
 group = 'com.noexamine'
 version = '1.5'
-sourceCompatibility = '1.8'
+sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
