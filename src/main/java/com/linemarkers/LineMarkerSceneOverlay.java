@@ -44,7 +44,7 @@ class LineMarkerSceneOverlay extends Overlay
 
 		WorldPoint playerLocation = client.getLocalPlayer().getWorldLocation();
 		int playerWorldId = client.getLocalPlayer().getWorldView().getId();
-		boolean isOnBoat = playerWorldId != -1;
+		boolean isOnBoat = playerWorldId != WorldView.TOPLEVEL;
 		if (isOnBoat)
 		{
 			playerLocation = WorldPoint.fromLocalInstance(client,
