@@ -34,6 +34,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -85,6 +86,9 @@ public class RadiusMarkerPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private ClientThread clientThread;
+
+	@Inject
 	private ClientToolbar clientToolbar;
 
 	@Inject
@@ -123,7 +127,7 @@ public class RadiusMarkerPlugin extends Plugin
 
 		loadMarkers();
 
-		pluginPanel = new RadiusMarkerPluginPanel(client, this, config);
+		pluginPanel = new RadiusMarkerPluginPanel(client, this, config, clientThread);
 		pluginPanel.rebuild();
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);

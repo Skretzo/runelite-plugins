@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import lombok.Getter;
 import net.runelite.api.Client;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
@@ -59,6 +60,7 @@ class RadiusMarkerPluginPanel extends PluginPanel
 	private final Client client;
 	private final RadiusMarkerPlugin plugin;
 	private final RadiusMarkerConfig config;
+	private final ClientThread clientThread;
 
 	@Getter
 	private PanelFilter panelFilter = PanelFilter.ALL;
@@ -98,11 +100,12 @@ class RadiusMarkerPluginPanel extends PluginPanel
 		};
 	}
 
-	public RadiusMarkerPluginPanel(Client client, RadiusMarkerPlugin plugin, RadiusMarkerConfig config)
+	public RadiusMarkerPluginPanel(Client client, RadiusMarkerPlugin plugin, RadiusMarkerConfig config, ClientThread clientThread)
 	{
 		this.client = client;
 		this.plugin = plugin;
 		this.config = config;
+		this.clientThread = clientThread;
 
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -268,30 +271,32 @@ class RadiusMarkerPluginPanel extends PluginPanel
 
 	public void rebuild()
 	{
-		markerView.removeAll();
+		clientThread.invokeLater(() -> {
+			markerView.removeAll();
 
-		filterMarkersAndDo(marker ->
-		{
-			markerView.add(new RadiusMarkerPanel(plugin, config, marker));
-			markerView.add(Box.createRigidArea(new Dimension(0, 10)));
-		});
+			filterMarkersAndDo(marker ->
+			{
+				markerView.add(new RadiusMarkerPanel(plugin, config, marker));
+				markerView.add(Box.createRigidArea(new Dimension(0, 10)));
+			});
 
-		boolean empty = markerView.getComponentCount() == 0;
-		noMarkersPanel.setContent("Radius Markers",
-			"Click the '+' button to add a radius marker at the feet of your character.");
-		noMarkersPanel.setVisible(empty);
-		searchPanel.setVisible(!empty);
-		if (empty && plugin.getMarkers().size() > 0)
-		{
+			boolean empty = markerView.getComponentCount() == 0;
 			noMarkersPanel.setContent("Radius Markers",
-				"No radius markers are available for the current search term and/or selected filter.");
-			searchPanel.setVisible(true);
-		}
+				"Click the '+' button to add a radius marker at the feet of your character.");
+			noMarkersPanel.setVisible(empty);
+			searchPanel.setVisible(!empty);
+			if (empty && plugin.getMarkers().size() > 0)
+			{
+				noMarkersPanel.setContent("Radius Markers",
+					"No radius markers are available for the current search term and/or selected filter.");
+				searchPanel.setVisible(true);
+			}
 
-		markerView.add(noMarkersPanel);
+			markerView.add(noMarkersPanel);
 
-		repaint();
-		revalidate();
+			repaint();
+			revalidate();
+		});
 	}
 
 	private void filterMarkersAndDo(Consumer<ColourRadiusMarker> consumer)
