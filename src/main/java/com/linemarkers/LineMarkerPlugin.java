@@ -35,6 +35,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -92,6 +93,9 @@ public class LineMarkerPlugin extends Plugin
 
 	@Inject
 	private ConfigManager configManager;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Inject
 	private ClientToolbar clientToolbar;
@@ -211,7 +215,7 @@ public class LineMarkerPlugin extends Plugin
 
 		loadMarkers();
 
-		pluginPanel = new LineMarkerPluginPanel(client, this);
+		pluginPanel = new LineMarkerPluginPanel(client, this, clientThread);
 		pluginPanel.rebuild();
 
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);

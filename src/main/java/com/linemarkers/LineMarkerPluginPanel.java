@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import lombok.Getter;
 import net.runelite.api.Client;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
@@ -51,6 +52,7 @@ class LineMarkerPluginPanel extends PluginPanel
 
 	private final Client client;
 	private final LineMarkerPlugin plugin;
+	private final ClientThread clientThread;
 
 	@Getter
 	private Filter filter = Filter.ALL;
@@ -86,10 +88,11 @@ class LineMarkerPluginPanel extends PluginPanel
 		};
 	}
 
-	public LineMarkerPluginPanel(Client client, LineMarkerPlugin plugin)
+	public LineMarkerPluginPanel(Client client, LineMarkerPlugin plugin, ClientThread clientThread)
 	{
 		this.client = client;
 		this.plugin = plugin;
+		this.clientThread = clientThread;
 
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -233,39 +236,41 @@ class LineMarkerPluginPanel extends PluginPanel
 
 	public void rebuild()
 	{
-		markerView.removeAll();
+		clientThread.invokeLater(() -> {
+			markerView.removeAll();
 
-		int regionId = client.getLocalPlayer() == null ? -1 : client.getLocalPlayer().getWorldLocation().getRegionID();
+			int regionId = client.getLocalPlayer() == null ? -1 : client.getLocalPlayer().getWorldLocation().getRegionID();
 
-		plugin.getGroups().sort(Comparator.comparing(LineGroup::getName));
-		for (final LineGroup group : plugin.getGroups())
-		{
-			if (group.getName().toLowerCase().contains(getSearchText().toLowerCase()) &&
-				(Filter.ALL.equals(filter) ||
-				(Filter.REGION.equals(filter) && plugin.anyLineInRegion(group.getLines(), regionId)) ||
-				(Filter.VISIBLE.equals(filter) && group.isVisible()) ||
-				(Filter.INVISIBLE.equals(filter) && !group.isVisible())))
+			plugin.getGroups().sort(Comparator.comparing(LineGroup::getName));
+			for (final LineGroup group : plugin.getGroups())
 			{
-				markerView.add(new LineMarkerPanel(plugin, group));
-				markerView.add(Box.createRigidArea(new Dimension(0, 10)));
+				if (group.getName().toLowerCase().contains(getSearchText().toLowerCase()) &&
+					(Filter.ALL.equals(filter) ||
+					(Filter.REGION.equals(filter) && plugin.anyLineInRegion(group.getLines(), regionId)) ||
+					(Filter.VISIBLE.equals(filter) && group.isVisible()) ||
+					(Filter.INVISIBLE.equals(filter) && !group.isVisible())))
+				{
+					markerView.add(new LineMarkerPanel(plugin, group));
+					markerView.add(Box.createRigidArea(new Dimension(0, 10)));
+				}
 			}
-		}
 
-		boolean empty = markerView.getComponentCount() == 0;
-		noMarkersPanel.setContent("Line Markers", "Shift right-click a tile to add a line marker.");
-		noMarkersPanel.setVisible(empty);
-		searchPanel.setVisible(!empty);
-		if (empty && plugin.getGroups().size() > 0)
-		{
-			noMarkersPanel.setContent("Line Markers",
-				"No line markers are available for the current search term and/or selected filter.");
-			searchPanel.setVisible(true);
-		}
+			boolean empty = markerView.getComponentCount() == 0;
+			noMarkersPanel.setContent("Line Markers", "Shift right-click a tile to add a line marker.");
+			noMarkersPanel.setVisible(empty);
+			searchPanel.setVisible(!empty);
+			if (empty && plugin.getGroups().size() > 0)
+			{
+				noMarkersPanel.setContent("Line Markers",
+					"No line markers are available for the current search term and/or selected filter.");
+				searchPanel.setVisible(true);
+			}
 
-		markerView.add(noMarkersPanel);
+			markerView.add(noMarkersPanel);
 
-		repaint();
-		revalidate();
+			repaint();
+			revalidate();
+		});
 	}
 
 	public String getSearchText()
