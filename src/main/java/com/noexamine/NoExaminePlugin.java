@@ -15,6 +15,7 @@ import net.runelite.api.NPCComposition;
 import net.runelite.api.ObjectComposition;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.MenuOpened;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -29,8 +30,7 @@ public class NoExaminePlugin extends Plugin
 {
 	private static final String EXAMINE = "Examine";
 	private static final String REMOVE = "Remove";
-	private static final int POH_BUILDING_MODE_VARBIT = 2176;
-	private static final Set<Integer> POH_REGION_IDS = new HashSet<>(Arrays.asList(7258, 7514, 7770, 8026, 7257, 7513, 7769, 8025));
+	private static final Set<Integer> POH_REGION_IDS = new HashSet<>(Arrays.asList(7534, 7535, 7790, 7791, 8046, 8047, 8302, 8303));
 
 	@Inject
 	private Client client;
@@ -118,7 +118,7 @@ public class NoExaminePlugin extends Plugin
 
 	private boolean isPoh()
 	{
-		return client.getVarbitValue(POH_BUILDING_MODE_VARBIT) != 1 &&
+		return client.getVarbitValue(VarbitID.POH_BUILDING_MODE) != 1 &&
 			POH_REGION_IDS.contains(WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation()).getRegionID());
 	}
 
