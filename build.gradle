@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = 'com.noexamine'
-version = '1.6'
+version = '1.6.1'
 sourceCompatibility = '1.11'
 
 tasks.withType(JavaCompile) {
