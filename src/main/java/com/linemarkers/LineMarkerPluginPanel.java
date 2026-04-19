@@ -280,10 +280,13 @@ class LineMarkerPluginPanel extends PluginPanel
 
 	private void copyMarkers()
 	{
-		if (plugin.copyMarkers() != null)
-		{
-			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(plugin.copyMarkers()), null);
-		}
+		clientThread.invokeLater(() -> {
+			String content = plugin.copyMarkers();
+			if (content != null)
+			{
+				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(content), null);
+			}
+		});
 	}
 
 	private void pasteMarkers()
