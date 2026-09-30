@@ -118,10 +118,10 @@ class LineMarkerMinimapOverlay extends Overlay
 		final int x = (int) (dx * tileSize + offsetX * tileSize / Perspective.LOCAL_TILE_SIZE - tileSize / 2);
 		final int y = (int) (dy * tileSize + offsetY * tileSize / Perspective.LOCAL_TILE_SIZE - tileSize / 2 + 1);
 
-		final int angle = client.getCameraYawTarget() & 0x7FF;
+		final int angle = client.getCameraYawTarget() & 0x3FFF;
 
-		final int sin = Perspective.SINE[angle];
-		final int cos = Perspective.COSINE[angle];
+		final int sin = Perspective.SINE14[angle];
+		final int cos = Perspective.COSINE14[angle];
 
 		final Widget minimapDrawWidget = plugin.getMinimapDrawWidget();
 		if (minimapDrawWidget == null || minimapDrawWidget.isHidden())
