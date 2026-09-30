@@ -121,10 +121,10 @@ public class MinimapOverlay extends Overlay
 		int x = (int) (dx * tileSize + offsetX * tileSize / Perspective.LOCAL_TILE_SIZE - tileSize / 2);
 		int y = (int) (dy * tileSize + offsetY * tileSize / Perspective.LOCAL_TILE_SIZE - tileSize / 2 + 1);
 
-		int angle = client.getCameraYawTarget() & 0x7FF;
+		int angle = client.getCameraYawTarget() & 0x3FFF;
 
-		int sin = Perspective.SINE[angle];
-		int cos = Perspective.COSINE[angle];
+		int sin = Perspective.SINE14[angle];
+		int cos = Perspective.COSINE14[angle];
 
 		Widget minimapDrawWidget = plugin.getMinimapDrawWidget();
 		if (minimapDrawWidget == null || minimapDrawWidget.isHidden())
