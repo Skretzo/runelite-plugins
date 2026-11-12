@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.util.Collection;
@@ -136,9 +137,73 @@ class RadiusMarkerSceneOverlay extends Overlay
 	private void drawBox(Graphics2D graphics, WorldPoint worldPoint, int radius,
 		Color borderColour, Stroke borderStroke, int size, boolean excludeCorner)
 	{
+		if (config.fillSceneTiles())
+		{
+			drawFilledTiles(graphics, worldPoint, radius, borderColour, size, excludeCorner);
+			return;
+		}
+
 		graphics.setStroke(borderStroke);
 		graphics.setColor(borderColour);
 		graphics.draw(getSquare(worldPoint, radius, size, excludeCorner));
+	}
+
+	private void drawFilledTiles(Graphics2D graphics, WorldPoint worldPoint, int radius,
+		Color colour, int size, boolean excludeCorner)
+	{
+		if (client.getLocalPlayer() == null || worldPoint.getPlane() != client.getPlane())
+		{
+			return;
+		}
+
+		final int diameter = 2 * radius + size;
+		if (diameter <= 0)
+		{
+			return;
+		}
+
+		final int startX = worldPoint.getX() - radius;
+		final int startY = worldPoint.getY() - radius;
+		final WorldPoint player = client.getLocalPlayer().getWorldLocation();
+
+		// Only process tiles near the player to avoid rendering off-scene radiuses.
+		final int minX = Math.max(startX, player.getX() - MAX_DRAW_DISTANCE + 1);
+		final int minY = Math.max(startY, player.getY() - MAX_DRAW_DISTANCE + 1);
+		final int maxX = Math.min(startX + diameter - 1, player.getX() + MAX_DRAW_DISTANCE - 1);
+		final int maxY = Math.min(startY + diameter - 1, player.getY() + MAX_DRAW_DISTANCE - 1);
+
+		final int alpha = colour.getAlpha() * config.sceneFillOpacity() / 255;
+		if (alpha == 0)
+		{
+			return;
+		}
+		graphics.setColor(new Color(colour.getRed(), colour.getGreen(), colour.getBlue(), alpha));
+
+		for (int tileX = minX; tileX <= maxX; tileX++)
+		{
+			for (int tileY = minY; tileY <= maxY; tileY++)
+			{
+				// Melee attack and aggression ranges exclude their four corner tiles.
+				if (excludeCorner && radius > 0
+					&& (tileX == startX || tileX == startX + diameter - 1)
+					&& (tileY == startY || tileY == startY + diameter - 1))
+				{
+					continue;
+				}
+
+				final LocalPoint localPoint = LocalPoint.fromWorld(client, tileX, tileY);
+				if (localPoint == null)
+				{
+					continue;
+				}
+
+				final Polygon tilePolygon = Perspective.getCanvasTilePoly(client, localPoint);
+				if (tilePolygon != null)
+				{
+					graphics.fill(tilePolygon);
+				}
+			}
+		}
 	}
 
 	private GeneralPath getSquare(final WorldPoint worldPoint, final int radius, final int size, boolean excludeCorner)
