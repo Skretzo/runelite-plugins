@@ -6,6 +6,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.Range;
 
 @ConfigGroup(RadiusMarkerPlugin.CONFIG_GROUP)
 public interface RadiusMarkerConfig extends Config
@@ -322,4 +323,28 @@ public interface RadiusMarkerConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "fillSceneTiles",
+		name = "Fill scene tiles",
+		description = "Fill the tiles inside visible NPC radiuses instead of outlining them in the game scene",
+		position = 27
+	)
+	default boolean fillSceneTiles()
+	{
+		return false;
+	}
+
+	@Range(min = 0, max = 255)
+	@ConfigItem(
+		keyName = "sceneFillOpacity",
+		name = "Scene fill opacity",
+		description = "Opacity for filled scene tiles (0 to 255), multiplied by the marker colour's opacity",
+		position = 28
+	)
+	default int sceneFillOpacity()
+	{
+		return 80;
+	}
+
 }
